@@ -2897,6 +2897,69 @@ public class DSA450Questions {
         return true;
     }
 
+    public void twoSum_UnsortedArray(int[] nums, int target) {
+        //.........................T: O(N)
+        //.........................S: O(N)
+        //https://leetcode.com/problems/two-sum/
+        Map<Integer, Integer> map = new HashMap<>();
+        int n = nums.length;
+        int[] result = null;
+        for (int i = 0; i < n; i++) {
+
+            int diff = target - nums[i];
+            if (map.containsKey(diff)) {
+                result = new int[]{map.get(diff), i};
+                break;
+            }
+            map.put(nums[i], i);
+        }
+        //output
+        if (result == null) {
+            System.out.println("No Two element found that sums equal to target");
+        } else {
+            System.out.println("Indexes(0-based index) of two element that sums equal to target: "
+                    + result[0] + " " + result[1]);
+        }
+    }
+
+    public void twoSum2_SortedArray(int[] nums, int target) {
+        //.........................T: O(N)
+        //.........................S: O(1)
+        //https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/
+        //explanation: https://youtu.be/cQ1Oz4ckceM
+        //this problem can also be solved with above twoSum_UnsortedArray()
+        int n = nums.length;
+        int[] result = null;
+
+        int start = 0;
+        int end = n - 1;
+
+        while (end > start) {
+
+            int sum = nums[start] + nums[end];
+            if (sum == target) {
+                result = new int[]{start + 1, end + 1};
+                break;
+            } else if (sum > target) {
+                //curr sum > target because nums[end] > nums[start] as
+                //array is sorted so try to reduce larger num from end
+                end--;
+            } else {
+                //curr sum < target because nums[end] > nums[start] as
+                //array is sorted so try to increase larger num from start
+                start++;
+            }
+        }
+
+        //output
+        if (result == null) {
+            System.out.println("No Two element found that sums equal to target");
+        } else {
+            System.out.println("Indexes(1-based index) of two element that sums equal to target: "
+                    + result[0] + " " + result[1]);
+        }
+    }
+
     public void rotateMatrixClockWise90Deg(int[][] mat) {
 
         int N = mat.length;
@@ -4557,31 +4620,32 @@ public class DSA450Questions {
         System.out.println("Largest number formed from the given set of numbers: " + sb.toString());
     }
 
-    public void stringCompression(char[] str) {
-
+    public void stringCompression(char[] arr) {
         //https://leetcode.com/problems/string-compression/
+        //explanation: https://youtu.be/IhJgguNiYYk
+        int n = arr.length;
         int start = 0;
         int end = 0;
-        int N = str.length;
-
-        for (int i = 0; i < N; i++) {
-
-            if (i + 1 == N || str[i] != str[i + 1]) {
-
-                str[end++] = str[start];
-                if (i > start) {
-                    String count = String.valueOf(i - start + 1);
-                    for (char intCount : count.toCharArray()) {
-                        str[end++] = intCount;
-                    }
-                }
-                start = i + 1;
+        int index = 0;
+        while (start < n) {
+            end = start;
+            while (end < n && arr[start] == arr[end]) {
+                end++;
             }
+            arr[index++] = arr[start];
+
+            if (end - start > 1) {
+                String count = String.valueOf(end - start);
+                for (char ch : count.toCharArray()) {
+                    arr[index++] = ch;
+                }
+            }
+            start = end;
         }
 
         //output
-        for (int i = 0; i < end; i++) {
-            System.out.print(str[i]);
+        for (int i = 0; i < index; i++) {
+            System.out.print(arr[i]);
         }
         System.out.println();
     }
@@ -4950,6 +5014,23 @@ public class DSA450Questions {
             end++;
         }
 
+        /*
+         partitionLabel() approach
+         int[] lastCharIndexes = new int[26];
+         for(int i = 0; i < s.length(); i++){
+         lastCharIndexes[s.charAt(i) - 'a'] = i;
+         }
+        
+         int maxLen = -1;
+        
+         for(int i = 0; i < s.length(); i++){
+         char ch = s.charAt(i);
+         int end = lastCharIndexes[ch - 'a'];
+         maxLen = Math.max(maxLen, end - i - 1);
+         }
+        
+         return maxLen;
+         */
         //output
         System.out.println("Largest subtring of chars between two same char: " + max);
     }
@@ -5438,6 +5519,104 @@ public class DSA450Questions {
         //end-index at which we will find the first odd chr/digit from end
         //0 to that end-index will be our largest odd string
         System.out.println("Largest odd number in given num string: " + numString.substring(0, end + 1));
+    }
+
+    public void smallestStringWithGivenLengthNAndCharSumValueK(int n, int k) {
+        //https://leetcode.com/problems/smallest-string-with-a-given-numeric-value/
+        char[] smallestString = new char[n];
+        //lexicographically smallest string of length n can be full of 'a'
+        Arrays.fill(smallestString, 'a');
+        //we have taken n length string full of 'a'
+        k = k - n;
+        int index = n - 1;
+        while (index >= 0 && k > 0) {
+            int minAscii = Math.min(25, k); // at max we can choose 25 == z
+            smallestString[index--] = (char) (minAscii + 'a');
+            k -= minAscii;
+        }
+        //output
+        System.out.println("Lexicographically smallest string of length n and char sum k: "
+                + String.valueOf(smallestString));
+    }
+
+    public void replaceAllQuestionMarksWithACharAndNoConsecutiveRepeatingChar(String str) {
+        //https://leetcode.com/problems/replace-all-s-to-avoid-consecutive-repeating-characters/
+        int n = str.length();
+
+        char[] arr = str.toCharArray();
+        for (int i = 0; i < n; i++) {
+
+            if (arr[i] == '?') {
+
+                int left = i - 1;
+                int right = i + 1;
+
+                char leftCh = '.';
+                char rightCh = '.';
+
+                if (left >= 0) {
+                    leftCh = arr[left];
+                }
+
+                if (right < n) {
+                    rightCh = arr[right];
+                }
+
+                //generate a new char from leftCh + 1 (next Acsii value as char)
+                //if that is a valid char use that char at ith '?' otherwise default 'a'
+                char candidateChar = (char) (leftCh + 1);
+                arr[i] = Character.isAlphabetic(candidateChar) ? candidateChar : 'a';
+
+                //if it happens to be that our newly generated char at ith
+                //pos is also similar to its rightCh char, we have choose a new 
+                //candidate char which will be rightCh + 1 (next Acsii value as char)
+                if (arr[i] == rightCh) {
+                    candidateChar = (char) (rightCh + 1);
+                    arr[i] = Character.isAlphabetic(candidateChar) ? candidateChar : 'a';
+                }
+            }
+        }
+        //output
+        System.out.println("Removing ? and no consecutive char are repeating: "
+                + String.valueOf(arr));
+    }
+
+    public String simplifyPath(String path) {
+        //https://leetcode.com/problems/simplify-path/
+        //explanation: https://youtu.be/qYlHrAKJfyA
+        Stack<String> filesOrDirs = new Stack<>();
+        StringBuilder canonicalPath = new StringBuilder();
+        String currFilesOrDirs = "";
+        for (char ch : path.toCharArray()) {
+
+            if (ch == '/') {
+
+                if (currFilesOrDirs.equals("..")) {
+                    //".." represent as move to parent dir in filesysytem
+                    //so poping means removing curr file or dir and moving to parent file or dir
+                    if (!filesOrDirs.isEmpty()) {
+                        filesOrDirs.pop();
+                    }
+                } else if (!currFilesOrDirs.equals("") && !currFilesOrDirs.equals(".")) {
+                    //cases when there // there will be currFilesOrDirs == "" and
+                    //"." represent as current working dir, we don't to do anything with that
+                    filesOrDirs.push(currFilesOrDirs);
+                }
+                //reset
+                currFilesOrDirs = "";
+            } else {
+                currFilesOrDirs += ch;
+            }
+        }
+
+        if (filesOrDirs.isEmpty()) {
+            return "/";
+        }
+
+        while (!filesOrDirs.isEmpty()) {
+            canonicalPath.insert(0, "/" + filesOrDirs.pop());
+        }
+        return canonicalPath.toString();
     }
 
     public Node<Integer> reverseLinkedList_Iterative(Node<Integer> node) {
@@ -12996,13 +13175,13 @@ public class DSA450Questions {
         return -1;
     }
 
-    private void surroundedRegions_Graph_DFS(char[][] board, int row, int col){
-        if(row < 0 || row >= board.length
+    private void surroundedRegions_Graph_DFS(char[][] board, int row, int col) {
+        if (row < 0 || row >= board.length
                 || col < 0 || col >= board[row].length
-                || board[row][col] != 'O'){
+                || board[row][col] != 'O') {
             return;
         }
-        
+
         //replace the O at the border regions with temp char T
         board[row][col] = 'T';
         //convert all the other O that are connected with O at the border regions
@@ -13011,7 +13190,7 @@ public class DSA450Questions {
         surroundedRegions_Graph_DFS(board, row, col - 1);
         surroundedRegions_Graph_DFS(board, row, col + 1);
     }
-    
+
     public void surroundedRegions_Graph(char[][] board) {
         //https://leetcode.com/problems/surrounded-regions/
         //explanantion: https://youtu.be/9z2BunfoZ5Y
@@ -13050,7 +13229,7 @@ public class DSA450Questions {
                 }
             }
         }
-        
+
         for (int r = 0; r < row; r++) {
             for (int c = 0; c < col; c++) {
                 //once all the Os that were surrounded by X are replaced with X 
@@ -13060,7 +13239,7 @@ public class DSA450Questions {
                 }
             }
         }
-        
+
         //output
         System.out.println("Surrounded regions output: ");
         for (int r = 0; r < row; r++) {
@@ -13069,6 +13248,68 @@ public class DSA450Questions {
             }
             System.out.println();
         }
+    }
+
+    private int longestIncreasingPathInMatrixFromAnyPoint_Graph_Memoization_DFS(
+            int[][] matrix, int row, int col, int prevVal, Map<String, Integer> memo) {
+        if (row < 0 || row >= matrix.length
+                || col < 0 || col >= matrix[0].length
+                || matrix[row][col] <= prevVal) {
+            return 0;
+        }
+
+        String key = row + "," + col;
+        if (memo.containsKey(key)) {
+            return memo.get(key);
+        }
+
+        //for each value in matrix that value itself is a longest incr path
+        //atleast for length 1
+        int currLongestIncrPath = 1;
+
+        //UP
+        currLongestIncrPath = Math.max(currLongestIncrPath,
+                longestIncreasingPathInMatrixFromAnyPoint_Graph_Memoization_DFS(
+                        matrix, row - 1, col, matrix[row][col], memo) + 1);
+        //DOWN
+        currLongestIncrPath = Math.max(currLongestIncrPath,
+                longestIncreasingPathInMatrixFromAnyPoint_Graph_Memoization_DFS(
+                        matrix, row + 1, col, matrix[row][col], memo) + 1);
+        //LEFT
+        currLongestIncrPath = Math.max(currLongestIncrPath,
+                longestIncreasingPathInMatrixFromAnyPoint_Graph_Memoization_DFS(
+                        matrix, row, col - 1, matrix[row][col], memo) + 1);
+        //RIGHT
+        currLongestIncrPath = Math.max(currLongestIncrPath,
+                longestIncreasingPathInMatrixFromAnyPoint_Graph_Memoization_DFS(
+                        matrix, row, col + 1, matrix[row][col], memo) + 1);
+
+        //cache the currLongestIncrPath at curr row,col
+        memo.put(key, currLongestIncrPath);
+
+        return currLongestIncrPath;
+    }
+
+    public void longestIncreasingPathInMatrixFromAnyPoint_Graph_Memoization(int[][] matrix) {
+        //https://leetcode.com/problems/longest-increasing-path-in-a-matrix/
+        //explanation: https://youtu.be/wCc_nd-GiEc
+        int row = matrix.length;
+        int col = matrix[0].length;
+
+        //<"row,col", currLongestIncrPath>
+        Map<String, Integer> memo = new HashMap<>();
+
+        int longestIncrPath = 0;
+
+        for (int r = 0; r < row; r++) {
+            for (int c = 0; c < col; c++) {
+                longestIncrPath = Math.max(longestIncrPath,
+                        longestIncreasingPathInMatrixFromAnyPoint_Graph_Memoization_DFS(
+                                matrix, r, c, -1, memo));
+            }
+        }
+        //output
+        System.out.println("Longest increasing path in matrix: " + longestIncrPath);
     }
 
     public void minimumCostToFillGivenBag_DP_Memoization(int[] cost, int W) {
@@ -17740,6 +17981,41 @@ public class DSA450Questions {
         obj.surroundedRegions_Graph(new char[][]{
             {'X', 'X', 'X', 'X'}, {'X', 'O', 'O', 'X'}, {'X', 'X', 'O', 'X'}, {'X', 'O', 'X', 'X'}
         });
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Longest Increasing Path in a Matrix");
+        //https://leetcode.com/problems/longest-increasing-path-in-a-matrix/
+        obj.longestIncreasingPathInMatrixFromAnyPoint_Graph_Memoization(new int[][]{
+            {9, 9, 4}, {6, 6, 8}, {2, 1, 1}
+        });
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Two Sum/ Two Sum II - Input Array Is Sorted");
+        //https://leetcode.com/problems/two-sum/
+        //https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/
+        obj.twoSum_UnsortedArray(new int[]{2, 7, 11, 15}, 9);
+        obj.twoSum_UnsortedArray(new int[]{3, 2, 4}, 6);
+        obj.twoSum2_SortedArray(new int[]{2, 7, 11, 15}, 9);
+        obj.twoSum2_SortedArray(new int[]{-1, 0}, -1);
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Smallest String With A Given Numeric Value");
+        //https://leetcode.com/problems/smallest-string-with-a-given-numeric-value/
+        obj.smallestStringWithGivenLengthNAndCharSumValueK(3, 27);
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Replace All ?'s to Avoid Consecutive Repeating Characters");
+        //https://leetcode.com/problems/replace-all-s-to-avoid-consecutive-repeating-characters/
+        obj.replaceAllQuestionMarksWithACharAndNoConsecutiveRepeatingChar("?zs");
+        obj.replaceAllQuestionMarksWithACharAndNoConsecutiveRepeatingChar("ubv?w");
+        obj.replaceAllQuestionMarksWithACharAndNoConsecutiveRepeatingChar("?z?a?");
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Simplify Path");
+        //https://leetcode.com/problems/simplify-path/
+        System.out.println("Canonical path: " + obj.simplifyPath("/home/"));
+        System.out.println("Canonical path: " + obj.simplifyPath("/../"));
+        System.out.println("Canonical path: " + obj.simplifyPath("/home///foo/./bar/zoo/./../"));
     }
 
 }
