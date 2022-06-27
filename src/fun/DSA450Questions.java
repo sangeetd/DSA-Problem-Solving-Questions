@@ -5815,6 +5815,62 @@ public class DSA450Questions {
         //output
         System.out.println("All common chars from the given words[]: " + result);
     }
+    
+    public void searchSuggestionSystem(String[] words, String search){
+        //https://leetcode.com/problems/search-suggestions-system/
+        //explanation: https://youtu.be/D4T2N0yAr20
+        
+        int n = words.length;
+        //this map is used for output purpose, nt req by question
+        Map<Character, List<String>> wordsPerSearchedChar = new HashMap<>();
+        List<List<String>> result = new ArrayList<>();
+        //sort lexicographically order
+        Arrays.sort(words);
+        int reqAtMost = 3;
+        int start = 0; 
+        int end = n - 1;
+        
+        for(int i = 0; i < search.length(); i++){
+            char searchChar = search.charAt(i);
+            List<String> curr = new ArrayList<>();
+            
+            while(end >= start
+                    //cond is to skip all those words from start which are
+                    //1. smaller than our search word ex: search = "apple", word[start] = "app"
+                    //at i = 3 search[3] = l where i >= "app".length()
+                    //2. the curr searchChar at ith pos is not matching with the ith char 
+                    //of word[start].charAt(i) ex search = "apple", word[start] = "ape"
+                    //at i = 2 searchChar = p !=  word[start].charAt(i) = e
+                    && (i >= words[start].length()
+                    || words[start].charAt(i) != searchChar)){
+                start++;
+            }
+            
+            while(end >= start
+                    //cond is to skip all those words from end which are
+                    //1. smaller than our search word ex: search = "apple", word[end] = "app"
+                    //at i = 3 search[3] = l where i >= "app".length()
+                    //2. the curr searchChar at ith pos is not matching with the ith char 
+                    //of word[end].charAt(i) ex search = "apple", word[end] = "ape"
+                    //at i = 2 searchChar = p !=  word[end].charAt(i) = e
+                    && (i >= words[end].length()
+                    || words[end].charAt(i) != searchChar)){
+                end--;
+            }
+            
+            //we need atmost 3 words but if we get any less amount then consume that much
+            int wordsToConsume = Math.min(reqAtMost, end - start + 1);
+            for(int j = 0; j < wordsToConsume; j++){
+                curr.add(words[start + j]);
+            }
+            result.add(curr);
+            //map is used for output purpose only
+            wordsPerSearchedChar.put(searchChar, curr);
+        }
+        //output
+        System.out.println("Search suggestions system: " + result);
+        System.out.println("Search suggestions system words per char: " + wordsPerSearchedChar);
+    }
 
     public Node<Integer> reverseLinkedList_Iterative(Node<Integer> node) {
         System.out.println("Reverse linked list iterative");
@@ -17976,183 +18032,183 @@ public class DSA450Questions {
 //        obj.rangeUpdateAndPointQueries(new int[]{0, 0, 0, 0, 0});
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Remove all adjacent duplicate K chars in the strings and print remaining");
-        //https://leetcode.com/problems/remove-all-adjacent-duplicates-in-string
-        //https://leetcode.com/problems/remove-all-adjacent-duplicates-in-string-ii/
-        obj.removeAdjacentDuplicateKCharInString("pbbcggttciiippooaais", 2);
-        obj.removeAdjacentDuplicateKCharInString("abcd", 2);
-        obj.removeAdjacentDuplicateKCharInString("deeedbbcccbdaa", 3);
-        obj.removeAdjacentDuplicateKCharInString("XABCDFFDCBA", 2);
+//        System.out.println("Remove all adjacent duplicate K chars in the strings and print remaining");
+//        //https://leetcode.com/problems/remove-all-adjacent-duplicates-in-string
+//        //https://leetcode.com/problems/remove-all-adjacent-duplicates-in-string-ii/
+//        obj.removeAdjacentDuplicateKCharInString("pbbcggttciiippooaais", 2);
+//        obj.removeAdjacentDuplicateKCharInString("abcd", 2);
+//        obj.removeAdjacentDuplicateKCharInString("deeedbbcccbdaa", 3);
+//        obj.removeAdjacentDuplicateKCharInString("XABCDFFDCBA", 2);
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Minimum Number of Swaps to Make the Binary String Alternating");
-        //https://leetcode.com/problems/minimum-number-of-swaps-to-make-the-binary-string-alternating/
-        System.out.println("Minswaps required to make binary string alternate: "
-                + obj.minSwapRequiredToMakeBinaryStringAlternate("111000")); //101010
-        System.out.println("Minswaps required to make binary string alternate: "
-                + obj.minSwapRequiredToMakeBinaryStringAlternate("00")); //Not Possible
-        System.out.println("Minswaps required to make binary string alternate: "
-                + obj.minSwapRequiredToMakeBinaryStringAlternate("1110")); //Not Possible
-        System.out.println("Minswaps required to make binary string alternate: "
-                + obj.minSwapRequiredToMakeBinaryStringAlternate("010")); //Already alternate
-        System.out.println("Minswaps required to make binary string alternate: "
-                + obj.minSwapRequiredToMakeBinaryStringAlternate("1")); //Already alternate
+//        System.out.println("Minimum Number of Swaps to Make the Binary String Alternating");
+//        //https://leetcode.com/problems/minimum-number-of-swaps-to-make-the-binary-string-alternating/
+//        System.out.println("Minswaps required to make binary string alternate: "
+//                + obj.minSwapRequiredToMakeBinaryStringAlternate("111000")); //101010
+//        System.out.println("Minswaps required to make binary string alternate: "
+//                + obj.minSwapRequiredToMakeBinaryStringAlternate("00")); //Not Possible
+//        System.out.println("Minswaps required to make binary string alternate: "
+//                + obj.minSwapRequiredToMakeBinaryStringAlternate("1110")); //Not Possible
+//        System.out.println("Minswaps required to make binary string alternate: "
+//                + obj.minSwapRequiredToMakeBinaryStringAlternate("010")); //Already alternate
+//        System.out.println("Minswaps required to make binary string alternate: "
+//                + obj.minSwapRequiredToMakeBinaryStringAlternate("1")); //Already alternate
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Rectangle overlapping");
-        //https://leetcode.com/problems/rectangle-overlap/
-        //https://leetcode.com/problems/rectangle-area/
-        System.out.println("Rectangle overlapping & area: "
-                + obj.rectangleOverlappingAndArea(new int[]{0, 0, 2, 2}, new int[]{1, 1, 3, 3})); //overlapping
-        System.out.println("Rectangle overlapping & area: "
-                + obj.rectangleOverlappingAndArea(new int[]{-2, 0, 0, 2}, new int[]{-3, 1, -1, 3})); //Other quadrant
-        System.out.println("Rectangle overlapping & area: "
-                + obj.rectangleOverlappingAndArea(new int[]{0, 0, 1, 1}, new int[]{2, 2, 2, 3})); //No overlapping
-        System.out.println("Rectangle overlapping & area: "
-                + obj.rectangleOverlappingAndArea(new int[]{1, 1, 2, 2}, new int[]{2, 1, 3, 2})); //Only edge touching
+//        System.out.println("Rectangle overlapping");
+//        //https://leetcode.com/problems/rectangle-overlap/
+//        //https://leetcode.com/problems/rectangle-area/
+//        System.out.println("Rectangle overlapping & area: "
+//                + obj.rectangleOverlappingAndArea(new int[]{0, 0, 2, 2}, new int[]{1, 1, 3, 3})); //overlapping
+//        System.out.println("Rectangle overlapping & area: "
+//                + obj.rectangleOverlappingAndArea(new int[]{-2, 0, 0, 2}, new int[]{-3, 1, -1, 3})); //Other quadrant
+//        System.out.println("Rectangle overlapping & area: "
+//                + obj.rectangleOverlappingAndArea(new int[]{0, 0, 1, 1}, new int[]{2, 2, 2, 3})); //No overlapping
+//        System.out.println("Rectangle overlapping & area: "
+//                + obj.rectangleOverlappingAndArea(new int[]{1, 1, 2, 2}, new int[]{2, 1, 3, 2})); //Only edge touching
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("All common element in 3 sorted arrays");
-        //https://practice.geeksforgeeks.org/problems/common-elements1132/1
-        obj.allCommonElementIn3SortedArray(
-                new int[]{1, 5, 10, 20, 40, 80},
-                new int[]{6, 7, 20, 80, 100},
-                new int[]{3, 4, 15, 20, 30, 70, 80, 120});
-        obj.allCommonElementIn3SortedArray(
-                new int[]{3, 3, 3, 3},
-                new int[]{3, 3, 3, 3},
-                new int[]{3, 3, 3, 3});
+//        System.out.println("All common element in 3 sorted arrays");
+//        //https://practice.geeksforgeeks.org/problems/common-elements1132/1
+//        obj.allCommonElementIn3SortedArray(
+//                new int[]{1, 5, 10, 20, 40, 80},
+//                new int[]{6, 7, 20, 80, 100},
+//                new int[]{3, 4, 15, 20, 30, 70, 80, 120});
+//        obj.allCommonElementIn3SortedArray(
+//                new int[]{3, 3, 3, 3},
+//                new int[]{3, 3, 3, 3},
+//                new int[]{3, 3, 3, 3});
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Rearrage elements of array randomly but in-place & in O(N)");
-        obj.randomlyRearrangeElementsOfArray(new int[]{1, 0, 7, 2, 10});
+//        System.out.println("Rearrage elements of array randomly but in-place & in O(N)");
+//        obj.randomlyRearrangeElementsOfArray(new int[]{1, 0, 7, 2, 10});
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Time Needed to Inform All Employees");
-        //https://leetcode.com/problems/time-needed-to-inform-all-employees/
-        obj.timeNeededToInformAllEmployee_NAryTree(1, 0, new int[]{-1}, new int[]{0});
-        obj.timeNeededToInformAllEmployee_NAryTree(6, 2, new int[]{2, 2, -1, 2, 2, 2}, new int[]{0, 0, 1, 0, 0, 0});
-        obj.timeNeededToInformAllEmployee_NAryTree(15, 0,
-                new int[]{-1, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6},
-                new int[]{1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0});
-        obj.timeNeededToInformAllEmployee_DFS(1, 0, new int[]{-1}, new int[]{0});
-        obj.timeNeededToInformAllEmployee_DFS(6, 2, new int[]{2, 2, -1, 2, 2, 2}, new int[]{0, 0, 1, 0, 0, 0});
-        obj.timeNeededToInformAllEmployee_DFS(15, 0,
-                new int[]{-1, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6},
-                new int[]{1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0});
+//        System.out.println("Time Needed to Inform All Employees");
+//        //https://leetcode.com/problems/time-needed-to-inform-all-employees/
+//        obj.timeNeededToInformAllEmployee_NAryTree(1, 0, new int[]{-1}, new int[]{0});
+//        obj.timeNeededToInformAllEmployee_NAryTree(6, 2, new int[]{2, 2, -1, 2, 2, 2}, new int[]{0, 0, 1, 0, 0, 0});
+//        obj.timeNeededToInformAllEmployee_NAryTree(15, 0,
+//                new int[]{-1, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6},
+//                new int[]{1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0});
+//        obj.timeNeededToInformAllEmployee_DFS(1, 0, new int[]{-1}, new int[]{0});
+//        obj.timeNeededToInformAllEmployee_DFS(6, 2, new int[]{2, 2, -1, 2, 2, 2}, new int[]{0, 0, 1, 0, 0, 0});
+//        obj.timeNeededToInformAllEmployee_DFS(15, 0,
+//                new int[]{-1, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6},
+//                new int[]{1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0});
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Minimum Index Sum of Two Lists");
-        //https://leetcode.com/problems/minimum-index-sum-of-two-lists/
-        obj.minimumIndexSumOfTwoStringArray(new String[]{"Shogun", "Tapioca Express", "Burger King", "KFC"},
-                new String[]{"KFC", "Burger King", "Tapioca Express", "Shogun"});
-        obj.minimumIndexSumOfTwoStringArray(new String[]{"Shogun", "Tapioca Express", "Burger King", "KFC"},
-                new String[]{"Piatti", "The Grill at Torrey Pines", "Hungry Hunter Steakhouse", "Shogun"});
+//        System.out.println("Minimum Index Sum of Two Lists");
+//        //https://leetcode.com/problems/minimum-index-sum-of-two-lists/
+//        obj.minimumIndexSumOfTwoStringArray(new String[]{"Shogun", "Tapioca Express", "Burger King", "KFC"},
+//                new String[]{"KFC", "Burger King", "Tapioca Express", "Shogun"});
+//        obj.minimumIndexSumOfTwoStringArray(new String[]{"Shogun", "Tapioca Express", "Burger King", "KFC"},
+//                new String[]{"Piatti", "The Grill at Torrey Pines", "Hungry Hunter Steakhouse", "Shogun"});
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Maximal square DP");
-        //https://leetcode.com/problems/maximal-square/
-        //https://practice.geeksforgeeks.org/problems/largest-square-formed-in-a-matrix0806/1
-        obj.maximalSquare_DP_Memoization(new int[][]{
-            {1, 0, 1, 0, 0},
-            {1, 0, 1, 1, 1},
-            {1, 1, 1, 1, 1},
-            {1, 0, 0, 1, 0},}); //SQR: mat[1][2] to mat[2][3]
-        obj.maximalSquare_DP_Memoization(new int[][]{
-            {0, 0, 0, 0},
-            {0, 0, 1, 0},
-            {0, 0, 0, 0},}); //SQR: mat[1][2]
-        obj.maximalSquare_DP_Memoization(new int[][]{
-            {0}}); //SQR: 0
-        obj.maximalSquare_DP_Memoization(new int[][]{
-            {1, 1, 1, 1},
-            {1, 1, 1, 1},
-            {1, 1, 1, 1},
-            {1, 1, 1, 1},}); //SQR: mat[N][N]
+//        System.out.println("Maximal square DP");
+//        //https://leetcode.com/problems/maximal-square/
+//        //https://practice.geeksforgeeks.org/problems/largest-square-formed-in-a-matrix0806/1
+//        obj.maximalSquare_DP_Memoization(new int[][]{
+//            {1, 0, 1, 0, 0},
+//            {1, 0, 1, 1, 1},
+//            {1, 1, 1, 1, 1},
+//            {1, 0, 0, 1, 0},}); //SQR: mat[1][2] to mat[2][3]
+//        obj.maximalSquare_DP_Memoization(new int[][]{
+//            {0, 0, 0, 0},
+//            {0, 0, 1, 0},
+//            {0, 0, 0, 0},}); //SQR: mat[1][2]
+//        obj.maximalSquare_DP_Memoization(new int[][]{
+//            {0}}); //SQR: 0
+//        obj.maximalSquare_DP_Memoization(new int[][]{
+//            {1, 1, 1, 1},
+//            {1, 1, 1, 1},
+//            {1, 1, 1, 1},
+//            {1, 1, 1, 1},}); //SQR: mat[N][N]
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Count all squares with one in binary matrix/ maximal squares approach");
-        //https://leetcode.com/problems/count-square-submatrices-with-all-ones
-        obj.countAllSquareWithOneInBinaryMatrix_DP_Memoization(new int[][]{
-            {0, 0, 0, 0},
-            {0, 0, 1, 0},
-            {0, 0, 0, 0},});
-        obj.countAllSquareWithOneInBinaryMatrix_DP_Memoization(new int[][]{
-            {0, 1, 1, 1},
-            {1, 1, 1, 1},
-            {0, 1, 1, 1},});
-        obj.countAllSquareWithOneInBinaryMatrix_DP_Memoization(new int[][]{
-            {1, 1, 0, 0},
-            {1, 1, 0, 0},
-            {0, 0, 0, 0},});
+//        System.out.println("Count all squares with one in binary matrix/ maximal squares approach");
+//        //https://leetcode.com/problems/count-square-submatrices-with-all-ones
+//        obj.countAllSquareWithOneInBinaryMatrix_DP_Memoization(new int[][]{
+//            {0, 0, 0, 0},
+//            {0, 0, 1, 0},
+//            {0, 0, 0, 0},});
+//        obj.countAllSquareWithOneInBinaryMatrix_DP_Memoization(new int[][]{
+//            {0, 1, 1, 1},
+//            {1, 1, 1, 1},
+//            {0, 1, 1, 1},});
+//        obj.countAllSquareWithOneInBinaryMatrix_DP_Memoization(new int[][]{
+//            {1, 1, 0, 0},
+//            {1, 1, 0, 0},
+//            {0, 0, 0, 0},});
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Teemo attacking ashee");
-        //https://leetcode.com/problems/teemo-attacking
-        //https://leetcode.com/discuss/interview-question/280433/Google-or-Phone-screen-or-Program-scheduling
-        System.out.println("Total time till ashee remained poisined: "
-                + obj.teemoAttackingAshee(new int[]{1, 4}, 2));
-        System.out.println("Total time till ashee remained poisined: "
-                + obj.teemoAttackingAshee(new int[]{1, 2}, 2));
-        System.out.println("Total time till ashee remained poisined: "
-                + obj.teemoAttackingAshee(new int[]{1, 10}, 5));
+//        System.out.println("Teemo attacking ashee");
+//        //https://leetcode.com/problems/teemo-attacking
+//        //https://leetcode.com/discuss/interview-question/280433/Google-or-Phone-screen-or-Program-scheduling
+//        System.out.println("Total time till ashee remained poisined: "
+//                + obj.teemoAttackingAshee(new int[]{1, 4}, 2));
+//        System.out.println("Total time till ashee remained poisined: "
+//                + obj.teemoAttackingAshee(new int[]{1, 2}, 2));
+//        System.out.println("Total time till ashee remained poisined: "
+//                + obj.teemoAttackingAshee(new int[]{1, 10}, 5));
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Min operation to make array equal of size n");
-        //https://leetcode.com/problems/minimum-operations-to-make-array-equal/
-        obj.minOperationToMakeArrayOfSizeNEqual(3);
+//        System.out.println("Min operation to make array equal of size n");
+//        //https://leetcode.com/problems/minimum-operations-to-make-array-equal/
+//        obj.minOperationToMakeArrayOfSizeNEqual(3);
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("First Unique Character in a String");
-        //https://leetcode.com/problems/first-unique-character-in-a-string/
-        System.out.println("Index of first unique char: " + obj.firstUniqueCharacterInString("aabbcc"));
-        System.out.println("Index of first unique char: " + obj.firstUniqueCharacterInString("leetcode"));
-        System.out.println("Index of first unique char: " + obj.firstUniqueCharacterInString("loveleetcode"));
-        System.out.println("Index of first unique char: " + obj.firstUniqueCharacterInString("aaaa"));
+//        System.out.println("First Unique Character in a String");
+//        //https://leetcode.com/problems/first-unique-character-in-a-string/
+//        System.out.println("Index of first unique char: " + obj.firstUniqueCharacterInString("aabbcc"));
+//        System.out.println("Index of first unique char: " + obj.firstUniqueCharacterInString("leetcode"));
+//        System.out.println("Index of first unique char: " + obj.firstUniqueCharacterInString("loveleetcode"));
+//        System.out.println("Index of first unique char: " + obj.firstUniqueCharacterInString("aaaa"));
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Find Pivot Index");
-        //https://leetcode.com/problems/find-pivot-indexs/
-        System.out.println("Pivot index: " + obj.findPivotIndex(new int[]{1, 7, 3, 6, 5, 6}));
-        System.out.println("Pivot index: " + obj.findPivotIndex(new int[]{1, 2, 3}));
-        System.out.println("Pivot index: " + obj.findPivotIndex(new int[]{2, 1, -1}));
+//        System.out.println("Find Pivot Index");
+//        //https://leetcode.com/problems/find-pivot-indexs/
+//        System.out.println("Pivot index: " + obj.findPivotIndex(new int[]{1, 7, 3, 6, 5, 6}));
+//        System.out.println("Pivot index: " + obj.findPivotIndex(new int[]{1, 2, 3}));
+//        System.out.println("Pivot index: " + obj.findPivotIndex(new int[]{2, 1, -1}));
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Maximum subarray sum with unique elements/ Maximum Erasure Value");
-        //https://leetcode.com/problems/maximum-erasure-value/
-        obj.maximumSubarraySumWithUniqueElements(new int[]{4, 2, 4, 5, 6}); //sunarr: [2,4,5,6]
-        obj.maximumSubarraySumWithUniqueElements(new int[]{5, 2, 1, 2, 5, 2, 1, 2, 5}); //sunarr: [5,2,1] or [1,2,5]
-        obj.maximumSubarraySumWithUniqueElements(new int[]{1, 1, 1, 1}); //subarr: [1]
-        obj.maximumSubarraySumWithUniqueElements(new int[]{1, 2, 3, 4}); //subarr: [1,2,3,4]
-        obj.maximumSubarraySumWithUniqueElements(new int[]{1, 1, 2, 2, 3, 3, 4, 4}); //subarr: [3,4]
+//        System.out.println("Maximum subarray sum with unique elements/ Maximum Erasure Value");
+//        //https://leetcode.com/problems/maximum-erasure-value/
+//        obj.maximumSubarraySumWithUniqueElements(new int[]{4, 2, 4, 5, 6}); //sunarr: [2,4,5,6]
+//        obj.maximumSubarraySumWithUniqueElements(new int[]{5, 2, 1, 2, 5, 2, 1, 2, 5}); //sunarr: [5,2,1] or [1,2,5]
+//        obj.maximumSubarraySumWithUniqueElements(new int[]{1, 1, 1, 1}); //subarr: [1]
+//        obj.maximumSubarraySumWithUniqueElements(new int[]{1, 2, 3, 4}); //subarr: [1,2,3,4]
+//        obj.maximumSubarraySumWithUniqueElements(new int[]{1, 1, 2, 2, 3, 3, 4, 4}); //subarr: [3,4]
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Minimum path sum in grid(top-left to bottom-right)");
-        //https://leetcode.com/problems/minimum-path-sum/
-        obj.minimumPathSumInGrid(new int[][]{
-            {1, 3, 1}, {1, 5, 1}, {4, 2, 1}
-        });
-        obj.minimumPathSumInGrid(new int[][]{
-            {1, 2, 3}, {4, 5, 6}
-        });
+//        System.out.println("Minimum path sum in grid(top-left to bottom-right)");
+//        //https://leetcode.com/problems/minimum-path-sum/
+//        obj.minimumPathSumInGrid(new int[][]{
+//            {1, 3, 1}, {1, 5, 1}, {4, 2, 1}
+//        });
+//        obj.minimumPathSumInGrid(new int[][]{
+//            {1, 2, 3}, {4, 5, 6}
+//        });
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Partition Array Into Three Parts With Equal Sum");
-        //https://leetcode.com/problems/partition-array-into-three-parts-with-equal-sum/
-        System.out.println("Pratition possible: "
-                + obj.partitionArrayIntoThreePartsWithEqualSum(new int[]{0, 2, 1, -6, 6, -7, 9, 1, 2, 0, 1}));
-        System.out.println("Pratition possible: "
-                + obj.partitionArrayIntoThreePartsWithEqualSum(new int[]{0, 2, 1, -6, 6, 7, 9, -1, 2, 0, 1}));
+//        System.out.println("Partition Array Into Three Parts With Equal Sum");
+//        //https://leetcode.com/problems/partition-array-into-three-parts-with-equal-sum/
+//        System.out.println("Pratition possible: "
+//                + obj.partitionArrayIntoThreePartsWithEqualSum(new int[]{0, 2, 1, -6, 6, -7, 9, 1, 2, 0, 1}));
+//        System.out.println("Pratition possible: "
+//                + obj.partitionArrayIntoThreePartsWithEqualSum(new int[]{0, 2, 1, -6, 6, 7, 9, -1, 2, 0, 1}));
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Substring with Concatenation of All Words");
-        //https://leetcode.com/problems/substring-with-concatenation-of-all-words/
-        obj.substringWithConcatenationsOfGivenWords("barfoothefoobarman",
-                new String[]{"foo", "bar"});
-        obj.substringWithConcatenationsOfGivenWords("wordgoodgoodgoodbestword",
-                new String[]{"word", "good", "best", "word"});
-        obj.substringWithConcatenationsOfGivenWords("barfoofoobarthefoobarman",
-                new String[]{"bar", "foo", "the"});
+//        System.out.println("Substring with Concatenation of All Words");
+//        //https://leetcode.com/problems/substring-with-concatenation-of-all-words/
+//        obj.substringWithConcatenationsOfGivenWords("barfoothefoobarman",
+//                new String[]{"foo", "bar"});
+//        obj.substringWithConcatenationsOfGivenWords("wordgoodgoodgoodbestword",
+//                new String[]{"word", "good", "best", "word"});
+//        obj.substringWithConcatenationsOfGivenWords("barfoofoobarthefoobarman",
+//                new String[]{"bar", "foo", "the"});
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
 //        System.out.println("Remove all sequences of consecutive linked list node sum to zero");
@@ -18361,6 +18417,11 @@ public class DSA450Questions {
         head.getNext().getNext().getNext().getNext().getNext().setNext(new Node<>(2));
         head.getNext().getNext().getNext().getNext().getNext().getNext().setNext(new Node<>(0));
         obj.mergeNodesInBetweenZeros(head);
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Search Suggestions System");
+        //https://leetcode.com/problems/search-suggestions-system/
+        obj.searchSuggestionSystem(new String[]{"mobile","mouse","moneypot","monitor","mousepad"}, "mouse");
     }
 
 }
