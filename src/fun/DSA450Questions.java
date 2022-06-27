@@ -2863,6 +2863,40 @@ public class DSA450Questions {
         System.out.println("Max sum circular subarray: " + maxSumSubArrCircular);
     }
 
+    public boolean nonDecreasingArrayWithAtmostOneChange(int[] nums) {
+        //https://leetcode.com/problems/non-decreasing-array/
+        //explanation: https://youtu.be/RegQckCegDk
+        int n = nums.length;
+        boolean atMostOneChangeHasDone = false;
+
+        for (int i = 0; i < n - 1; i++) {
+
+            //already increasing ex: 1 2 Or 1 1
+            if (nums[i] <= nums[i + 1]) {
+                continue;
+            }
+
+            //we can modify the array with atmost one element
+            //if we have previouly done it, we can't do it second time
+            //hence false
+            if (atMostOneChangeHasDone) {
+                return false;
+            }
+
+            //if curr ith value and its next value >= its prev value
+            //then convert that ith value to next value nums[i + 1]
+            //ex: i == 0 cases like [4, 2], other cond cases like [3,2,5]
+            if (i == 0 || nums[i + 1] >= nums[i - 1]) {
+                //update nums[i] = 2 with nums[i + 1] = 5
+                nums[i] = nums[i + 1];
+            } else {
+                nums[i + 1] = nums[i];
+            }
+            atMostOneChangeHasDone = true;
+        }
+        return true;
+    }
+
     public void rotateMatrixClockWise90Deg(int[][] mat) {
 
         int N = mat.length;
@@ -4962,7 +4996,6 @@ public class DSA450Questions {
     }
 
     public void minCharacterRequiredToMakeStringTAnagramOfS(String s, String t) {
-
         //https://leetcode.com/problems/minimum-number-of-steps-to-make-two-strings-anagram/
         Map<Character, Long> sMap = s.chars().mapToObj(c -> (char) c)
                 .collect(Collectors.groupingBy(
@@ -5358,27 +5391,53 @@ public class DSA450Questions {
         int wordsCanBeTyped = splitWords.length - brokenWordCount;
         System.out.println("Maxmum words that you can type : " + wordsCanBeTyped);
     }
-    
-    public boolean checkIfParenthesisStringCanBeValid(String s, String locked){
+
+    public boolean checkIfParenthesisStringCanBeValid(String s, String locked) {
         //https://leetcode.com/problems/check-if-a-parentheses-string-can-be-valid/
         //https://leetcode.com/problems/check-if-a-parentheses-string-can-be-valid/discuss/1905993/Keep-a-Range-1-Pass-O(n)-Java
         int n = s.length();
-        if(n % 2 == 1){
+        if (n % 2 == 1) {
             return false;
         }
-        
+
         int max = 0;
         int min = 0;
-        
-        for(int i = 0; i < n; i++){
+
+        for (int i = 0; i < n; i++) {
             max += locked.charAt(i) == '0' || s.charAt(i) == '(' ? 1 : -1;
             min += locked.charAt(i) == '0' || s.charAt(i) == ')' ? -1 : 1;
-            if(max < 0){
+            if (max < 0) {
                 return false;
             }
             min = Math.max(0, min);
         }
         return min == 0;
+    }
+
+    public void largestOddNumInGivenNumString(String numString) {
+        //https://leetcode.com/problems/largest-odd-number-in-string/
+        int n = numString.length();
+        int lastChar = numString.charAt(n - 1);
+        int lastDigit = lastChar - '0';
+
+        //if last digit of a num is odd then the whole num is odd itself
+        //ex: 7, 27, 427,...so on
+        if (lastDigit % 2 == 1) {
+            System.out.println("Largest odd number in given num string: " + numString);
+            return;
+        }
+
+        //we already checked lastDigit above, it was not odd
+        //so start end from second last char index
+        int end = n - 2;
+        //loop until we reach a odd char/digit from end
+        while (end >= 0 && (numString.charAt(end) - '0') % 2 != 1) {
+            end--;
+        }
+        //output
+        //end-index at which we will find the first odd chr/digit from end
+        //0 to that end-index will be our largest odd string
+        System.out.println("Largest odd number in given num string: " + numString.substring(0, end + 1));
     }
 
     public Node<Integer> reverseLinkedList_Iterative(Node<Integer> node) {
@@ -8665,7 +8724,7 @@ public class DSA450Questions {
         if (root.getLeft() == null && root.getRight() == null) {
             strs.add(sb.toString());
             //we only need 1 string as answer
-            if(strs.size() > 1){
+            if (strs.size() > 1) {
                 strs.poll();
             }
         }
@@ -12937,6 +12996,81 @@ public class DSA450Questions {
         return -1;
     }
 
+    private void surroundedRegions_Graph_DFS(char[][] board, int row, int col){
+        if(row < 0 || row >= board.length
+                || col < 0 || col >= board[row].length
+                || board[row][col] != 'O'){
+            return;
+        }
+        
+        //replace the O at the border regions with temp char T
+        board[row][col] = 'T';
+        //convert all the other O that are connected with O at the border regions
+        surroundedRegions_Graph_DFS(board, row - 1, col);
+        surroundedRegions_Graph_DFS(board, row + 1, col);
+        surroundedRegions_Graph_DFS(board, row, col - 1);
+        surroundedRegions_Graph_DFS(board, row, col + 1);
+    }
+    
+    public void surroundedRegions_Graph(char[][] board) {
+        //https://leetcode.com/problems/surrounded-regions/
+        //explanantion: https://youtu.be/9z2BunfoZ5Y
+
+        int row = board.length;
+        int col = board[0].length;
+
+        //actual
+        for (int r = 0; r < row; r++) {
+            for (int c = 0; c < col; c++) {
+                System.out.print(board[r][c] + " ");
+            }
+            System.out.println();
+        }
+
+        for (int r = 0; r < row; r++) {
+            for (int c = 0; c < col; c++) {
+                //First convert all the O at the border region and all other O 
+                //that is connected to these O
+                if (board[r][c] == 'O'
+                        //border regions ==> row == TOP EDGE || BOTTOM EDGE, col == LEFT EDGE || RIGHT EDGE
+                        && ((r == 0 || r == row - 1) || (c == 0 || c == col - 1))) {
+                    surroundedRegions_Graph_DFS(board, r, c);
+                }
+            }
+        }
+
+        for (int r = 0; r < row; r++) {
+            for (int c = 0; c < col; c++) {
+                //once all the Os at the border regions are replaced with temp char T
+                //we will be left with those O which are surrounded by X only
+                //because only those O were not reachable from above dfs
+                //we can easily convert these Os to X as per question
+                if (board[r][c] == 'O') {
+                    board[r][c] = 'X';
+                }
+            }
+        }
+        
+        for (int r = 0; r < row; r++) {
+            for (int c = 0; c < col; c++) {
+                //once all the Os that were surrounded by X are replaced with X 
+                //in previous loop, we can replace temp char T back with O again
+                if (board[r][c] == 'T') {
+                    board[r][c] = 'O';
+                }
+            }
+        }
+        
+        //output
+        System.out.println("Surrounded regions output: ");
+        for (int r = 0; r < row; r++) {
+            for (int c = 0; c < col; c++) {
+                System.out.print(board[r][c] + " ");
+            }
+            System.out.println();
+        }
+    }
+
     public void minimumCostToFillGivenBag_DP_Memoization(int[] cost, int W) {
 
         //0-1Knapsack problem
@@ -17019,6 +17153,7 @@ public class DSA450Questions {
 //        Row: SEPARATE QUESTION IMPORTANT
 //        System.out.println("Minimum char required to make string t anagram of string s");
 //        //https://leetcode.com/problems/minimum-number-of-steps-to-make-two-strings-anagram/
+//        //https://leetcode.com/problems/minimum-number-of-steps-to-make-two-strings-anagram-ii/
 //        obj.minCharacterRequiredToMakeStringTAnagramOfS("bab", "aba");
 //        obj.minCharacterRequiredToMakeStringTAnagramOfS("leetcode", "practice");
 //        obj.minCharacterRequiredToMakeStringTAnagramOfS("xxyyzz", "xxyyzz");
@@ -17577,10 +17712,34 @@ public class DSA450Questions {
 //        Row: SEPARATE QUESTION IMPORTANT
         System.out.println("Check if a Parentheses String Can Be Valid");
         //https://leetcode.com/problems/check-if-a-parentheses-string-can-be-valid/
-       System.out.println("Valid parenthesis possible: " + obj.checkIfParenthesisStringCanBeValid("))()))", "010100"));
-       System.out.println("Valid parenthesis possible: " + obj.checkIfParenthesisStringCanBeValid(")))(((", "001100"));
-       System.out.println("Valid parenthesis possible: " + obj.checkIfParenthesisStringCanBeValid("()()", "0000"));
-       System.out.println("Valid parenthesis possible: " + obj.checkIfParenthesisStringCanBeValid(")", "0"));
+        System.out.println("Valid parenthesis possible: " + obj.checkIfParenthesisStringCanBeValid("))()))", "010100"));
+        System.out.println("Valid parenthesis possible: " + obj.checkIfParenthesisStringCanBeValid(")))(((", "001100"));
+        System.out.println("Valid parenthesis possible: " + obj.checkIfParenthesisStringCanBeValid("()()", "0000"));
+        System.out.println("Valid parenthesis possible: " + obj.checkIfParenthesisStringCanBeValid(")", "0"));
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Largest Odd Number in String");
+        //https://leetcode.com/problems/largest-odd-number-in-string/
+        obj.largestOddNumInGivenNumString("52");
+        obj.largestOddNumInGivenNumString("4206");
+        obj.largestOddNumInGivenNumString("864278642");
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Non-decreasing Array");
+        //https://leetcode.com/problems/non-decreasing-array/
+        System.out.println("Non decreasing array with atmost one element change possible: "
+                + obj.nonDecreasingArrayWithAtmostOneChange(new int[]{4, 2, 3}));
+        System.out.println("Non decreasing array with atmost one element change possible: "
+                + obj.nonDecreasingArrayWithAtmostOneChange(new int[]{4, 2}));
+        System.out.println("Non decreasing array with atmost one element change possible: "
+                + obj.nonDecreasingArrayWithAtmostOneChange(new int[]{4, 2, 1}));
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Surrounded Regions");
+        //https://leetcode.com/problems/surrounded-regions/
+        obj.surroundedRegions_Graph(new char[][]{
+            {'X', 'X', 'X', 'X'}, {'X', 'O', 'O', 'X'}, {'X', 'X', 'O', 'X'}, {'X', 'O', 'X', 'X'}
+        });
     }
 
 }
