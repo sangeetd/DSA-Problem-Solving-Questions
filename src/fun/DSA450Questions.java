@@ -2960,21 +2960,186 @@ public class DSA450Questions {
         }
     }
 
-    public void rotateMatrixClockWise90Deg(int[][] mat) {
+    public void maximumLengthOfSubarrayWithPositiveProduct(int[] nums) {
+        //https://leetcode.com/problems/maximum-length-of-subarray-with-positive-product/
+        int n = nums.length;
+        int positiveCount = 0;
+        int negativeCount = 0;
+        int temp;
+        int length = 0;
 
-        int N = mat.length;
-        for (int x = 0; x < N / 2; x++) {
-            for (int y = x; y < N - x - 1; y++) {
+        for (int val : nums) {
 
-                int temp = mat[x][y];
-                mat[x][y] = mat[y][N - 1 - x];
-                mat[y][N - 1 - x] = mat[N - 1 - x][N - 1 - y];
-                mat[N - 1 - x][N - 1 - y] = mat[N - 1 - y][x];
-                mat[N - 1 - y][x] = temp;
+            int anyCase = val < 0 ? -1 : val == 0 ? 0 : 1;
+            switch (anyCase) {
+                case 0:
+                    //reset
+                    positiveCount = 0;
+                    negativeCount = 0;
+                    break;
+                case 1:
+                    positiveCount++;
+                    if (negativeCount != 0) {
+                        negativeCount++;
+                    }
+                    break;
+                case -1:
+                    temp = positiveCount;
+                    positiveCount = negativeCount > 0 ? negativeCount + 1 : 0;
+                    negativeCount = temp + 1;
+                    break;
+            }
+            length = Math.max(length, positiveCount);
+        }
+        //output
+        System.out.println("max length of subarray with positive product: " + length);
+    }
+
+    public void minimumIntervalToIncludeEachQuery(int[][] intervals, int[] queries) {
+        //https://leetcode.com/problems/minimum-interval-to-include-each-query/
+        //explanation: https://youtu.be/5hQ5WWW5awQ
+        class Node {
+
+            int dist;
+            int rightEnd;
+
+            public Node(int dist, int rightEnd) {
+                this.dist = dist;
+                this.rightEnd = rightEnd;
             }
         }
 
+        int intervalLen = intervals.length;
+        int queriesLen = queries.length;
+        int[] result = new int[queriesLen];
+        //<queries[i], List(i)>
+        Map<Integer, List<Integer>> queriesIndex = new HashMap<>();
+        for (int i = 0; i < queriesLen; i++) {
+            queriesIndex.putIfAbsent(queries[i], new ArrayList<>());
+            queriesIndex.get(queries[i]).add(i);
+        }
+
+        Arrays.sort(queries);
+        Arrays.sort(intervals, (a, b) -> a[0] - b[0]);
+
+        PriorityQueue<Node> minHeapDist = new PriorityQueue<>((n1, n2) -> n1.dist - n2.dist);
+        int intervalIndex = 0;
+
+        for (int query : queries) {
+
+            int queryIndex = queriesIndex.get(query).remove(0);
+            if (queriesIndex.get(query).size() == 0) {
+                queriesIndex.remove(query);
+            }
+
+            while (intervalIndex < intervalLen && intervals[intervalIndex][0] <= query) {
+                int left = intervals[intervalIndex][0];
+                int right = intervals[intervalIndex][1];
+
+                int dist = right - left + 1;
+                minHeapDist.add(new Node(dist, right));
+                intervalIndex++;
+            }
+
+            while (!minHeapDist.isEmpty() && minHeapDist.peek().rightEnd < query) {
+                minHeapDist.poll();
+            }
+
+            result[queryIndex] = minHeapDist.isEmpty() ? -1 : minHeapDist.peek().dist;
+        }
         //output
+        for (int i = 0; i < queriesLen; i++) {
+            System.out.println("For query : " + queries[i] + " dist : " + result[i]);
+        }
+    }
+
+    public void rotateMatrixClockWise90Deg(int[][] mat) {
+        //https://leetcode.com/problems/rotate-image
+        int col = mat[0].length;
+
+        int left = 0;
+        int right = col - 1;
+
+        while (right > left) {
+            //(right - left is amount of element need to take)
+            for (int i = 0; i < (right - left); i++) {
+                int top = left;
+                int bottom = right;
+
+                /*
+                
+                 top-[left + i]  ---> [top + i]-right
+                 /\                             |
+                 |   Clock dir                  |
+                 |                             \/
+                 [bottom - i]-left <---- bottom-[right - i]
+                
+                 */
+                //save top-left corner value
+                int topLeftCornerValue = mat[top][left + i];
+                //in top-left put bottom-left value
+                mat[top][left + i] = mat[bottom - i][left];
+                //in bottom-left put bottom-right value
+                mat[bottom - i][left] = mat[bottom][right - i];
+                //in bottom-right put top-right value
+                mat[bottom][right - i] = mat[top + i][right];
+                //in top-right put top-left value
+                mat[top + i][right] = topLeftCornerValue;
+            }
+            left++;
+            right--;
+        }
+
+        //output
+        System.out.println("N * N matrix 90deg clockwise rotation: ");
+        for (int[] r : mat) {
+            for (int c : r) {
+                System.out.print(c + "\t");
+            }
+            System.out.println();
+        }
+    }
+
+    public void rotateMatrixAntiClockWise90Deg(int[][] mat) {
+
+        int row = mat.length;
+        int col = mat[0].length;
+
+        int left = 0;
+        int right = col - 1;
+
+        while (right > left) {
+
+            for (int i = 0; i < (right - left); i++) {
+                int top = left;
+                int bottom = right;
+
+                /*
+                
+                 [top + i]-left  <--- top-[right - i]
+                 |                              /\
+                 |   AntiClock dir              |
+                 \/                             |
+                 bottom-[left + i] ----> [bottom - i]-right
+                
+                 */
+                //save top-left corner value
+                int topLeftCornerValue = mat[top + i][left];
+                //in top-right put top-right value
+                mat[top + i][left] = mat[top][right - i];
+                //in top-right put bottom-right value
+                mat[top][right - i] = mat[bottom - i][right];
+                //in bottom-right put bottom-left value
+                mat[bottom - i][right] = mat[bottom][left + i];
+                //in bottom-left put top-left value
+                mat[bottom][left + i] = topLeftCornerValue;
+            }
+            left++;
+            right--;
+        }
+
+        //output
+        System.out.println("N * N matrix 90deg anticlockwise rotation: ");
         for (int[] r : mat) {
             for (int c : r) {
                 System.out.print(c + "\t");
@@ -5619,6 +5784,38 @@ public class DSA450Questions {
         return canonicalPath.toString();
     }
 
+    public void findCommonCharacters(String[] words) {
+        //https://leetcode.com/problems/find-common-characters/
+        List<Character> result = new ArrayList<>();
+        int[] minFreq = new int[26];
+        Arrays.fill(minFreq, Integer.MAX_VALUE);
+        for (String word : words) {
+            //calculate freq of each charater in the curr word
+            int[] currFreq = new int[26];
+            for (char ch : word.toCharArray()) {
+                currFreq[ch - 'a']++;
+            }
+
+            //choose min of freq of each char from curr word or any prev words
+            for (int i = 0; i < 26; i++) {
+                minFreq[i] = Math.min(
+                        minFreq[i],
+                        currFreq[i]
+                );
+            }
+        }
+
+        for (int i = 0; i < 26; i++) {
+            int freq = minFreq[i];
+            while (freq != 0) {
+                result.add((char) (i + 'a'));
+                freq--;
+            }
+        }
+        //output
+        System.out.println("All common chars from the given words[]: " + result);
+    }
+
     public Node<Integer> reverseLinkedList_Iterative(Node<Integer> node) {
         System.out.println("Reverse linked list iterative");
         //actual
@@ -6963,6 +7160,32 @@ public class DSA450Questions {
         new LinkedListUtil<>(dummy.getNext()).print();
     }
 
+    public void mergeNodesInBetweenZeros(Node<Integer> head){
+        //https://leetcode.com/problems/merge-nodes-in-between-zeros/ 
+        //actual
+        new LinkedListUtil<Integer>(head).print();
+        
+        Node<Integer> curr = head;
+        Node<Integer> next = head.getNext();
+        
+        while(next != null){
+            
+            if(next.getData() == 0){
+                curr.setNext(next.getNext());
+                curr = curr.getNext();
+                next = next.getNext();
+            } else {
+                curr.setData(curr.getData() + next.getData());
+            }
+            if(next == null){
+                break;
+            }
+            next = next.getNext();
+        }
+        //output
+        new LinkedListUtil<Integer>(head).print();
+    }
+    
     public void levelOrderTraversal_Iterative(TreeNode root) {
 
         if (root == null) {
@@ -13312,6 +13535,69 @@ public class DSA450Questions {
         System.out.println("Longest increasing path in matrix: " + longestIncrPath);
     }
 
+    public int swimInRisingWater_Graph(int[][] grid) {
+        //https://leetcode.com/problems/swim-in-rising-water/
+        //explanation: https://youtu.be/amvrKlMLuGY
+        class Node {
+
+            int time;
+            int x;
+            int y;
+
+            public Node(int time, int x, int y) {
+                this.time = time;
+                this.x = x;
+                this.y = y;
+            }
+
+        }
+
+        int n = grid.length;
+        Set<String> visited = new HashSet<>();
+        PriorityQueue<Node> minHeapTime = new PriorityQueue<>(
+                (n1, n2) -> n1.time - n2.time
+        );
+
+        int[][] dirs = {
+            {1, 0},
+            {-1, 0},
+            {0, 1},
+            {0, -1}
+        };
+
+        int currX = 0;
+        int currY = 0;
+
+        visited.add(currX + "," + currY);
+        minHeapTime.add(new Node(grid[currX][currY], currX, currY));
+
+        while (!minHeapTime.isEmpty()) {
+
+            Node curr = minHeapTime.poll();
+
+            if (curr.x == n - 1 && curr.y == n - 1) {
+                return curr.time;
+            }
+            int currTime = curr.time;
+
+            for (int[] dir : dirs) {
+
+                int newX = curr.x + dir[0];
+                int newY = curr.y + dir[1];
+
+                if (newX < 0 || newX >= n
+                        || newY < 0 || newY >= n
+                        || visited.contains(newX + "," + newY)) {
+                    continue;
+                }
+                minHeapTime.add(new Node(
+                        Math.max(currTime, grid[newX][newY]),
+                        newX, newY));
+            }
+        }
+        return -1;
+    }
+
     public void minimumCostToFillGivenBag_DP_Memoization(int[] cost, int W) {
 
         //0-1Knapsack problem
@@ -14091,6 +14377,20 @@ public class DSA450Questions {
         System.out.println("Adding two nums: " + a + " " + b + " without + or - : " + sum);
     }
 
+    public void threeConsecutiveNumberThatSumsToGivenNumber(int num) {
+        //https://leetcode.com/problems/find-three-consecutive-integers-that-sum-to-a-given-number/
+        //https://leetcode.com/problems/find-three-consecutive-integers-that-sum-to-a-given-number/discuss/2164778/the-three-integers-will-be-in-arithmetic-progression
+        if (num % 3 == 0) {
+            int first = (num / 3) - 1;
+            int second = (num / 3);
+            int third = (num / 3) + 1;
+            System.out.println("Three consecutive number that sums to " + num + " : "
+                    + first + ", " + second + ", " + third);
+            return;
+        }
+        System.out.println("Three consecutive number that sums to " + num + " : Not possible");
+    }
+
     public static void main(String[] args) {
 
         //Object to access method
@@ -14611,10 +14911,12 @@ public class DSA450Questions {
 //        obj.sortArrayOf012_2(new int[]{0, 1, 1, 0, 1, 2, 1, 2, 0, 0, 0, 1}); //DUTCH NATIONAL FLAG ALGO
         //......................................................................
 //        Row: 51
-//        System.out.println("Rotate a matrix 90 degrees");
+//        System.out.println("Rotate a matrix 90 degrees clockwise/anticlockwise");
 //        //https://leetcode.com/problems/rotate-image
-//        int[][] mat = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
+//        int[][] mat = new int[][]{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
 //        obj.rotateMatrixClockWise90Deg(mat);
+//        mat = new int[][]{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
+//        obj.rotateMatrixAntiClockWise90Deg(mat);
         //......................................................................
 //        Row: 62
 //        System.out.println("Count and say");
@@ -17853,32 +18155,32 @@ public class DSA450Questions {
                 new String[]{"bar", "foo", "the"});
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Remove all sequences of consecutive linked list node sum to zero");
-        //https://leetcode.com/problems/remove-zero-sum-consecutive-nodes-from-linked-list/
-        Node<Integer> head = new Node<>(1);
-        head.setNext(new Node<>(2));
-        head.getNext().setNext(new Node<>(3));
-        head.getNext().getNext().setNext(new Node<>(-3));
-        head.getNext().getNext().getNext().setNext(new Node<>(-2));
-        obj.removeZeroSumConsecutiveNodesFromLinkedList(head);
-        head = new Node<>(1);
-        head.setNext(new Node<>(2));
-        head.getNext().setNext(new Node<>(3));
-        head.getNext().getNext().setNext(new Node<>(-3));
-        head.getNext().getNext().getNext().setNext(new Node<>(4));
-        obj.removeZeroSumConsecutiveNodesFromLinkedList(head);
-        head = new Node<>(1);
-        head.setNext(new Node<>(2));
-        head.getNext().setNext(new Node<>(3));
-        head.getNext().getNext().setNext(new Node<>(-3));
-        head.getNext().getNext().getNext().setNext(new Node<>(1));
-        obj.removeZeroSumConsecutiveNodesFromLinkedList(head);
-        head = new Node<>(0);
-        head.setNext(new Node<>(2));
-        head.getNext().setNext(new Node<>(3));
-        head.getNext().getNext().setNext(new Node<>(0));
-        head.getNext().getNext().getNext().setNext(new Node<>(4));
-        obj.removeZeroSumConsecutiveNodesFromLinkedList(head);
+//        System.out.println("Remove all sequences of consecutive linked list node sum to zero");
+//        //https://leetcode.com/problems/remove-zero-sum-consecutive-nodes-from-linked-list/
+//        Node<Integer> head = new Node<>(1);
+//        head.setNext(new Node<>(2));
+//        head.getNext().setNext(new Node<>(3));
+//        head.getNext().getNext().setNext(new Node<>(-3));
+//        head.getNext().getNext().getNext().setNext(new Node<>(-2));
+//        obj.removeZeroSumConsecutiveNodesFromLinkedList(head);
+//        head = new Node<>(1);
+//        head.setNext(new Node<>(2));
+//        head.getNext().setNext(new Node<>(3));
+//        head.getNext().getNext().setNext(new Node<>(-3));
+//        head.getNext().getNext().getNext().setNext(new Node<>(4));
+//        obj.removeZeroSumConsecutiveNodesFromLinkedList(head);
+//        head = new Node<>(1);
+//        head.setNext(new Node<>(2));
+//        head.getNext().setNext(new Node<>(3));
+//        head.getNext().getNext().setNext(new Node<>(-3));
+//        head.getNext().getNext().getNext().setNext(new Node<>(1));
+//        obj.removeZeroSumConsecutiveNodesFromLinkedList(head);
+//        head = new Node<>(0);
+//        head.setNext(new Node<>(2));
+//        head.getNext().setNext(new Node<>(3));
+//        head.getNext().getNext().setNext(new Node<>(0));
+//        head.getNext().getNext().getNext().setNext(new Node<>(4));
+//        obj.removeZeroSumConsecutiveNodesFromLinkedList(head);
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
         System.out.println("Add two nums without usiing + or -");
@@ -18016,6 +18318,49 @@ public class DSA450Questions {
         System.out.println("Canonical path: " + obj.simplifyPath("/home/"));
         System.out.println("Canonical path: " + obj.simplifyPath("/../"));
         System.out.println("Canonical path: " + obj.simplifyPath("/home///foo/./bar/zoo/./../"));
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Maximum Length of Subarray With Positive Product");
+        //https://leetcode.com/problems/maximum-length-of-subarray-with-positive-product/
+        obj.maximumLengthOfSubarrayWithPositiveProduct(new int[]{1, -2, -3, 4}); //lenght = 4 as 1 * -2 * -3 * 4 > 0
+        obj.maximumLengthOfSubarrayWithPositiveProduct(new int[]{0, 1, -2, -3, -4});
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Swim in Rising Water");
+        //https://leetcode.com/problems/swim-in-rising-water/
+        System.out.println("Time taken to swim in rising water to bottom-right corner: "
+                + obj.swimInRisingWater_Graph(new int[][]{
+                    {0, 2}, {1, 3}}));
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Find Common Characters");
+        //https://leetcode.com/problems/find-common-characters/
+        obj.findCommonCharacters(new String[]{"bella", "label", "roller"});
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Minimum Interval to Include Each Query");
+        //https://leetcode.com/problems/minimum-interval-to-include-each-query/
+        obj.minimumIntervalToIncludeEachQuery(new int[][]{
+            {1, 4}, {2, 4}, {3, 6}, {4, 4}}, new int[]{2, 3, 4, 5});
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Find Three Consecutive Integers That Sum to a Given Number");
+        //https://leetcode.com/problems/find-three-consecutive-integers-that-sum-to-a-given-number/
+        obj.threeConsecutiveNumberThatSumsToGivenNumber(33);
+        obj.threeConsecutiveNumberThatSumsToGivenNumber(4);
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Merge Nodes in Between Zeros");
+        //https://leetcode.com/problems/merge-nodes-in-between-zeros/
+        Node<Integer> head = new Node<>(0);
+        head.setNext(new Node<>(3));
+        head.getNext().setNext(new Node<>(1));
+        head.getNext().getNext().setNext(new Node<>(0));
+        head.getNext().getNext().getNext().setNext(new Node<>(4));
+        head.getNext().getNext().getNext().getNext().setNext(new Node<>(5));
+        head.getNext().getNext().getNext().getNext().getNext().setNext(new Node<>(2));
+        head.getNext().getNext().getNext().getNext().getNext().getNext().setNext(new Node<>(0));
+        obj.mergeNodesInBetweenZeros(head);
     }
 
 }
