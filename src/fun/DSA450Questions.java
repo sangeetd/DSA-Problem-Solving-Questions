@@ -5815,11 +5815,11 @@ public class DSA450Questions {
         //output
         System.out.println("All common chars from the given words[]: " + result);
     }
-    
-    public void searchSuggestionSystem(String[] words, String search){
+
+    public void searchSuggestionSystem(String[] words, String search) {
         //https://leetcode.com/problems/search-suggestions-system/
         //explanation: https://youtu.be/D4T2N0yAr20
-        
+
         int n = words.length;
         //this map is used for output purpose, nt req by question
         Map<Character, List<String>> wordsPerSearchedChar = new HashMap<>();
@@ -5827,14 +5827,14 @@ public class DSA450Questions {
         //sort lexicographically order
         Arrays.sort(words);
         int reqAtMost = 3;
-        int start = 0; 
+        int start = 0;
         int end = n - 1;
-        
-        for(int i = 0; i < search.length(); i++){
+
+        for (int i = 0; i < search.length(); i++) {
             char searchChar = search.charAt(i);
             List<String> curr = new ArrayList<>();
-            
-            while(end >= start
+
+            while (end >= start
                     //cond is to skip all those words from start which are
                     //1. smaller than our search word ex: search = "apple", word[start] = "app"
                     //at i = 3 search[3] = l where i >= "app".length()
@@ -5842,11 +5842,11 @@ public class DSA450Questions {
                     //of word[start].charAt(i) ex search = "apple", word[start] = "ape"
                     //at i = 2 searchChar = p !=  word[start].charAt(i) = e
                     && (i >= words[start].length()
-                    || words[start].charAt(i) != searchChar)){
+                    || words[start].charAt(i) != searchChar)) {
                 start++;
             }
-            
-            while(end >= start
+
+            while (end >= start
                     //cond is to skip all those words from end which are
                     //1. smaller than our search word ex: search = "apple", word[end] = "app"
                     //at i = 3 search[3] = l where i >= "app".length()
@@ -5854,13 +5854,13 @@ public class DSA450Questions {
                     //of word[end].charAt(i) ex search = "apple", word[end] = "ape"
                     //at i = 2 searchChar = p !=  word[end].charAt(i) = e
                     && (i >= words[end].length()
-                    || words[end].charAt(i) != searchChar)){
+                    || words[end].charAt(i) != searchChar)) {
                 end--;
             }
-            
+
             //we need atmost 3 words but if we get any less amount then consume that much
             int wordsToConsume = Math.min(reqAtMost, end - start + 1);
-            for(int j = 0; j < wordsToConsume; j++){
+            for (int j = 0; j < wordsToConsume; j++) {
                 curr.add(words[start + j]);
             }
             result.add(curr);
@@ -5872,6 +5872,60 @@ public class DSA450Questions {
         System.out.println("Search suggestions system words per char: " + wordsPerSearchedChar);
     }
 
+    public int maximumLengthOfSubstringThatExistsAsSubseqInOtherString(String main, String curr) {
+        //https://www.geeksforgeeks.org/maximum-length-prefix-one-string-occurs-subsequence-another/?ref=rp
+        int currLenCovered = 0;
+        int mainLen = main.length();
+        for (int i = 0; i < mainLen; i++) {
+            if (currLenCovered == curr.length()) {
+                break;
+            }
+            if (main.charAt(i) == curr.charAt(currLenCovered)) {
+                currLenCovered++;
+            }
+        }
+        //output
+        String substr = curr.substring(0, currLenCovered);
+        System.out.println("Maximum length of substring exists as subseq in main string: "
+                + currLenCovered + " substr " + substr);
+        return currLenCovered;
+    }
+
+    public boolean isSubsequence(String main, String curr) {
+        //https://leetcode.com/problems/is-subsequence/
+        //https://www.geeksforgeeks.org/maximum-length-prefix-one-string-occurs-subsequence-another/?ref=rp
+        int currLenCovered = 0;
+        int mainLen = main.length();
+        int currLen = curr.length();
+        for (int i = 0; i < mainLen; i++) {
+            if (currLenCovered == curr.length()) {
+                return true;
+            }
+            if (main.charAt(i) == curr.charAt(currLenCovered)) {
+                currLenCovered++;
+            }
+        }
+        return currLen == currLenCovered;
+    }
+    
+    public void minimumPartitionsInCurrStringWherePrefixExistsAsSubseqInMainString(String main, String curr){
+        //MY GOOGLE INTERVIEW QUESTION
+        int partitions = 0;
+        String subseq = curr;
+        while(subseq.length() > 0){
+            
+            int prefixLengthMatchedInCurr = maximumLengthOfSubstringThatExistsAsSubseqInOtherString(main, subseq);
+            if(prefixLengthMatchedInCurr == 0){
+                System.out.println("No partition is possible");
+                return;
+            }
+            subseq = subseq.substring(prefixLengthMatchedInCurr);
+            partitions++;
+        }
+        //output
+        System.out.println("Partitions of curr string where each substring exists as subseq in mains string: " + partitions);
+    }
+    
     public Node<Integer> reverseLinkedList_Iterative(Node<Integer> node) {
         System.out.println("Reverse linked list iterative");
         //actual
@@ -7216,24 +7270,24 @@ public class DSA450Questions {
         new LinkedListUtil<>(dummy.getNext()).print();
     }
 
-    public void mergeNodesInBetweenZeros(Node<Integer> head){
+    public void mergeNodesInBetweenZeros(Node<Integer> head) {
         //https://leetcode.com/problems/merge-nodes-in-between-zeros/ 
         //actual
         new LinkedListUtil<Integer>(head).print();
-        
+
         Node<Integer> curr = head;
         Node<Integer> next = head.getNext();
-        
-        while(next != null){
-            
-            if(next.getData() == 0){
+
+        while (next != null) {
+
+            if (next.getData() == 0) {
                 curr.setNext(next.getNext());
                 curr = curr.getNext();
                 next = next.getNext();
             } else {
                 curr.setData(curr.getData() + next.getData());
             }
-            if(next == null){
+            if (next == null) {
                 break;
             }
             next = next.getNext();
@@ -7241,7 +7295,7 @@ public class DSA450Questions {
         //output
         new LinkedListUtil<Integer>(head).print();
     }
-    
+
     public void levelOrderTraversal_Iterative(TreeNode root) {
 
         if (root == null) {
@@ -18421,7 +18475,27 @@ public class DSA450Questions {
 //        Row: SEPARATE QUESTION IMPORTANT
         System.out.println("Search Suggestions System");
         //https://leetcode.com/problems/search-suggestions-system/
-        obj.searchSuggestionSystem(new String[]{"mobile","mouse","moneypot","monitor","mousepad"}, "mouse");
+        obj.searchSuggestionSystem(new String[]{"mobile", "mouse", "moneypot", "monitor", "mousepad"}, "mouse");
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Maximum length prefix of one string that occurs as subsequence in another");
+        //https://www.geeksforgeeks.org/maximum-length-prefix-one-string-occurs-subsequence-another/?ref=rp
+        obj.maximumLengthOfSubstringThatExistsAsSubseqInOtherString("biggerdiagram", "digger");
+        obj.maximumLengthOfSubstringThatExistsAsSubseqInOtherString("abcdef", "xyz");
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Is Subsequence");
+        //https://leetcode.com/problems/is-subsequence/
+        System.out.println("Is string curr exists as any subseq in main: "
+        + obj.isSubsequence("ahbgdc", "abc"));
+         //whole digger string doesn't exists as any subseq in main string
+        System.out.println("Is string curr exists as any subseq in main: "
+        + obj.isSubsequence("biggerdiagram", "digger"));
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT MY GOOGLE INTERVIEW QUESTION
+        System.out.println("Minimum partitions in curr string where its prefix exists as subseq in main string");
+        obj.minimumPartitionsInCurrStringWherePrefixExistsAsSubseqInMainString("aaaabbc", "aacbbabc");
+        obj.minimumPartitionsInCurrStringWherePrefixExistsAsSubseqInMainString("aaaabbc", "lmno");
     }
 
 }
