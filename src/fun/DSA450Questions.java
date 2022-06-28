@@ -5907,25 +5907,76 @@ public class DSA450Questions {
         }
         return currLen == currLenCovered;
     }
-    
-    public void minimumPartitionsInCurrStringWherePrefixExistsAsSubseqInMainString(String main, String curr){
+
+    public void minimumPartitionsInCurrStringWherePrefixExistsAsSubseqInMainString(String main, String curr) {
         //MY GOOGLE INTERVIEW QUESTION
+        /*
+         main = "aaaabbc"
+         curr = "abcbbbabc"
+         partition in curr string should be 3 as abc | bb | abc
+         */
         int partitions = 0;
         String subseq = curr;
-        while(subseq.length() > 0){
-            
-            int prefixLengthMatchedInCurr = maximumLengthOfSubstringThatExistsAsSubseqInOtherString(main, subseq);
-            if(prefixLengthMatchedInCurr == 0){
+        int prefixLengthMatchedInCurr = 0;
+        Set<String> cache = new HashSet<>();
+        while (subseq.length() > 0) {
+            //chechs if subseq is already processes before then we don't 
+            //need to call the below fun again for same
+            //ex: curr = "abcbbabc" first prefix abc will again going
+            //to be checked later after bb
+            if (cache.contains(subseq)) {
+                prefixLengthMatchedInCurr = subseq.length();
+                subseq = subseq.substring(prefixLengthMatchedInCurr);
+                partitions++;
+                continue;
+            }
+            //if subseq is not cached previously
+            //we must find a prefix in curr that exists as subseq in main
+            prefixLengthMatchedInCurr = maximumLengthOfSubstringThatExistsAsSubseqInOtherString(main, subseq);
+            //if any prefix is not present as subseq the length will return as 0
+            //that means we can't divide curr string where it exists as subseq
+            if (prefixLengthMatchedInCurr == 0) {
                 System.out.println("No partition is possible");
                 return;
             }
+            //if any prefix of curr found as subseq cache what prefix is that
+            //ex: curr = "abcbbabc" first prefix = "abc" exists as subseq in "aaaabbc"
+            //save substring(0, prefixLengthMatchedInCurr) i.e, first "abc" and so on...
+            cache.add(subseq.substring(0, prefixLengthMatchedInCurr));
+            //remove the prefix that has been found
+            //like above first "abc" is found as subseq now reduce our actual subseq
+            //substring(prefixLengthMatchedInCurr) ==> "bbabc" and so on...
             subseq = subseq.substring(prefixLengthMatchedInCurr);
+            //if we can do all this we mean that we have a partition
             partitions++;
         }
         //output
         System.out.println("Partitions of curr string where each substring exists as subseq in mains string: " + partitions);
     }
-    
+
+    public void numberOfMatchingSubseq(String main, String[] words) {
+        //https://leetcode.com/problems/number-of-matching-subsequences/
+        int n = words.length;
+        Set<String> alreadyFound = new HashSet<>();
+        Set<String> notFound = new HashSet<>();
+        int totalMatch = 0;
+        for (String word : words) {
+
+            if (notFound.contains(word)) {
+                continue;
+            } else if (alreadyFound.contains(word)) {
+                totalMatch++;
+            } else if (isSubsequence(main, word)) {
+                totalMatch++;
+                alreadyFound.add(word);
+            } else {
+                notFound.add(word);
+            }
+        }
+        //output
+        System.out.println("Total words matches that exists as subseq in main string: " + totalMatch);
+    }
+
     public Node<Integer> reverseLinkedList_Iterative(Node<Integer> node) {
         System.out.println("Reverse linked list iterative");
         //actual
@@ -10518,6 +10569,43 @@ public class DSA450Questions {
         }
         System.out.println("Max time required to inform all employee from head manager to subordinate(Direct DFS): "
                 + maxTime);
+    }
+
+    private enum BinaryTreeCameraState {
+
+        hasCamera, needCamera, covered
+    }
+    int binaryTreeCameras_ReqCamera;
+
+    private BinaryTreeCameraState binaryTreeCameras_Helper(TreeNode<Integer> root) {
+        if (root == null) {
+            return BinaryTreeCameraState.covered;
+        }
+
+        BinaryTreeCameraState leftState = binaryTreeCameras_Helper(root.getLeft());
+        BinaryTreeCameraState rightState = binaryTreeCameras_Helper(root.getRight());
+
+        if (leftState == BinaryTreeCameraState.needCamera
+                || rightState == BinaryTreeCameraState.needCamera) {
+            binaryTreeCameras_ReqCamera++;
+            return BinaryTreeCameraState.hasCamera;
+        }
+
+        if (leftState == BinaryTreeCameraState.hasCamera
+                || rightState == BinaryTreeCameraState.hasCamera) {
+            return BinaryTreeCameraState.covered;
+        }
+        return BinaryTreeCameraState.needCamera;
+    }
+
+    public void binaryTreeCameras(TreeNode<Integer> root) {
+        //https://leetcode.com/problems/binary-tree-cameras/
+        //https://leetcode.com/problems/binary-tree-cameras/solution/
+        binaryTreeCameras_ReqCamera = 0;
+        int output = binaryTreeCameras_Helper(root) == BinaryTreeCameraState.needCamera
+                ? binaryTreeCameras_ReqCamera++ 
+                : binaryTreeCameras_ReqCamera;
+        System.out.println("Binary tree cameras : " + output);
     }
 
     // STACK
@@ -18313,32 +18401,32 @@ public class DSA450Questions {
         obj.maximumWordsThatYouCanType("hello world", "xy"); //hello, world both can be typed, no words contains broken chars x & y
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Maximum length AP in binary tree");
-        //https://www.geeksforgeeks.org/longest-path-to-the-bottom-of-a-binary-tree-forming-an-arithmetic-progression/
-        //https://www.geeksforgeeks.org/longest-arithmetic-progression-path-in-given-binary-tree/
-        TreeNode<Integer> root1 = new TreeNode<>(6);
-        root1.setRight(new TreeNode<>(9)); //common diff from prev node is 3
-        root1.getRight().setRight(new TreeNode<>(12)); //common diff from prev node is 3
-        root1.getRight().getRight().setRight(new TreeNode<>(15)); //common diff from prev node is 3
-        root1.getRight().setLeft(new TreeNode<>(7));
-        obj.longestPathArithemeticProgressionInBinaryTree(root1);
-        root1 = new TreeNode<>(6);
-        obj.longestPathArithemeticProgressionInBinaryTree(root1);
-        root1 = new TreeNode<>(6);
-        root1.setRight(new TreeNode<>(9));
-        obj.longestPathArithemeticProgressionInBinaryTree(root1);
-        root1 = new TreeNode<>(15);
-        root1.setRight(new TreeNode<>(12)); //common diff from prev node is 3
-        root1.getRight().setRight(new TreeNode<>(9)); //common diff from prev node is 3
-        root1.getRight().getRight().setRight(new TreeNode<>(6)); //common diff from prev node is 3
-        root1.getRight().setLeft(new TreeNode<>(7));
-        obj.longestPathArithemeticProgressionInBinaryTree(root1);
-        root1 = new TreeNode<>(15);
-        root1.setRight(new TreeNode<>(12)); //common diff from prev node is 3
-        root1.getRight().setRight(new TreeNode<>(11)); //common diff from prev node is NOT 3, hence breaking AP, maxLen - 15 -> 12 = 2
-        root1.getRight().getRight().setRight(new TreeNode<>(9));
-        root1.getRight().setLeft(new TreeNode<>(7));
-        obj.longestPathArithemeticProgressionInBinaryTree(root1);
+//        System.out.println("Maximum length AP in binary tree");
+//        //https://www.geeksforgeeks.org/longest-path-to-the-bottom-of-a-binary-tree-forming-an-arithmetic-progression/
+//        //https://www.geeksforgeeks.org/longest-arithmetic-progression-path-in-given-binary-tree/
+//        TreeNode<Integer> root1 = new TreeNode<>(6);
+//        root1.setRight(new TreeNode<>(9)); //common diff from prev node is 3
+//        root1.getRight().setRight(new TreeNode<>(12)); //common diff from prev node is 3
+//        root1.getRight().getRight().setRight(new TreeNode<>(15)); //common diff from prev node is 3
+//        root1.getRight().setLeft(new TreeNode<>(7));
+//        obj.longestPathArithemeticProgressionInBinaryTree(root1);
+//        root1 = new TreeNode<>(6);
+//        obj.longestPathArithemeticProgressionInBinaryTree(root1);
+//        root1 = new TreeNode<>(6);
+//        root1.setRight(new TreeNode<>(9));
+//        obj.longestPathArithemeticProgressionInBinaryTree(root1);
+//        root1 = new TreeNode<>(15);
+//        root1.setRight(new TreeNode<>(12)); //common diff from prev node is 3
+//        root1.getRight().setRight(new TreeNode<>(9)); //common diff from prev node is 3
+//        root1.getRight().getRight().setRight(new TreeNode<>(6)); //common diff from prev node is 3
+//        root1.getRight().setLeft(new TreeNode<>(7));
+//        obj.longestPathArithemeticProgressionInBinaryTree(root1);
+//        root1 = new TreeNode<>(15);
+//        root1.setRight(new TreeNode<>(12)); //common diff from prev node is 3
+//        root1.getRight().setRight(new TreeNode<>(11)); //common diff from prev node is NOT 3, hence breaking AP, maxLen - 15 -> 12 = 2
+//        root1.getRight().getRight().setRight(new TreeNode<>(9));
+//        root1.getRight().setLeft(new TreeNode<>(7));
+//        obj.longestPathArithemeticProgressionInBinaryTree(root1);
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
         System.out.println("Longest string chain");
@@ -18487,15 +18575,30 @@ public class DSA450Questions {
         System.out.println("Is Subsequence");
         //https://leetcode.com/problems/is-subsequence/
         System.out.println("Is string curr exists as any subseq in main: "
-        + obj.isSubsequence("ahbgdc", "abc"));
-         //whole digger string doesn't exists as any subseq in main string
+                + obj.isSubsequence("ahbgdc", "abc"));
+        //whole digger string doesn't exists as any subseq in main string
         System.out.println("Is string curr exists as any subseq in main: "
-        + obj.isSubsequence("biggerdiagram", "digger"));
+                + obj.isSubsequence("biggerdiagram", "digger"));
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT MY GOOGLE INTERVIEW QUESTION
         System.out.println("Minimum partitions in curr string where its prefix exists as subseq in main string");
         obj.minimumPartitionsInCurrStringWherePrefixExistsAsSubseqInMainString("aaaabbc", "aacbbabc");
         obj.minimumPartitionsInCurrStringWherePrefixExistsAsSubseqInMainString("aaaabbc", "lmno");
+        obj.minimumPartitionsInCurrStringWherePrefixExistsAsSubseqInMainString("aaaabbc", "abcbbabc");
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Number of Matching Subsequences");
+        //https://leetcode.com/problems/number-of-matching-subsequences/
+        obj.numberOfMatchingSubseq("abcde", new String[]{"a", "bb", "acd", "ace"});
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Binary Tree Cameras");
+        //https://leetcode.com/problems/binary-tree-cameras/
+        TreeNode<Integer> root1 = new TreeNode<>(0);
+        root1.setLeft(new TreeNode<>(0));
+        root1.getLeft().setLeft(new TreeNode<>(0));
+        root1.getLeft().setRight(new TreeNode<>(0));
+        obj.binaryTreeCameras(root1);
     }
 
 }
