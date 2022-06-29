@@ -760,6 +760,7 @@ public class DSA450Questions {
 
         //.................................T: O(N.LogN)
         //https://leetcode.com/problems/merge-intervals/
+        //https://leetcode.com/problems/non-overlapping-intervals/
         System.out.println("approach 1");
         List<int[]> result = new ArrayList<>();
 
@@ -1426,7 +1427,7 @@ public class DSA450Questions {
     }
 
     public void flipMZerosFindMaxLengthOfConsecutiveOnes(int[] arr, int M) {
-
+        //https://leetcode.com/problems/max-consecutive-ones-iii/
         int start = 0;
         int end = 0;
         int zeroCount = 0;
@@ -3053,6 +3054,91 @@ public class DSA450Questions {
         }
     }
 
+    public void candyDistributionToNStudent(int[] ratings) {
+        //.........................T: O(N)
+        //.........................S: O(N + N), left & right neighbour
+        //https://leetcode.com/problems/candy/
+        //explanation: https://youtu.be/h6_lIwZYHQw
+        /*
+         rule:
+         You are giving candies to these children subjected to the following requirements:
+         1. Each child must have at least one candy.
+         2. Children with a higher rating get more candies than their neighbors.
+         */
+        int n = ratings.length;
+        int[] leftNeighbour = new int[n];
+        int[] rightNeighbour = new int[n];
+        int candiesNeeded = 0;
+        //atleast candy is given to each student
+        leftNeighbour[0] = 1;
+        for (int i = 1; i < n; i++) {
+            //if rating of curr ith student is greater than its prev left student
+            //that curr student should have 1 candy extra than its prev left student
+            //otherwise atleast 1 candy should be given
+            leftNeighbour[i] = ratings[i] > ratings[i - 1]
+                    ? leftNeighbour[i - 1] + 1
+                    : 1;
+        }
+        //atleast candy is given to each student
+        rightNeighbour[n - 1] = 1;
+        for (int i = n - 2; i >= 0; i--) {
+            //if rating of curr ith student is greater than its next right student
+            //that curr student should have 1 candy extra than its next right student
+            //otherwise atleast 1 candy should be given
+            rightNeighbour[i] = ratings[i] > ratings[i + 1]
+                    ? rightNeighbour[i + 1] + 1
+                    : 1;
+        }
+
+        for (int i = 0; i < n; i++) {
+            //add all the max candies req by each ith student
+            candiesNeeded += Math.max(leftNeighbour[i], rightNeighbour[i]);
+        }
+        //output
+        System.out.println("Candies required to be distributed: " + candiesNeeded);
+    }
+    
+    public void candyDistributionToNStudent2(int[] ratings) {
+        //.........................T: O(N)
+        //.........................S: O(N), candies
+        //OPTIMISED
+        //https://leetcode.com/problems/candy/
+        //https://leetcode.com/problems/candy/solution/
+        //explanation: https://youtu.be/h6_lIwZYHQw
+        /*
+         rule:
+         You are giving candies to these children subjected to the following requirements:
+         1. Each child must have at least one candy.
+         2. Children with a higher rating get more candies than their neighbors.
+         */
+        int n = ratings.length;
+        int[] candies = new int[n];
+        //atleast candy is given to each student
+        Arrays.fill(candies, 1);
+        int candiesNeeded = 0;
+        for (int i = 1; i < n; i++) {
+            //if rating of curr ith student is greater than its prev left student
+            //that curr student should have 1 candy extra than its prev left student
+            //otherwise atleast 1 candy should be given
+            candies[i] = ratings[i] > ratings[i - 1]
+                    ? candies[i - 1] + 1
+                    : 1;
+        }
+        
+        candiesNeeded = candies[n - 1];
+        for (int i = n - 2; i >= 0; i--) {
+            //if rating of curr ith student is greater than its next right student
+            //that curr student should have 1 candy extra than its next right student
+            //otherwise atleast 1 candy should be given
+            if(ratings[i] > ratings[i + 1]){
+                candies[i] = Math.max(candies[i], candies[i + 1] + 1);
+            }
+            candiesNeeded += candies[i];
+        }
+        //output
+        System.out.println("Candies required to be distributed: " + candiesNeeded);
+    }
+
     public void rotateMatrixClockWise90Deg(int[][] mat) {
         //https://leetcode.com/problems/rotate-image
         int col = mat[0].length;
@@ -3470,6 +3556,37 @@ public class DSA450Questions {
         }
         //output
         System.out.println("Min path sum in grid from top-left to bottom-right: " + grid[R - 1][C - 1]);
+    }
+
+    public int triangleMinPathSumTopToBottom(List<List<Integer>> triangle) {
+        //https://leetcode.com/problems/triangle/
+        //explanation: https://youtu.be/OM1MTokvxs4
+        int size = triangle.size();
+        if (size == 1) {
+            return triangle.get(0).get(0);
+        }
+        int secondLastRow = size - 2;
+        //find the min values from the end rows and proceed from bottom to top
+        //add each min value to curr row value
+        for (int row = secondLastRow; row >= 0; row--) {
+
+            int rowBelowCurr = row + 1;
+            List<Integer> rowBelowCurrList = triangle.get(rowBelowCurr);
+            List<Integer> currRowList = triangle.get(row);
+            int currRowSize = currRowList.size();
+
+            for (int c = 0; c < currRowSize; c++) {
+
+                int currRowValue = currRowList.get(c);
+
+                int firstChild = rowBelowCurrList.get(c);
+                int secondChild = rowBelowCurrList.get(c + 1);
+
+                int minOfTwoChild = Math.min(firstChild, secondChild);
+                currRowList.set(c, currRowValue + minOfTwoChild);
+            }
+        }
+        return triangle.get(0).get(0);
     }
 
     public String reverseString(String str) {
@@ -10603,9 +10720,36 @@ public class DSA450Questions {
         //https://leetcode.com/problems/binary-tree-cameras/solution/
         binaryTreeCameras_ReqCamera = 0;
         int output = binaryTreeCameras_Helper(root) == BinaryTreeCameraState.needCamera
-                ? binaryTreeCameras_ReqCamera++ 
+                ? binaryTreeCameras_ReqCamera++
                 : binaryTreeCameras_ReqCamera;
         System.out.println("Binary tree cameras : " + output);
+    }
+
+    private TreeNode<Integer> convertSortedArrayToHeightBalancedBinarySearchTree_Helper(
+            int[] arr, int start, int end) {
+        if (start > end) {
+            return null;
+        }
+
+        int mid = start + (end - start) / 2;
+        TreeNode<Integer> root = new TreeNode<>(arr[mid]);
+        root.setLeft(
+                convertSortedArrayToHeightBalancedBinarySearchTree_Helper(arr, start, mid - 1)
+        );
+        root.setRight(
+                convertSortedArrayToHeightBalancedBinarySearchTree_Helper(arr, mid + 1, end)
+        );
+
+        return root;
+    }
+
+    public void convertSortedArrayToHeightBalancedBinarySearchTree(int[] arr) {
+        //https://leetcode.com/problems/convert-sorted-array-to-binary-search-tree/
+        //explanation: https://youtu.be/0K0uCMYq5ng
+        TreeNode<Integer> root = convertSortedArrayToHeightBalancedBinarySearchTree_Helper(arr, 0, arr.length - 1);
+        //output
+        new BinarySearchTree<>(root).treeInorder();
+        System.out.println();
     }
 
     // STACK
@@ -12804,6 +12948,26 @@ public class DSA450Questions {
         System.out.println("Order of tasks in which tasks can be consumed:");
         Arrays.stream(res).boxed().forEach(x -> System.out.print(x + " "));
         System.out.println();
+    }
+
+    public void minimumArrowsToBurstBalloons_Greedy(int[][] balloonPoints) {
+        //https://leetcode.com/problems/minimum-number-of-arrows-to-burst-balloons/
+        //sort on balloon end point
+        Arrays.sort(balloonPoints, (a, b) -> a[1] - b[1]);
+        int prevStart = balloonPoints[0][0];
+        int prevEnd = balloonPoints[0][1];
+        int n = balloonPoints.length;
+        int minArrow = 1;
+        for (int i = 0; i < n; i++) {
+            int currStart = balloonPoints[i][0];
+            int currEnd = balloonPoints[i][1];
+            if (currStart > prevEnd) {
+                minArrow++;
+                prevEnd = currEnd;
+            }
+        }
+        //output
+        System.out.println("Minimum arrows required to burst all balloon: " + minArrow);
     }
 
     public void graphBFSAdjList_Graph(int V, List<List<Integer>> adjList) {
@@ -16207,6 +16371,7 @@ public class DSA450Questions {
 //        Row: 19
 //        System.out.println("Merge intervals");
 //        //https://leetcode.com/problems/merge-intervals/
+//        //https://leetcode.com/problems/non-overlapping-intervals/
 //        int[][] intervals = new int[][]{
 //            {1, 3}, {2, 6}, {8, 10}, {15, 18}
 //        };
@@ -18599,6 +18764,42 @@ public class DSA450Questions {
         root1.getLeft().setLeft(new TreeNode<>(0));
         root1.getLeft().setRight(new TreeNode<>(0));
         obj.binaryTreeCameras(root1);
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Convert Sorted Array to Height Balanced Binary Search Tree");
+        //https://leetcode.com/problems/convert-sorted-array-to-binary-search-tree/
+        obj.convertSortedArrayToHeightBalancedBinarySearchTree(new int[]{-10, -3, 0, 5, 9});
+        obj.convertSortedArrayToHeightBalancedBinarySearchTree(new int[]{1, 2, 3, 4, 5});
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Minimum Number of Arrows to Burst Balloons");
+        //https://leetcode.com/problems/minimum-number-of-arrows-to-burst-balloons/
+        obj.minimumArrowsToBurstBalloons_Greedy(new int[][]{
+            {10, 16}, {2, 8}, {1, 6}, {7, 12}});
+        obj.minimumArrowsToBurstBalloons_Greedy(new int[][]{
+            {1, 2}, {3, 4}, {5, 6}, {7, 8}});
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Triangle - minimum path sum from top to bottom");
+        //https://leetcode.com/problems/triangle/
+        List<List<Integer>> triangle = new ArrayList<>();
+        triangle.add(Arrays.asList(2));
+        triangle.add(Arrays.asList(3, 4));
+        triangle.add(Arrays.asList(6, 5, 7));
+        triangle.add(Arrays.asList(4, 1, 8, 3));
+        System.out.println("Min path sum top to bottom in triangle 2d matrix: "
+                + obj.triangleMinPathSumTopToBottom(triangle));
+        triangle = new ArrayList<>();
+        triangle.add(Arrays.asList(2));
+        System.out.println("Min path sum top to bottom in triangle 2d matrix: "
+                + obj.triangleMinPathSumTopToBottom(triangle));
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Candy Distribution");
+        //https://leetcode.com/problems/candy/
+        obj.candyDistributionToNStudent(new int[]{1, 0, 2}); //EASY UNDERSTANDING
+        obj.candyDistributionToNStudent2(new int[]{1, 0, 2}); //SPACE OPTIMISED
+        
     }
 
 }
