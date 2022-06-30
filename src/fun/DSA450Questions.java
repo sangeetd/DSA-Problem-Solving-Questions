@@ -1251,17 +1251,49 @@ public class DSA450Questions {
     public void jumpGame(int[] nums) {
 
         //https://leetcode.com/problems/jump-game/
-        //Explanantion: https://youtu.be/Zb4eRjuPHbM
-        //approach is to use reverse way assume that we can actually end of nums[]
-        //now traverse backwards to check if we can reach 0 index (reachablePoint == 0)
-        int reachablePoint = nums[nums.length - 1];
-        for (int i = nums.length - 1; i >= 0; i--) {
-            if (i + nums[i] >= reachablePoint) {
-                reachablePoint = i;
+        //Explanantion: https://youtu.be/muDPTDrpS28
+        int reachablePoint = 0;
+        for (int i = 0; i < nums.length; i++) {
+            if (i > reachablePoint) {
+                System.out.println("Can we reach the end of nums array from 0th index: NO");
+                return;
             }
+            reachablePoint = Math.max(reachablePoint, i + nums[i]);
         }
 
-        System.out.println("can we reach the end of nums array from 0th index: " + (reachablePoint == 0));
+        System.out.println("can we reach the end of nums array from 0th index: YES");
+    }
+    
+    public void jumpGameThree(int[] nums, int startIndex) {
+        //https://leetcode.com/problems/jump-game-iii/
+        int n = nums.length;
+        boolean[] visited = new boolean[n];
+        Queue<Integer> queue = new LinkedList<>();
+        queue.add(startIndex);
+        
+        while(!queue.isEmpty()){
+            int currIndex = queue.poll();
+            
+            if(visited[currIndex] == true){
+                continue;
+            }
+            visited[currIndex] = true;
+            if(nums[currIndex] == 0){
+                System.out.println("Can we reach where nums value is 0 from startIndex index: YES");
+                return;
+            }
+            
+            int leftIndex = currIndex - nums[currIndex];
+            int rightIndex = currIndex + nums[currIndex];
+            
+            if(leftIndex >= 0){
+                queue.add(leftIndex);
+            }
+            if(rightIndex < n){
+                queue.add(rightIndex);
+            }
+        }
+        System.out.println("Can we reach where nums value is 0 from startIndex index: NO");
     }
 
     public void nextGreaterElement2_CyclicArray(int[] arr) {
@@ -3138,7 +3170,24 @@ public class DSA450Questions {
         //output
         System.out.println("Candies required to be distributed: " + candiesNeeded);
     }
-
+    
+    public void findTriangularSumOfArray(int[] nums){
+        //https://leetcode.com/problems/find-triangular-sum-of-an-array/
+        int n = nums.length;
+        int index = 1;
+        while(n > 1){
+            while(index < n){
+                int sum = nums[index - 1] + nums[index];
+                nums[index - 1] = sum % 10;
+                index++;
+            }
+            index = 1;
+            n--;
+        }
+        //output
+        System.out.println("Triangular sum of array: "+ nums[0]);
+    }
+    
     public void rotateMatrixClockWise90Deg(int[][] mat) {
         //https://leetcode.com/problems/rotate-image
         int col = mat[0].length;
@@ -11240,7 +11289,8 @@ public class DSA450Questions {
     }
 
     public void validSudoku(String[][] grid) {
-
+        //https://leetcode.com/problems/valid-sudoku/
+        //https://leetcode.com/problems/check-if-every-row-and-column-contains-all-numbers/
         //Explanantion: https://youtu.be/Pl7mMcBm2b8
         HashSet<String> vis = new HashSet<>();
 
@@ -12968,6 +13018,24 @@ public class DSA450Questions {
         }
         //output
         System.out.println("Minimum arrows required to burst all balloon: " + minArrow);
+    }
+    
+    public void partitionArrSuchThatMaxDiffIsK_Greedy(int[] nums, int k){
+        //https://leetcode.com/problems/partition-array-such-that-maximum-difference-is-k/
+        int n = nums.length;
+        Arrays.sort(nums);
+        int partition = 1;
+        int prevIndex = 0;
+        
+        for(int i = 1; i < n; i++){
+            int currDiffInMaxAndMinVals = nums[i] - nums[prevIndex];
+            if(currDiffInMaxAndMinVals > k){
+                partition++;
+                prevIndex = i;
+            }
+        }
+        //output
+        System.out.println("Partitions : " + partition);
     }
 
     public void graphBFSAdjList_Graph(int V, List<List<Integer>> adjList) {
@@ -16258,6 +16326,7 @@ public class DSA450Questions {
         //......................................................................
 //        Row: 107, 16
 //        System.out.println("Find repeating and missing in unsorted array");
+//        //https://leetcode.com/problems/find-all-numbers-disappeared-in-an-array/
 //        //https://www.geeksforgeeks.org/find-a-repeating-and-a-missing-number/
 //        obj.findRepeatingAndMissingInUnsortedArray_1(new int[]{7, 3, 4, 5, 5, 6, 2 });
 //        obj.findRepeatingAndMissingInUnsortedArray_1(new int[]{3,1,3});
@@ -17063,6 +17132,9 @@ public class DSA450Questions {
 //        obj.jumpGame(new int[]{3, 2, 1, 0, 4});
 //        obj.jumpGame(new int[]{1});
 //        obj.jumpGame(new int[]{0});
+//        //https://leetcode.com/problems/jump-game-iii/
+//        obj.jumpGameThree(new int[]{4,2,3,0,3,1,2}, 5);
+//        obj.jumpGameThree(new int[]{3,0,2,1,2}, 2);
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
 //        System.out.println("Next greater element 2 (consider array to cyclic)");
@@ -17073,6 +17145,7 @@ public class DSA450Questions {
 //        Row: SEPARATE QUESTION IMPORTANT
 //        System.out.println("Valid sudoku");
 //        //https://leetcode.com/problems/valid-sudoku/
+//        //https://leetcode.com/problems/check-if-every-row-and-column-contains-all-numbers/
 //        obj.validSudoku(new String[][]{
 //            {"5", "3", ".", ".", "7", ".", ".", ".", "."}, 
 //            {"6", ".", ".", "1", "9", "5", ".", ".", "."}, 
@@ -18799,7 +18872,19 @@ public class DSA450Questions {
         //https://leetcode.com/problems/candy/
         obj.candyDistributionToNStudent(new int[]{1, 0, 2}); //EASY UNDERSTANDING
         obj.candyDistributionToNStudent2(new int[]{1, 0, 2}); //SPACE OPTIMISED
-        
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Partition Array Such That Maximum Difference Is K");
+        //https://leetcode.com/problems/partition-array-such-that-maximum-difference-is-k/
+        obj.partitionArrSuchThatMaxDiffIsK_Greedy(new int[]{3,6,1,2,5}, 2);
+        obj.partitionArrSuchThatMaxDiffIsK_Greedy(new int[]{2,2,4,5}, 0);
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Find Triangular Sum of an Array");
+        //https://leetcode.com/problems/find-triangular-sum-of-an-array/
+        //https://leetcode.com/problems/min-max-game/
+        obj.findTriangularSumOfArray(new int[]{1,2,3,4,5});
+        obj.findTriangularSumOfArray(new int[]{5});
     }
 
 }
