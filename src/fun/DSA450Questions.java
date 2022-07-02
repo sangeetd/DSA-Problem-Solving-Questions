@@ -559,14 +559,15 @@ public class DSA450Questions {
         System.out.println("No of intersection element: " + intersectionSet.size() + " elements: " + intersectionSet);
     }
 
-    public void rotateArrayByK(int[] arr, int k) {
-
+    public void rotateArrayByK_BruteForce(int[] arr, int k) {
+        //.......................T: O(N^2)
+        //https://leetcode.com/problems/rotate-array/
         //actual:
         for (int x : arr) {
             System.out.print(x + " ");
         }
         System.out.println();
-
+        int actualK = k; //just for output purpose
         int n = arr.length;
 
         while (k-- != 0) {
@@ -579,6 +580,49 @@ public class DSA450Questions {
         }
 
         //output:
+        System.out.println("Rotate array by " + actualK + " steps output brute force: ");
+        for (int x : arr) {
+            System.out.print(x + " ");
+        }
+        System.out.println();
+    }
+
+    private void rotateArrayByK_ReverseArray(int[] arr, int start, int end) {
+
+        while (end > start) {
+            int temp = arr[start];
+            arr[start] = arr[end];
+            arr[end] = temp;
+            start++;
+            end--;
+        }
+    }
+
+    public void rotateArrayByK(int[] arr, int k) {
+        //......................T: O(N)
+        //https://leetcode.com/problems/rotate-array/
+        //explanation: https://youtu.be/BHr381Guz3Y
+        //actual:
+        for (int x : arr) {
+            System.out.print(x + " ");
+        }
+        System.out.println();
+
+        int len = arr.length;
+        //if k > len, mod it with len so that k always fall under range of len
+        k = k % len;
+        int start = 0;
+        //reverse the array
+        rotateArrayByK_ReverseArray(arr, start, len - 1);
+
+        //reverse first [0 to k] elements
+        rotateArrayByK_ReverseArray(arr, start, k - 1);
+
+        //reverse remaining [k to len] elements
+        rotateArrayByK_ReverseArray(arr, k, len - 1);
+
+        //output:
+        System.out.println("Rotate array by " + k + " steps output approach2: ");
         for (int x : arr) {
             System.out.print(x + " ");
         }
@@ -1263,33 +1307,33 @@ public class DSA450Questions {
 
         System.out.println("can we reach the end of nums array from 0th index: YES");
     }
-    
+
     public void jumpGameThree(int[] nums, int startIndex) {
         //https://leetcode.com/problems/jump-game-iii/
         int n = nums.length;
         boolean[] visited = new boolean[n];
         Queue<Integer> queue = new LinkedList<>();
         queue.add(startIndex);
-        
-        while(!queue.isEmpty()){
+
+        while (!queue.isEmpty()) {
             int currIndex = queue.poll();
-            
-            if(visited[currIndex] == true){
+
+            if (visited[currIndex] == true) {
                 continue;
             }
             visited[currIndex] = true;
-            if(nums[currIndex] == 0){
+            if (nums[currIndex] == 0) {
                 System.out.println("Can we reach where nums value is 0 from startIndex index: YES");
                 return;
             }
-            
+
             int leftIndex = currIndex - nums[currIndex];
             int rightIndex = currIndex + nums[currIndex];
-            
-            if(leftIndex >= 0){
+
+            if (leftIndex >= 0) {
                 queue.add(leftIndex);
             }
-            if(rightIndex < n){
+            if (rightIndex < n) {
                 queue.add(rightIndex);
             }
         }
@@ -2304,7 +2348,7 @@ public class DSA450Questions {
         /*logic is try to flip only 1 zero and get the max len consecutive ones, 
          now we have to delete one element so just do maxLen - 1 this will be like
          delete that one element to get rest of consecutive ones.
-         edge case: when all the elements are 1 and there are not 0 to flip, 
+         edge case: when all the elements are 1 and there are no 0s to flip, 
          then maxLen will remain 0 only, if we do maxLen - 1 it will be -ve that 
          means all elements were 1 in arr[] so just do n - 1
          */
@@ -2337,7 +2381,8 @@ public class DSA450Questions {
         }
 
         //output
-        System.out.println("Longest consecutive ones after deleting one element: " + (maxLen - 1 < 0 ? n - 1 : maxLen - 1));
+        System.out.println("Longest consecutive ones after deleting one element: "
+                + (maxLen - 1 < 0 ? n - 1 : maxLen - 1));
     }
 
     public void countSubarrayWithOddSum(int[] arr) {
@@ -2354,8 +2399,8 @@ public class DSA450Questions {
         int res = 0;
         int mod = 1000000007;
 
-        for (int e : arr) {
-            sum += e;
+        for (int val : arr) {
+            sum += val;
             if (sum % 2 == 0) {
                 res = (res + oddSumPrefix) % mod;
                 evenSumPrefix++;
@@ -2364,7 +2409,6 @@ public class DSA450Questions {
                 oddSumPrefix++;
             }
         }
-
         //output
         System.out.println("Count subarray with odd sum: " + res);
     }
@@ -2376,6 +2420,31 @@ public class DSA450Questions {
             return;
         }
 
+        /*
+         1.
+         ..........a-----b
+         .....................p-----q
+         2.
+         ................a-----b
+         ......p-----q
+        
+         3.
+         ..........a------b
+         ......p------q
+         min(p,a) & max(q, b)
+        
+         .........a------b
+         ............p-------q
+         min(p,a) & max(q, b)
+        
+         .....a----b
+         p--------------q
+         min(p,a) & max(q, b)
+        
+         a--------------b
+         ....p-----q
+         min(p,a) & max(q, b)
+         */
         List<int[]> left = new ArrayList<>();
         List<int[]> right = new ArrayList<>();
 
@@ -3129,7 +3198,7 @@ public class DSA450Questions {
         //output
         System.out.println("Candies required to be distributed: " + candiesNeeded);
     }
-    
+
     public void candyDistributionToNStudent2(int[] ratings) {
         //.........................T: O(N)
         //.........................S: O(N), candies
@@ -3156,13 +3225,13 @@ public class DSA450Questions {
                     ? candies[i - 1] + 1
                     : 1;
         }
-        
+
         candiesNeeded = candies[n - 1];
         for (int i = n - 2; i >= 0; i--) {
             //if rating of curr ith student is greater than its next right student
             //that curr student should have 1 candy extra than its next right student
             //otherwise atleast 1 candy should be given
-            if(ratings[i] > ratings[i + 1]){
+            if (ratings[i] > ratings[i + 1]) {
                 candies[i] = Math.max(candies[i], candies[i + 1] + 1);
             }
             candiesNeeded += candies[i];
@@ -3170,13 +3239,13 @@ public class DSA450Questions {
         //output
         System.out.println("Candies required to be distributed: " + candiesNeeded);
     }
-    
-    public void findTriangularSumOfArray(int[] nums){
+
+    public void findTriangularSumOfArray(int[] nums) {
         //https://leetcode.com/problems/find-triangular-sum-of-an-array/
         int n = nums.length;
         int index = 1;
-        while(n > 1){
-            while(index < n){
+        while (n > 1) {
+            while (index < n) {
                 int sum = nums[index - 1] + nums[index];
                 nums[index - 1] = sum % 10;
                 index++;
@@ -3185,9 +3254,9 @@ public class DSA450Questions {
             n--;
         }
         //output
-        System.out.println("Triangular sum of array: "+ nums[0]);
+        System.out.println("Triangular sum of array: " + nums[0]);
     }
-    
+
     public void rotateMatrixClockWise90Deg(int[][] mat) {
         //https://leetcode.com/problems/rotate-image
         int col = mat[0].length;
@@ -7331,7 +7400,84 @@ public class DSA450Questions {
         slow.setNext(null);
 
         //output
+        System.out.println("Rotate linked list " + K + " times output approach1: ");
         new LinkedListUtil<>(dummy.getNext()).print();
+    }
+
+    public void rotateLinkedListKTimes2(Node<Integer> head, int K) {
+
+        //https://leetcode.com/problems/rotate-list/
+        //explanation: https://youtu.be/BHr381Guz3Y
+        //approach similar to rotateArrayByK
+        //Actual
+        new LinkedListUtil<>(head).print();
+        
+        //find len of the the linked list
+        int len = 0;
+        Node<Integer> curr = head;
+        while (curr != null) {
+            len++;
+            curr = curr.getNext();
+        }
+        
+        //K > len, mod it by len so that K remains under len range
+        K = K % len;
+        
+        curr = head;
+        Node<Integer> prev = null;
+        Node<Integer> next = null;
+        
+        //reverse linked list normally
+        while (curr != null) {
+            next = curr.getNext();
+            curr.setNext(prev);
+            prev = curr;
+            curr = next;
+        }
+        
+        //this is the node where we will append the second part of reversed list
+        //ex: LL [1,2,3,4,5]
+        //above reverse LL: [5,4,3,2,1]
+        //lastNodeInFirstKReverse == prev = 5
+        //let say if k = 2, so first k nodes reverse will be [4, 5]
+        //second part reversal = [1,2,3] now the 1 should be linked to 5 above
+        //lastNodeInFirstKReverse.next = 1
+        Node<Integer> lastNodeInFirstKReverse = prev;
+        
+        //reverse first K nodes
+        int firstK = K;
+        curr = prev; // prev is new head after reversing above
+        prev = null;
+        next = null;
+        while (firstK > 0 && curr != null) {
+            next = curr.getNext();
+            curr.setNext(prev);
+            prev = curr;
+            curr = next;
+            firstK--;
+        }
+        
+        //after reversing first K nodes its prev will be new head
+        Node<Integer> rotatedListHead = prev; 
+        
+        //reverse remaining nodes of list
+        if (next != null) {
+            curr = next;
+            prev = null;
+            next = null;
+            while (curr != null) {
+                next = curr.getNext();
+                curr.setNext(prev);
+                prev = curr;
+                curr = next;
+            }
+            //join two parts of the linked list
+            lastNodeInFirstKReverse.setNext(prev);
+        }
+
+        //output
+        System.out.println("Rotate linked list " + K + " times output approach2: ");
+        new LinkedListUtil<>(rotatedListHead).print();
     }
 
     public void sortLinkedListInRelativeOrderOfArr(Node<Integer> head, int[] arr) {
@@ -7421,44 +7567,42 @@ public class DSA450Questions {
         }
     }
 
-    public void removeAllNodesSameAsGivenValueFromLinkedList(Node<Integer> head, int val) {
-
+    public void trimLinkedListAndRemoveAllOccurencesOfGivenVal(Node<Integer> head, int val) {
+        //............................T: O(N)
+        //............................S: O(1)
         //https://leetcode.com/problems/remove-linked-list-elements
         //actual
         System.out.println("Actual");
         new LinkedListUtil<>(head).print();
 
-        Node<Integer> curr = head;
-        Node<Integer> next = null;
-        Node<Integer> newHead = new Node<>(Integer.MIN_VALUE);
-        Node<Integer> copy = newHead;
+        Node<Integer> prev = head;
+        Node<Integer> curr = head.getNext();
 
         while (curr != null) {
 
-            //save next node of curr
-            next = curr.getNext();
-            //isolate curr node by setting next node of curr as null
-            curr.setNext(null);
-
-            if (curr.getData() != val) {
-                copy.setNext(curr);
-                copy = copy.getNext();
+            //we are moving all the val-to-remove curr ptr only once so T: remains O(N)
+            //move curr ptr till curr.data value is same as val,
+            //it will break when they don't match curr.data != val
+            while (curr != null && curr.getData() == val) {
+                curr = curr.getNext();
             }
-
-            //if next.data == val move until next.val == val is false
-            while (next != null && next.getData() == val) {
-                next = next.getNext();
+            //since prev ptr was not moving, append this curr next to prev
+            //this will break all links between prev and the val that needs to be removed
+            prev.setNext(curr);
+            //update the prev ptr to its next value
+            prev = prev.getNext();
+            //if curr is not already null, update curr as well
+            if (curr != null) {
+                curr = curr.getNext();
             }
-            //update curr with next
-            curr = next;
         }
 
         //output
-        if (newHead.getNext() == null) {
-            System.out.println("Null");
-            return;
-        }
-        new LinkedListUtil<>(newHead.getNext()).print();
+        //this cond will occur when val to remove occur at the starting of linked list
+        head = head.getData() == val
+                ? head.getNext()
+                : head;
+        new LinkedListUtil<>(head).print();
     }
 
     public void removeZeroSumConsecutiveNodesFromLinkedList(Node<Integer> head) {
@@ -10497,18 +10641,26 @@ public class DSA450Questions {
         }
 
         if (goingLeft) {
+            //as we are goingLeft == true so turn will not be counted 
+            //going deeper to left subtrees
             if (countNumberOfTurnsBetweenRootToGivenKey(root.getLeft(),
                     key, goingLeft)) {
                 return true;
             }
+            //each time we make a move to right subtree that means we are making
+            //a turn to find the key
             if (countNumberOfTurnsBetweenRootToGivenKey(root.getRight(), key, !goingLeft)) {
                 countNumberOfTurnsBetweenRootToGivenKey_CountTurns += 1;
                 return true;
             }
         } else { //goingLeft == false
+            //as we are goingLeft == false(going to right) so turn will not be counted 
+            //going deeper to right subtrees
             if (countNumberOfTurnsBetweenRootToGivenKey(root.getRight(), key, goingLeft)) {
                 return true;
             }
+            //each time we make a move to left subtree that means we are making
+            //a turn to find the key
             if (countNumberOfTurnsBetweenRootToGivenKey(root.getLeft(), key, !goingLeft)) {
                 countNumberOfTurnsBetweenRootToGivenKey_CountTurns += 1;
                 return true;
@@ -10571,12 +10723,12 @@ public class DSA450Questions {
 
     class LongestZigZagPathInTreePair {
 
-        int first;
-        int second;
+        int leftZigZagPath;
+        int rightZigZagPath;
 
-        public LongestZigZagPathInTreePair(int first, int second) {
-            this.first = first;
-            this.second = second;
+        public LongestZigZagPathInTreePair(int leftZigZagPath, int rightZigZagPath) {
+            this.leftZigZagPath = leftZigZagPath;
+            this.rightZigZagPath = rightZigZagPath;
         }
     }
 
@@ -10592,11 +10744,16 @@ public class DSA450Questions {
         longestZigZagPathInTree_Helper(root.getLeft(), map);
         longestZigZagPathInTree_Helper(root.getRight(), map);
 
-        map.get(root).first = 1 + map.get(root.getLeft()).second;
-        map.get(root).second = 1 + map.get(root.getRight()).first;
+        //calculate zig zag path for curr root for its both
+        //leftZigZagPath i.e, path from root.left and its rightZigZagPath
+        //rightZigZagPath i.e, path from root.right and its leftZigZagPath
+        map.get(root).leftZigZagPath = 1 + map.get(root.getLeft()).rightZigZagPath;
+        map.get(root).rightZigZagPath = 1 + map.get(root.getRight()).leftZigZagPath;
 
-        longestZigZagPathInTree_Length = Math.max(longestZigZagPathInTree_Length,
-                Math.max(map.get(root).first, map.get(root).second));
+        longestZigZagPathInTree_Length = Math.max(
+                longestZigZagPathInTree_Length,
+                Math.max(map.get(root).leftZigZagPath,
+                        map.get(root).rightZigZagPath));
     }
 
     int longestZigZagPathInTree_Length;
@@ -10610,7 +10767,42 @@ public class DSA450Questions {
         longestZigZagPathInTree_Helper(root, map);
 
         //output
-        System.out.println("Longest zig zag path in tree: " + (longestZigZagPathInTree_Length - 1));
+        System.out.println("Longest zig zag path in tree approach1: " + (longestZigZagPathInTree_Length - 1));
+    }
+
+    private int longestZigZagPathInTree2_Helper(
+            TreeNode<Integer> root, boolean isComingFromLeft, boolean isComingFromRight, int pathLength) {
+        if (root == null) {
+            return pathLength;
+        }
+        int leftPathLength = longestZigZagPathInTree2_Helper(root.getLeft(),
+                true, //from curr root going to its left
+                false,
+                //if previously coming from right
+                //and now going to left that means its a zig zag path
+                //so pathLen + 1
+                //otherwise not coming from right and going to left 
+                //consider it starting of some new zig zag path
+                isComingFromRight ? pathLength + 1 : 1);
+        int rightPathLength = longestZigZagPathInTree2_Helper(root.getRight(),
+                false,
+                true, //from curr root going to its right
+                //if previously coming from left
+                //and now going to right that means its a zig zag path
+                //so pathLen + 1
+                //otherwise not coming from left and going to right 
+                //consider it starting of some new zig zag path
+                isComingFromLeft ? pathLength + 1 : 1);
+        return Math.max(leftPathLength, rightPathLength);
+    }
+
+    public void longestZigZagPathInTree2(TreeNode<Integer> root) {
+        //FASTER than above approach 1
+        //https://leetcode.com/problems/longest-zigzag-path-in-a-binary-tree/
+        //https://leetcode.com/problems/longest-zigzag-path-in-a-binary-tree/discuss/2225080/Java-Solution
+        int longestZigZagPath = longestZigZagPathInTree2_Helper(root, false, false, 1) - 1;
+        //output
+        System.out.println("Longest zig zag path in tree approach2: " + longestZigZagPath);
     }
 
     private int longestPathArithemeticProgressionInBinaryTree_MaxLength;
@@ -13019,17 +13211,17 @@ public class DSA450Questions {
         //output
         System.out.println("Minimum arrows required to burst all balloon: " + minArrow);
     }
-    
-    public void partitionArrSuchThatMaxDiffIsK_Greedy(int[] nums, int k){
+
+    public void partitionArrSuchThatMaxDiffIsK_Greedy(int[] nums, int k) {
         //https://leetcode.com/problems/partition-array-such-that-maximum-difference-is-k/
         int n = nums.length;
         Arrays.sort(nums);
         int partition = 1;
         int prevIndex = 0;
-        
-        for(int i = 1; i < n; i++){
+
+        for (int i = 1; i < n; i++) {
             int currDiffInMaxAndMinVals = nums[i] - nums[prevIndex];
-            if(currDiffInMaxAndMinVals > k){
+            if (currDiffInMaxAndMinVals > k) {
                 partition++;
                 prevIndex = i;
             }
@@ -15974,6 +16166,9 @@ public class DSA450Questions {
         //......................................................................
 //        Row: 12
 //        System.out.println("Cyclically rotate element in array by 1");
+//        //https://leetcode.com/problems/rotate-array/
+//        obj.rotateArrayByK_BruteForce(new int[]{1, 2, 3, 4, 5}, 1);
+//        obj.rotateArrayByK_BruteForce(new int[]{1, 2, 3, 4, 5}, 4);
 //        obj.rotateArrayByK(new int[]{1, 2, 3, 4, 5}, 1);
 //        obj.rotateArrayByK(new int[]{1, 2, 3, 4, 5}, 4);
         //......................................................................
@@ -17677,6 +17872,17 @@ public class DSA450Questions {
 //        head.getNext().getNext().setNext(new Node<>(4));
 //        head.getNext().getNext().getNext().setNext(new Node<>(5));
 //        obj.rotateLinkedListKTimes(head, 2);
+//        //same linked list approach 2
+//        head = new Node<>(0);
+//        head.setNext(new Node<>(1));
+//        head.getNext().setNext(new Node<>(2));
+//        obj.rotateLinkedListKTimes2(head, 4);
+//        head = new Node<>(1);
+//        head.setNext(new Node<>(2));
+//        head.getNext().setNext(new Node<>(3));
+//        head.getNext().getNext().setNext(new Node<>(4));
+//        head.getNext().getNext().getNext().setNext(new Node<>(5));
+//        obj.rotateLinkedListKTimes2(head, 2);
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
 //        System.out.println("Sort the linked list in relative order of the given arr");
@@ -18199,16 +18405,16 @@ public class DSA450Questions {
 //        head.getNext().getNext().getNext().getNext().setNext(new Node<>(4));
 //        head.getNext().getNext().getNext().getNext().getNext().setNext(new Node<>(5));
 //        head.getNext().getNext().getNext().getNext().getNext().getNext().setNext(new Node<>(6));
-//        obj.removeAllNodesSameAsGivenValueFromLinkedList(head, 6);
+//        obj.trimLinkedListAndRemoveAllOccurencesOfGivenVal(head, 6);
 //        head = new Node<>(6);
 //        head.setNext(new Node<>(6));
 //        head.getNext().setNext(new Node<>(6));
 //        head.getNext().getNext().setNext(new Node<>(6));
 //        head.getNext().getNext().getNext().setNext(new Node<>(6));
 //        head.getNext().getNext().getNext().getNext().setNext(new Node<>(6));
-//        obj.removeAllNodesSameAsGivenValueFromLinkedList(head, 6);
+//        obj.trimLinkedListAndRemoveAllOccurencesOfGivenVal(head, 6);
 //        head = new Node<>(6);
-//        obj.removeAllNodesSameAsGivenValueFromLinkedList(head, 6);
+//        obj.trimLinkedListAndRemoveAllOccurencesOfGivenVal(head, 6);
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
 //        System.out.println("Count number of jumps to reach the end");
@@ -18277,8 +18483,10 @@ public class DSA450Questions {
 //        root1.getLeft().getRight().setRight(new TreeNode<>(6));
 //        root1.setRight(new TreeNode<>(3));
 //        obj.longestZigZagPathInTree(root1);
+//        obj.longestZigZagPathInTree2(root1);
 //        root1 = new TreeNode<>(1);
 //        obj.longestZigZagPathInTree(root1);
+//        obj.longestZigZagPathInTree2(root1);
 //        root1 = new TreeNode<>(1);
 //        root1.setRight(new TreeNode<>(2));
 //        root1.getRight().setLeft(new TreeNode<>(3));
@@ -18288,11 +18496,13 @@ public class DSA450Questions {
 //        root1.getRight().getRight().getLeft().getRight().setRight(new TreeNode<>(8));
 //        root1.getRight().getRight().setRight(new TreeNode<>(6));
 //        obj.longestZigZagPathInTree(root1);
+//        obj.longestZigZagPathInTree2(root1);
 //        root1 = new TreeNode<>(1); //SKEWED
 //        root1.setLeft(new TreeNode<>(2));
 //        root1.getLeft().setLeft(new TreeNode<>(3));
 //        root1.getLeft().getLeft().setLeft(new TreeNode<>(4));
 //        obj.longestZigZagPathInTree(root1);
+//        obj.longestZigZagPathInTree2(root1);
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
 //        System.out.println("Duplicate zero in-place");
@@ -18786,17 +18996,17 @@ public class DSA450Questions {
         obj.threeConsecutiveNumberThatSumsToGivenNumber(4);
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Merge Nodes in Between Zeros");
-        //https://leetcode.com/problems/merge-nodes-in-between-zeros/
-        Node<Integer> head = new Node<>(0);
-        head.setNext(new Node<>(3));
-        head.getNext().setNext(new Node<>(1));
-        head.getNext().getNext().setNext(new Node<>(0));
-        head.getNext().getNext().getNext().setNext(new Node<>(4));
-        head.getNext().getNext().getNext().getNext().setNext(new Node<>(5));
-        head.getNext().getNext().getNext().getNext().getNext().setNext(new Node<>(2));
-        head.getNext().getNext().getNext().getNext().getNext().getNext().setNext(new Node<>(0));
-        obj.mergeNodesInBetweenZeros(head);
+//        System.out.println("Merge Nodes in Between Zeros");
+//        //https://leetcode.com/problems/merge-nodes-in-between-zeros/
+//        Node<Integer> head = new Node<>(0);
+//        head.setNext(new Node<>(3));
+//        head.getNext().setNext(new Node<>(1));
+//        head.getNext().getNext().setNext(new Node<>(0));
+//        head.getNext().getNext().getNext().setNext(new Node<>(4));
+//        head.getNext().getNext().getNext().getNext().setNext(new Node<>(5));
+//        head.getNext().getNext().getNext().getNext().getNext().setNext(new Node<>(2));
+//        head.getNext().getNext().getNext().getNext().getNext().getNext().setNext(new Node<>(0));
+//        obj.mergeNodesInBetweenZeros(head);
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
         System.out.println("Search Suggestions System");
@@ -18830,13 +19040,13 @@ public class DSA450Questions {
         obj.numberOfMatchingSubseq("abcde", new String[]{"a", "bb", "acd", "ace"});
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Binary Tree Cameras");
-        //https://leetcode.com/problems/binary-tree-cameras/
-        TreeNode<Integer> root1 = new TreeNode<>(0);
-        root1.setLeft(new TreeNode<>(0));
-        root1.getLeft().setLeft(new TreeNode<>(0));
-        root1.getLeft().setRight(new TreeNode<>(0));
-        obj.binaryTreeCameras(root1);
+//        System.out.println("Binary Tree Cameras");
+//        //https://leetcode.com/problems/binary-tree-cameras/
+//        TreeNode<Integer> root1 = new TreeNode<>(0);
+//        root1.setLeft(new TreeNode<>(0));
+//        root1.getLeft().setLeft(new TreeNode<>(0));
+//        root1.getLeft().setRight(new TreeNode<>(0));
+//        obj.binaryTreeCameras(root1);
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
         System.out.println("Convert Sorted Array to Height Balanced Binary Search Tree");
@@ -18876,14 +19086,14 @@ public class DSA450Questions {
 //        Row: SEPARATE QUESTION IMPORTANT
         System.out.println("Partition Array Such That Maximum Difference Is K");
         //https://leetcode.com/problems/partition-array-such-that-maximum-difference-is-k/
-        obj.partitionArrSuchThatMaxDiffIsK_Greedy(new int[]{3,6,1,2,5}, 2);
-        obj.partitionArrSuchThatMaxDiffIsK_Greedy(new int[]{2,2,4,5}, 0);
+        obj.partitionArrSuchThatMaxDiffIsK_Greedy(new int[]{3, 6, 1, 2, 5}, 2);
+        obj.partitionArrSuchThatMaxDiffIsK_Greedy(new int[]{2, 2, 4, 5}, 0);
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
         System.out.println("Find Triangular Sum of an Array");
         //https://leetcode.com/problems/find-triangular-sum-of-an-array/
         //https://leetcode.com/problems/min-max-game/
-        obj.findTriangularSumOfArray(new int[]{1,2,3,4,5});
+        obj.findTriangularSumOfArray(new int[]{1, 2, 3, 4, 5});
         obj.findTriangularSumOfArray(new int[]{5});
     }
 

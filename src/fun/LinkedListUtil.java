@@ -19,6 +19,12 @@ public class LinkedListUtil<T> {
     }
     
     public LinkedListUtil(Node<T> node) {
+        
+        if(node == null){
+            System.out.println("node is empty");
+            return;
+        }
+        
         head = node;
         
         //traverse to end and set tail
@@ -29,10 +35,8 @@ public class LinkedListUtil<T> {
             temp = temp.getNext();
             
         }
-        
         tail = temp;
         size++;
-        
     }
 
     public void addAtHead(T data) {
@@ -281,8 +285,8 @@ public class LinkedListUtil<T> {
 
     public void print() {
 
-        if (head == null && tail == null) {
-            throw new RuntimeException("LinkedList is already empty");
+        if (head == null || tail == null) {
+            System.out.println("LinkedList is already empty");
         }
 
         Node<T> temp = head;
