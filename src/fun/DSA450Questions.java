@@ -2548,9 +2548,9 @@ public class DSA450Questions {
         int userDist = Math.abs(0 - target[0]) + Math.abs(0 - target[1]);
         for (int[] ghost : ghosts) {
             //dist of ghost from target
-            int ghostDist = Math.abs(ghost[0] - target[0]) + Math.abs(ghost[1] - target[1]);
-            if (ghostDist <= userDist) {
-                //if the ghost reaches the target before user or at the same time as you reached,
+            int ghostDistFromTarget = Math.abs(ghost[0] - target[0]) + Math.abs(ghost[1] - target[1]);
+            if (ghostDistFromTarget <= userDist) {
+                //if the ghost reaches the target before user or at the same time as user reached,
                 //ghost will catch you so false
                 return false;
             }
@@ -2568,20 +2568,26 @@ public class DSA450Questions {
         System.out.println();
 
         int n = arr.length;
-        int num = arr[0];
         int start = 0;
         int end = 0;
-        int counter = 0;
+        int currVal = arr[end];
+        int atMostCounter = 0;
         while (end < n) {
-
-            if (arr[end] == num) {
-                counter++;
+            //count the occurences of the consecutive same value as that of currVal
+            if (arr[end] == currVal) {
+                atMostCounter++;
             } else {
-                num = arr[end];
-                counter = 1;
+                //if the arr[end] didn't match the currVal
+                //we will update the currVal and start counting occurences of this value
+                currVal = arr[end];
+                //reseting counter back to 1 as atleast this curr arr[end] occuring 1 time
+                atMostCounter = 1;
             }
 
-            if (counter <= 2) {
+            //we only need atmost 2 occurences of the value (arr[end])
+            if (atMostCounter <= 2) {
+                //put value at start index if it is less that or equal to 2
+                //all greater occurences will not be taken into account
                 arr[start] = arr[end];
                 start++;
             }
@@ -2615,72 +2621,38 @@ public class DSA450Questions {
         //..................T: O(N * LogN)
         //https://leetcode.com/problems/powx-n/
         /* n can be +ve or -ve value*/
-        System.out.println("pow(x, n): " + (n >= 0
+        double output = n >= 0
                 ? nPowerOfX_Helper(x, n)
-                : 1.0 / nPowerOfX_Helper(x, Math.abs(n))));
-    }
-
-    public void efficientJanitor(double[] arr) {
-
-        //https://leetcode.com/discuss/interview-question/490066/Efficient-Janitor-Efficient-Vineet-(Hackerrank-OA)
-        /*
-         ex: {1.01, 1.01, 3.0, 2.7, 1.99, 2.3, 1.7}
-         Output: 5 groups: (1.01 , 1.99), (1.01, 1.7), (3.0), (2.7), (2.3)
-         */
-        int n = arr.length;
-        int start = 0;
-        int end = n - 1;
-
-        int groups = 0;
-        Arrays.sort(arr);
-
-        while (end >= start) {
-
-            if (end == start) {
-                groups++;
-                break;
-            } else if (arr[start] + arr[end] <= 3.0) {
-                start++;
-                end--;
-                groups++;
-            } else {
-                end--;
-                groups++;
-            }
-        }
-
-        //output
-        System.out.println("Groups of item with sum at most 3: " + groups);
+                : 1.0 / nPowerOfX_Helper(x, Math.abs(n));
+        System.out.println("pow(x, n): "
+                + output);
     }
 
     public void subarraySumDivisibleByK(int[] arr, int K) {
 
-        //APPROACH similar to subarraySumEqualsK()
         //https://leetcode.com/problems/subarray-sums-divisible-by-k/
         //https://leetcode.com/problems/subarray-sums-divisible-by-k/discuss/1227888/Java-Map-soln.
+        //explanation: https://youtu.be/QM0klnvTQzk
+        //APPROACH similar to subarraySumEqualsK()
         /*
          ex: arr = [4,5,0,-2,-3,1], k = 5
          There are 7 subarrays with a sum divisible by k = 5:
          [4, 5, 0, -2, -3, 1], [5], [5, 0], [5, 0, -2, -3], [0], [0, -2, -3], [-2, -3]
          */
-        Map<Integer, Integer> map = new HashMap<>();
-        map.put(0, 1); // Default: sum = 0, freq = 1
-        int n = arr.length;
-        int sum = 0;
+        Map<Integer, Integer> prefixSumRemainderCounter = new HashMap<>();
+        prefixSumRemainderCounter.put(0, 1); // Default: remainder = 0, freq = 1
+        int prefixSum = 0;
         int count = 0;
 
-        for (int i = 0; i < n; i++) {
-            sum += arr[i];
-            int rem = sum % K;
-            if (rem < 0) {
-                rem += K;
-            }
-            if (map.containsKey(rem)) {
-                count += map.get(rem);
-            }
-            map.put(rem, map.getOrDefault(rem, 0) + 1);
+        for (int val : arr) {
+            prefixSum += val;
+            int remainder = prefixSum % K;
+            //handle -ve remainder
+            remainder = remainder < 0 ? remainder + K : remainder;
+            count += prefixSumRemainderCounter.getOrDefault(remainder, 0);
+            prefixSumRemainderCounter.put(remainder,
+                    prefixSumRemainderCounter.getOrDefault(remainder, 0) + 1);
         }
-
         //output
         System.out.println("Total subarrays divisible by K: " + count);
     }
@@ -2703,9 +2675,10 @@ public class DSA450Questions {
         }
 
         //output;
-        System.out.println("Starting index of gas station to complete the circuit: " + (sum < 0 ? -1 : maxIndex));
+        System.out.println("Starting index of gas station to complete the circuit(approach 1): "
+                + (sum < 0 ? -1 : maxIndex));
     }
-
+    
     private void rangeUpdateAndPointQueries_Update(int[] arr, int left, int right, int val) {
         arr[left] += val;
         if (right + 1 < arr.length) {
@@ -3255,6 +3228,50 @@ public class DSA450Questions {
         }
         //output
         System.out.println("Triangular sum of array: " + nums[0]);
+    }
+
+    public boolean has132Pattern(int[] nums) {
+        //https://leetcode.com/problems/132-pattern/
+        //explanation: https://youtu.be/q5ANAl8Z458
+        /*
+         a 132 pattern is a subsequence of three integers 
+         nums[i], nums[j] and nums[k] 
+         such that i < j < k and nums[i] < nums[k] < nums[j].
+         */
+        class Pair {
+
+            int val;
+            int prevMin;
+
+            public Pair(int val, int prevMin) {
+                this.val = val;
+                this.prevMin = prevMin;
+            }
+
+        }
+
+        int n = nums.length;
+        int currMin = nums[0]; //some prev nums[i] pattern
+        Stack<Pair> stack = new Stack();
+
+        for (int k = 1; k < n; k++) {
+
+            int currVal = nums[k];
+            //when the loop break at stack.peek().val greater than currVal that 
+            //stack.peek().val = nums[j] as nums[k](here currVal) < nums[j]
+            while (!stack.isEmpty() && stack.peek().val <= currVal) {
+                stack.pop();
+            }
+            //here, stack.peek().prevMin = nums[i]
+            //currVal = nums[k]
+            //stack.peek().val = nums[j]
+            if (!stack.isEmpty() && currVal > stack.peek().prevMin) {
+                return true;
+            }
+            stack.push(new Pair(currVal, currMin));
+            currMin = Math.min(currMin, currVal);
+        }
+        return false;
     }
 
     public void rotateMatrixClockWise90Deg(int[][] mat) {
@@ -5574,7 +5591,7 @@ public class DSA450Questions {
 
     public void convertInfixToPostfixExpression(String infix) {
 
-        Stack<Character> stack = new Stack<>();
+        Stack<Character> bracketsAndOperatorStack = new Stack<>();
         StringBuilder sb = new StringBuilder();
 
         for (char ch : infix.toCharArray()) {
@@ -5582,24 +5599,25 @@ public class DSA450Questions {
             if (Character.isLetterOrDigit(ch)) {
                 sb.append(ch);
             } else if (ch == '(') {
-                stack.push(ch);
+                bracketsAndOperatorStack.push(ch);
             } else if (ch == ')') {
-                while (!stack.isEmpty() && stack.peek() != '(') {
-                    sb.append(stack.pop());
+                while (!bracketsAndOperatorStack.isEmpty() && bracketsAndOperatorStack.peek() != '(') {
+                    sb.append(bracketsAndOperatorStack.pop());
                 }
-                stack.pop();
+                //this pop is to remove the '(' that broke the while loop above
+                bracketsAndOperatorStack.pop();
             } else {
-                while (!stack.isEmpty()
+                while (!bracketsAndOperatorStack.isEmpty()
                         && convertInfixToPostfixExpression_OperatorPrecedence(ch)
-                        <= convertInfixToPostfixExpression_OperatorPrecedence(stack.peek())) {
-                    sb.append(stack.pop());
+                        <= convertInfixToPostfixExpression_OperatorPrecedence(bracketsAndOperatorStack.peek())) {
+                    sb.append(bracketsAndOperatorStack.pop());
                 }
-                stack.push(ch);
+                bracketsAndOperatorStack.push(ch);
             }
         }
 
-        while (!stack.isEmpty()) {
-            sb.append(stack.pop());
+        while (!bracketsAndOperatorStack.isEmpty()) {
+            sb.append(bracketsAndOperatorStack.pop());
         }
 
         //output
@@ -5613,13 +5631,17 @@ public class DSA450Questions {
          number of '0's (possibly 0), followed by some number of '1's 
          (also possibly 0.)
          //example of monotones
-         ex: 00000..
-         ex: 11111..
-         ex: 00011..
+         ex: 00000
+         ex: 11111
+         ex: 00011
          */
         int one = 0;
         int flip = 0;
         for (char ch : str.toCharArray()) {
+            //count 1's that are coming after the consecutive 0's(possibly none)
+            //intutions says that any 0 coming after 1s those will be counted in flip++
+            //if no 1 has been counted so far one will remain 0 indicating
+            //we don't need to do any flips ==> flips = min(one, flip)
             if (ch == '1') {
                 one++;
             } else {
@@ -7411,7 +7433,7 @@ public class DSA450Questions {
         //approach similar to rotateArrayByK
         //Actual
         new LinkedListUtil<>(head).print();
-        
+
         //find len of the the linked list
         int len = 0;
         Node<Integer> curr = head;
@@ -7419,14 +7441,14 @@ public class DSA450Questions {
             len++;
             curr = curr.getNext();
         }
-        
+
         //K > len, mod it by len so that K remains under len range
         K = K % len;
-        
+
         curr = head;
         Node<Integer> prev = null;
         Node<Integer> next = null;
-        
+
         //reverse linked list normally
         while (curr != null) {
             next = curr.getNext();
@@ -7434,7 +7456,7 @@ public class DSA450Questions {
             prev = curr;
             curr = next;
         }
-        
+
         //this is the node where we will append the second part of reversed list
         //ex: LL [1,2,3,4,5]
         //above reverse LL: [5,4,3,2,1]
@@ -7443,7 +7465,7 @@ public class DSA450Questions {
         //second part reversal = [1,2,3] now the 1 should be linked to 5 above
         //lastNodeInFirstKReverse.next = 1
         Node<Integer> lastNodeInFirstKReverse = prev;
-        
+
         //reverse first K nodes
         int firstK = K;
         curr = prev; // prev is new head after reversing above
@@ -7456,10 +7478,10 @@ public class DSA450Questions {
             curr = next;
             firstK--;
         }
-        
+
         //after reversing first K nodes its prev will be new head
-        Node<Integer> rotatedListHead = prev; 
-        
+        Node<Integer> rotatedListHead = prev;
+
         //reverse remaining nodes of list
         if (next != null) {
             curr = next;
@@ -13229,6 +13251,67 @@ public class DSA450Questions {
         //output
         System.out.println("Partitions : " + partition);
     }
+    
+    public void efficientJanitor_Greedy(double[] arr) {
+        //https://leetcode.com/problems/boats-to-save-people/
+        //https://leetcode.com/discuss/interview-question/490066/Efficient-Janitor-Efficient-Vineet-(Hackerrank-OA)
+        //TWO POINTER approach 1
+        /*
+         ex: {1.01, 1.01, 3.0, 2.7, 1.99, 2.3, 1.7}
+         Output: 5 groups: (1.01 , 1.99), (1.01, 1.7), (3.0), (2.7), (2.3)
+         */
+        int n = arr.length;
+        int start = 0;
+        int end = n - 1;
+
+        int groups = 0;
+        Arrays.sort(arr);
+
+        while (end >= start) {
+
+            if (end == start) {
+                groups++;
+                break;
+            } else if (arr[start] + arr[end] <= 3.0) {
+                start++;
+                end--;
+                groups++;
+            } else {
+                end--;
+                groups++;
+            }
+        }
+
+        //output
+        System.out.println("Groups of item with sum at most 3(approach 1): " + groups);
+    }
+    
+    public void efficientJanitor2_Greedy(double[] arr) {
+        //https://leetcode.com/problems/boats-to-save-people/
+        //https://leetcode.com/discuss/interview-question/490066/Efficient-Janitor-Efficient-Vineet-(Hackerrank-OA)
+        //TWO POINTER approach 2
+        /*
+         ex: {1.01, 1.01, 3.0, 2.7, 1.99, 2.3, 1.7}
+         Output: 5 groups: (1.01 , 1.99), (1.01, 1.7), (3.0), (2.7), (2.3)
+         */
+        int n = arr.length;
+        int start = 0;
+        int end = n - 1;
+
+        int groups = 0;
+        Arrays.sort(arr);
+
+        while (end >= start) {
+            groups++;
+            if (arr[start] + arr[end] <= 3.0) {
+                start++;
+            }
+            end--;
+        }
+
+        //output
+        System.out.println("Groups of item with sum at most 3(approach 2): " + groups);
+    }
 
     public void graphBFSAdjList_Graph(int V, List<List<Integer>> adjList) {
 
@@ -13867,7 +13950,7 @@ public class DSA450Questions {
         return true;
     }
 
-    private boolean courseSchedule2_IsDirectedGraphCycle(Map<Integer, List<Integer>> adjMap,
+    private boolean courseSchedule2_IsDirectedGraphCycle(Map<Integer, List<Integer>> graph,
             int vertex, boolean[] visited, boolean[] recurStack) {
         //same as detect cycle in directed graph but with map based graph input
         if (recurStack[vertex]) {
@@ -13880,9 +13963,11 @@ public class DSA450Questions {
 
         recurStack[vertex] = true;
         visited[vertex] = true;
-        List<Integer> childrens = adjMap.getOrDefault(vertex, new ArrayList<>());
+
+        List<Integer> childrens = graph.getOrDefault(vertex, new ArrayList<>());
         for (int childVertex : childrens) {
-            if (courseSchedule2_IsDirectedGraphCycle(adjMap, childVertex, visited, recurStack)) {
+            if (courseSchedule2_IsDirectedGraphCycle(
+                    graph, childVertex, visited, recurStack)) {
                 return true;
             }
         }
@@ -13891,16 +13976,16 @@ public class DSA450Questions {
         return false;
     }
 
-    private void courseSchedule2_TopoSort(Map<Integer, List<Integer>> adjMap, int vertex,
+    private void courseSchedule2_TopoSort(
+            Map<Integer, List<Integer>> graph, int vertex,
             boolean[] visited, Stack<Integer> stack) {
         //same as topological sort but with map based graph input
         visited[vertex] = true;
-        List<Integer> childrens = adjMap.get(vertex);
-        if (childrens != null && childrens.size() > 0) {
-            for (int childVertex : childrens) {
-                if (visited[childVertex] != true) {
-                    courseSchedule2_TopoSort(adjMap, childVertex, visited, stack);
-                }
+        List<Integer> childrens = graph.getOrDefault(vertex, new ArrayList<>());
+        for (int childVertex : childrens) {
+            if (visited[childVertex] != true) {
+                courseSchedule2_TopoSort(
+                        graph, childVertex, visited, stack);
             }
         }
 
@@ -13911,17 +13996,23 @@ public class DSA450Questions {
 
         //https://leetcode.com/problems/course-schedule-ii/
         //https://leetcode.com/discuss/interview-question/742238/Amazon-or-Student-Order
-        Map<Integer, List<Integer>> adj = new HashMap<>();
+        //Directed graph
+        Map<Integer, List<Integer>> graph = new HashMap<>();
         for (int[] schedule : courseSchedule) {
-            adj.putIfAbsent(schedule[0], new ArrayList<>());
-            adj.get(schedule[0]).add(schedule[1]);
+            int u = schedule[0];
+            int v = schedule[1];
+            graph.putIfAbsent(u, new ArrayList<>());
+            graph.get(u).add(v);
         }
 
+        //graph as input
+        System.out.println("Graph: " + graph);
+
         //check cycle in Directed acyclic graph
-        boolean[] vis = new boolean[courses];
+        boolean[] visited = new boolean[courses];
         boolean[] recurStack = new boolean[courses];
         for (int u = 0; u < courses; u++) {
-            if (adj.containsKey(u) && courseSchedule2_IsDirectedGraphCycle(adj, u, vis, recurStack)) {
+            if (courseSchedule2_IsDirectedGraphCycle(graph, u, visited, recurStack)) {
                 //if there is cycle in the graph
                 //course can't new schedules
                 //return new int[]{}; //empty schedule
@@ -13930,11 +14021,11 @@ public class DSA450Questions {
             }
         }
 
-        Arrays.fill(vis, false);
+        Arrays.fill(visited, false);
         Stack<Integer> stack = new Stack<>();
         for (int u = 0; u < courses; u++) {
-            if (vis[u] != true) {
-                courseSchedule2_TopoSort(adj, u, vis, stack);
+            if (visited[u] != true) {
+                courseSchedule2_TopoSort(graph, u, visited, stack);
             }
         }
 
@@ -14510,6 +14601,48 @@ public class DSA450Questions {
         }
         //output
         System.out.println("Max string chain formed: " + maxChain);
+    }
+
+    private void minimumUnfairDistributionOfCookiesToKStudent_Backtracking_findUnfairness(
+            int[] cookieSumToKthStudent) {
+
+        int currMaxSum = cookieSumToKthStudent[0];
+        for (int sum : cookieSumToKthStudent) {
+            currMaxSum = Math.max(currMaxSum, sum);
+        }
+        minimumUnfairDistributionOfCookiesToKStudent_Result = Math.min(
+                minimumUnfairDistributionOfCookiesToKStudent_Result,
+                currMaxSum);
+    }
+
+    private void minimumUnfairDistributionOfCookiesToKStudent_Backtracking_Helper(
+            int[] cookies, int[] cookieSumToKthStudent, int currCookieTaken) {
+
+        if (currCookieTaken >= cookies.length) {
+            minimumUnfairDistributionOfCookiesToKStudent_Backtracking_findUnfairness(cookieSumToKthStudent);
+            return;
+        }
+
+        for (int i = 0; i < cookieSumToKthStudent.length; i++) {
+            cookieSumToKthStudent[i] += cookies[currCookieTaken];
+            minimumUnfairDistributionOfCookiesToKStudent_Backtracking_Helper(
+                    cookies, cookieSumToKthStudent, currCookieTaken + 1);
+            cookieSumToKthStudent[i] -= cookies[currCookieTaken];
+        }
+    }
+
+    private int minimumUnfairDistributionOfCookiesToKStudent_Result;
+
+    public void minimumUnfairDistributionOfCookiesToKStudent_Backtracking(int[] cookies, int k) {
+        //https://leetcode.com/problems/fair-distribution-of-cookies/
+        //https://leetcode.com/problems/fair-distribution-of-cookies/discuss/2212309/JAVA-oror-SIMPLE-BACKTRACKING
+        int[] cookieSumToKthStudent = new int[k];
+        minimumUnfairDistributionOfCookiesToKStudent_Result = Integer.MAX_VALUE;
+        minimumUnfairDistributionOfCookiesToKStudent_Backtracking_Helper(
+                cookies, cookieSumToKthStudent, 0);
+        //output:
+        System.out.println("Min unfairness in distribution of cookies: "
+                + minimumUnfairDistributionOfCookiesToKStudent_Result);
     }
 
     public void LRUCacheDesignImpl(List<String> operations, List<List<Integer>> inputs) {
@@ -16726,15 +16859,6 @@ public class DSA450Questions {
 //        System.out.println("Is linked list pallindrome: "+obj.checkIfLinkedListPallindrome_1(node));
 //        System.out.println("Is linked list pallindrome OPTIMISED: "+obj.checkIfLinkedListPallindrome_2(node));
         //......................................................................
-//        Row: 307
-//        System.out.println("Postfix expression evaluation");
-//        //https://leetcode.com/problems/evaluate-reverse-polish-notation/
-//        obj.postfixExpressionEvaluation_SingleDigit("23+");
-//        obj.postfixExpressionEvaluation_SingleDigit("231*+9-");
-//        obj.postfixExpressionEvaluation_MultipleDigit("10 20 +");
-//        obj.postfixExpressionEvaluation_MultipleDigit("100 200 * 10 /");
-//        obj.postfixExpressionEvaluation_MultipleDigit("100 200 + 10 / 1000 +");
-        //......................................................................
 //        Row: 71, 301
 //        System.out.println("Balanced parenthesis evaluation");
 //        //https://leetcode.com/problems/valid-parentheses/
@@ -18539,7 +18663,8 @@ public class DSA450Questions {
 //        obj.nPowerOfX(5.0, 0); //5 ^ 0 = 1
 //        obj.nPowerOfX(5.0, 1); //5 ^ 1 = 5
 //        obj.nPowerOfX(2.0, 10);
-//        obj.nPowerOfX(2.0, -2);
+//        obj.nPowerOfX(2.0, -3);
+//        obj.nPowerOfX(-2.0, 2);
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
 //        System.out.println("Convert postfix exprssion to infix expression");
@@ -18550,10 +18675,22 @@ public class DSA450Questions {
 //        Row: SEPARATE QUESTION IMPORTANT
 //        System.out.println("Convert infix exprssion to postfix expression");
 //        //https://www.geeksforgeeks.org/stack-set-2-infix-to-postfix/
+//        //https://leetcode.com/problems/basic-calculator/
 //        obj.convertInfixToPostfixExpression("a*b+c/d");
 //        obj.convertInfixToPostfixExpression("a+b*c/d-e");
 //        obj.convertInfixToPostfixExpression("(a*b)+(c/d)-(e^f)");
 //        obj.convertInfixToPostfixExpression("a+b*(c^d-e)^(f+g*h)-i");
+//        obj.convertInfixToPostfixExpression("(1+(4+5+2)-3)+(6+8)");
+        //......................................................................
+//        Row: 307
+//        System.out.println("Postfix expression evaluation");
+//        //https://leetcode.com/problems/evaluate-reverse-polish-notation/
+//        //https://leetcode.com/problems/basic-calculator/
+//        obj.postfixExpressionEvaluation_SingleDigit("23+");
+//        obj.postfixExpressionEvaluation_SingleDigit("231*+9-");
+//        obj.postfixExpressionEvaluation_MultipleDigit("10 20 +");
+//        obj.postfixExpressionEvaluation_MultipleDigit("100 200 * 10 /");
+//        obj.postfixExpressionEvaluation_MultipleDigit("100 200 + 10 / 1000 +");
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
 //        System.out.println("Course Schedule 2");
@@ -18578,10 +18715,14 @@ public class DSA450Questions {
 //        obj.courseSchedule2_Graph(new int[][]{{0, 1}, {1, 2}}, 3); //3 is total student
 //        //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-//        System.out.println("Efficient janitor");
+//        System.out.println("Boats to Save People/ Efficient janitor");
+//        //https://leetcode.com/problems/boats-to-save-people/
 //        //https://leetcode.com/discuss/interview-question/490066/Efficient-Janitor-Efficient-Vineet-(Hackerrank-OA)
-//        obj.efficientJanitor(new double[]{1.01, 1.01, 3.0, 2.7, 1.99, 2.3, 1.7});
-//        obj.efficientJanitor(new double[]{1.01, 1.991, 1.32, 1.4});
+//        //both the approaches works for boats-to-save-people & efficient janitor
+//        obj.efficientJanitor_Greedy(new double[]{1.01, 1.01, 3.0, 2.7, 1.99, 2.3, 1.7});
+//        obj.efficientJanitor_Greedy(new double[]{1.01, 1.991, 1.32, 1.4});
+//        obj.efficientJanitor2_Greedy(new double[]{1.01, 1.01, 3.0, 2.7, 1.99, 2.3, 1.7});
+//        obj.efficientJanitor2_Greedy(new double[]{1.01, 1.991, 1.32, 1.4});
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
 //        System.out.println("Flip string to monotone increase");
@@ -18596,15 +18737,18 @@ public class DSA450Questions {
 //        System.out.println("Subarray sum divisible by K");
 //        //https://leetcode.com/problems/subarray-sums-divisible-by-k/
 //        obj.subarraySumDivisibleByK(new int[]{4, 5, 0, -2, -3, 1}, 5);
+//        obj.subarraySumDivisibleByK(new int[]{-1,2,9}, 2);
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
 //        System.out.println("Gas station");
 //        //https://leetcode.com/problems/gas-station/
 //        obj.gasStationCompleteCircuit(new int[]{1, 2, 3, 4, 5}, new int[]{3, 4, 5, 1, 2});
 //        obj.gasStationCompleteCircuit(new int[]{2, 3, 4}, new int[]{3, 4, 3});
+//        obj.gasStationCompleteCircuit(new int[]{3,1,1}, new int[]{1,2,2});
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
 //        System.out.println("Minimum deletion cost to avoid repeating charracters");
+//        //https://leetcode.com/problems/minimum-time-to-make-rope-colorful/
 //        //https://leetcode.com/problems/minimum-deletion-cost-to-avoid-repeating-letters/
 //        obj.minDeletionCostToAvoidRepeatingChar("abaac", new int[]{1, 2, 3, 4, 5});
 //        obj.minDeletionCostToAvoidRepeatingChar("abc", new int[]{1, 2, 3});
@@ -19095,6 +19239,18 @@ public class DSA450Questions {
         //https://leetcode.com/problems/min-max-game/
         obj.findTriangularSumOfArray(new int[]{1, 2, 3, 4, 5});
         obj.findTriangularSumOfArray(new int[]{5});
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+//        System.out.println("Fair Distribution of Cookies");
+//        //https://leetcode.com/problems/fair-distribution-of-cookies/
+//        obj.minimumUnfairDistributionOfCookiesToKStudent_Backtracking(new int[]{8, 15, 10, 20, 8}, 2);
+//        obj.minimumUnfairDistributionOfCookiesToKStudent_Backtracking(new int[]{6, 1, 3, 2, 2, 4, 1, 2}, 3);
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("132 Pattern");
+        //https://leetcode.com/problems/132-pattern/
+        System.out.println("132 Pattern: " + obj.has132Pattern(new int[]{1, 2, 3, 4}));
+        System.out.println("132 Pattern: " + obj.has132Pattern(new int[]{3, 1, 4, 2}));
     }
 
 }
