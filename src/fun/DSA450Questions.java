@@ -1588,6 +1588,12 @@ public class DSA450Questions {
 
         //https://leetcode.com/problems/hand-of-straights/
         //explanation: https://leetcode.com/problems/hand-of-straights/solution/
+        int n = arr.length;
+        //if we can not make a group of size (W) out of n length arr return false
+        if (n % W != 0) {
+            return false;
+        }
+
         TreeMap<Integer, Integer> map = new TreeMap<>(); //TreeMap is important
         for (int c : arr) {
             map.put(c, map.getOrDefault(c, 0) + 1);
@@ -2678,7 +2684,7 @@ public class DSA450Questions {
         System.out.println("Starting index of gas station to complete the circuit(approach 1): "
                 + (sum < 0 ? -1 : maxIndex));
     }
-    
+
     private void rangeUpdateAndPointQueries_Update(int[] arr, int left, int right, int val) {
         arr[left] += val;
         if (right + 1 < arr.length) {
@@ -2768,12 +2774,12 @@ public class DSA450Questions {
         //.............................S: O(1), in-place
         // random{} generates random num between 0 & 1
         // (i + 1) * Math.random(), (i + 1) is length of arr at ith iteration 
-        // so if N = 5, ex: 1)iteration: i = N - 1 => 4 => i + 1 => 4 + 1 => 5
-        // (i + 1) * random ranges => 5 * 0 & 5 * 1 => 0 & 5
+        // so if N = 5, ex: 1)iteration: i = N - 1 => 4 => i => 4 => 4
+        // (i) * random ranges => 4 * 0 & 4 * 1 => 0 & 4
         // floor will keep the ranges to lower bounds that also matches with array indexes
         int N = arr.length;
         for (int i = N - 1; i > 0; i--) {
-            int randomIndex = (int) Math.floor((i + 1) * Math.random());
+            int randomIndex = (int) Math.floor(i * Math.random());
             //swap
             int temp = arr[i];
             arr[i] = arr[randomIndex];
@@ -3272,6 +3278,96 @@ public class DSA450Questions {
             currMin = Math.min(currMin, currVal);
         }
         return false;
+    }
+
+    private int shipWeightsWithinGivenDays_CheckDays(int[] weights, int maxWeight) {
+        int day = 1;
+        int currWeightSum = 0;
+        for (int weight : weights) {
+            currWeightSum += weight;
+            if (currWeightSum > maxWeight) {
+                day++;
+                currWeightSum = weight;
+            }
+        }
+        return day;
+    }
+
+    private int shipWeightsWithinGivenDays_BinarySearch(
+            int[] weights, int days, int startWeight, int endWeight) {
+        int capacity = -1;
+        while (endWeight >= startWeight) {
+            int midWeight = startWeight + (endWeight - startWeight) / 2;
+            int dayCount = shipWeightsWithinGivenDays_CheckDays(weights, midWeight);
+
+            if (dayCount <= days) {
+                capacity = midWeight;
+                endWeight = midWeight - 1;
+            } else {
+                startWeight = midWeight + 1;
+            }
+        }
+        return capacity;
+    }
+
+    public void shipWeightsWithinGivenDays(int[] weights, int days) {
+        //https://leetcode.com/problems/capacity-to-ship-packages-within-d-days/
+        int totalWeight = 0;
+        int maxShipmentWeight = 0;
+        for (int weight : weights) {
+            totalWeight += weight;
+            maxShipmentWeight = Math.max(maxShipmentWeight, weight);
+        }
+
+        int weightPerDay = totalWeight / days;
+        int maxWeight = Math.max(maxShipmentWeight, weightPerDay);
+
+        int capacityOfShipNeeded = shipWeightsWithinGivenDays_BinarySearch(
+                weights, days, maxWeight, totalWeight);
+        //output:
+        System.out.println("Capacity of ship required to ship all weights in given days: " + capacityOfShipNeeded);
+    }
+
+    public void amountToPaintTheArea(int[][] areaPoints) {
+        //https://leetcode.com/problems/amount-of-new-area-painted-each-day/
+        //https://leetcode.com/discuss/interview-question/2072036/Google-or-Onsite-or-banglore-or-May-2022-or-Paint-a-line
+        //<start, end>
+        Map<Integer, Integer> paintMap = new HashMap<>();
+        List<Integer> result = new ArrayList<>();
+        for (int[] point : areaPoints) {
+
+            int start = point[0];
+            int end = point[1];
+
+            int cost = 0;
+            //for each start to end value, paint each unit of are sequentially
+            //and calculate the cost per unit
+            //ex: [4, 10] = seq unit cost = start = 4, cost = 1
+            //seq unit cost = start = 5, cost = 2
+            //seq unit cost = start = 6, cost = 3 until seq unit = start = 9
+            //at the same time add these seq unit and given end in map
+            //because in future any other point[] comes that tries to paint the same area
+            //we can easily find that and map.value will give the end value which is previous
+            //area painted
+            while (start < end) {
+                if (paintMap.containsKey(start)) {
+                    //if curr start is already pained previously
+                    //it value = end will tell us upto which point it was covered that time
+                    //ex: [4, 10] in between seq unit 7 was also covered map[7 = 10]
+                    //now when another point[7, 13] will come it will first check 7 is already painted or not
+                    //here it was painted when point[4, 10] so will get the end value
+                    //it painted which was map[7] = 10 that means from this 10 we might need to paint
+                    start = paintMap.get(start);
+                    continue;
+                }
+                cost++;
+                paintMap.put(start, end);
+                start++;
+            }
+            result.add(cost);
+        }
+        //output
+        System.out.println("Total cost to paint the given area points effectively : " + result);
     }
 
     public void rotateMatrixClockWise90Deg(int[][] mat) {
@@ -4599,23 +4695,30 @@ public class DSA450Questions {
     }
 
     public void longestRepeatingCharacterByKReplacement(String str, int K) {
-
-        //explanation: https://youtu.be/00FmUN1pkGE
+        //https://leetcode.com/problems/longest-repeating-character-replacement/
+        //explanation: https://youtu.be/gqXU1UyA8pk
         //SLIDING WINDOW
-        int[] charCount = new int[26];
+        int[] charFreq = new int[26];
         int start = 0;
         int end = 0;
         int maxLen = 0;
-        int maxCount = 0;
+        int mostFreqCharTill = 0;
         int n = str.length();
         while (end < n) {
 
             char chEnd = str.charAt(end);
-            charCount[chEnd - 'A']++;
-            maxCount = Math.max(maxCount, charCount[chEnd - 'A']);
-
-            while ((end - start + 1) - maxCount > K) {
-                charCount[str.charAt(start) - 'A']--;
+            charFreq[chEnd - 'A']++;
+            
+            mostFreqCharTill = Math.max(mostFreqCharTill, charFreq[chEnd - 'A']);
+            //let suppose curr win len (end - start + 1) has substr = ..."BABB"...
+            //mostFreqCharTill = charFreq[B] = 3
+            //now see out these BABB if you leave mostFreqChar(B) you are left with
+            //A's like this winLen = 4, B = 3, A = 1
+            //then winLen - mostFreqChar(B) ==> 4 - 3 = 1(i.e freq of A)
+            //now you just have replace them, least freq chars (which we are allowed replace only K) 
+            //if these least freq char are more than K we must minimize our win
+            while ((end - start + 1) - mostFreqCharTill > K) {
+                charFreq[str.charAt(start) - 'A']--;
                 start++;
             }
 
@@ -4640,15 +4743,14 @@ public class DSA450Questions {
             generateBalancedParenthesis_Helper(n, curr + "{", open + 1, close, result);
         }
 
-        if (open > close) {
+        if (close < open) {
             generateBalancedParenthesis_Helper(n, curr + "}", open, close + 1, result);
         }
     }
 
     public void generateBalancedParenthesis(int n) {
-
+        //https://leetcode.com/problems/generate-parentheses
         //https://www.geeksforgeeks.org/print-all-combinations-of-balanced-parentheses/
-        //https://leetcode.com/problems/generate-parentheses/solution/
         List<String> result = new ArrayList<>();
         generateBalancedParenthesis_Helper(n, "", 0, 0, result);
 
@@ -5670,6 +5772,14 @@ public class DSA450Questions {
                     res += cost[i]; //min(cost[i], cost[i + 1]) = cost[i]
                 } else {
                     res += cost[i + 1]; //min(cost[i], cost[i + 1]) = cost[i + 1]
+                    //since here in else block the cost[i + 1] < cost[i]
+                    //updating cost[i + 1] with greater cost[i] signifies that we have
+                    //deleted a char with min cost (here cost[i + 1]) but we still
+                    //have a char with a value cost[i], incase we found a same char at s[(i + 1) + 1]
+                    //ex: s = "aaa" cost[4,1,1] first mid 'a' will be deleted
+                    //as s[0] == 'a' have cost[0] == 4 && s[0 + 1] == 'a' have cost[0 + 1] == 1
+                    //minCost = 1 but at the same time update cost[0 + 1] = cost[0] == 4
+                    //meaning s[0 + 1] & cost[0 + 1] is deleted
                     cost[i + 1] = cost[i];
                 }
             }
@@ -5730,28 +5840,30 @@ public class DSA450Questions {
          evenIndex 0[   0        0  ]             
          oddIndex  1[   0        0  ]   
          */
-        int[][] countZeroAndOneAtEvenOddIndices = new int[2][2];
+        int evenIndex = 0;
+        int oddIndex = 1;
+        int[][] countZeroAndOne = new int[2][2];
         for (int i = 0; i < binaryString.length(); i++) {
             char ch = binaryString.charAt(i);
-            countZeroAndOneAtEvenOddIndices[i % 2][ch - '0']++;
+            countZeroAndOne[i % 2][ch - '0']++;
         }
 
-        if ((countZeroAndOneAtEvenOddIndices[0][0] == 0 && countZeroAndOneAtEvenOddIndices[1][1] == 0)
-                || (countZeroAndOneAtEvenOddIndices[0][1] == 0 && countZeroAndOneAtEvenOddIndices[1][0] == 0)) {
+        if ((countZeroAndOne[evenIndex][0] == 0 && countZeroAndOne[oddIndex][1] == 0)
+                || (countZeroAndOne[evenIndex][1] == 0 && countZeroAndOne[oddIndex][0] == 0)) {
             return 0;
         }
 
-        if ((countZeroAndOneAtEvenOddIndices[0][0] != countZeroAndOneAtEvenOddIndices[1][1])
-                && (countZeroAndOneAtEvenOddIndices[0][1] != countZeroAndOneAtEvenOddIndices[1][0])) {
+        if ((countZeroAndOne[evenIndex][0] != countZeroAndOne[oddIndex][1])
+                && (countZeroAndOne[evenIndex][1] != countZeroAndOne[oddIndex][0])) {
             return -1;
         }
 
-        int res1 = countZeroAndOneAtEvenOddIndices[0][0] == countZeroAndOneAtEvenOddIndices[1][1]
-                ? countZeroAndOneAtEvenOddIndices[0][0]
+        int res1 = countZeroAndOne[evenIndex][0] == countZeroAndOne[oddIndex][1]
+                ? countZeroAndOne[evenIndex][0]
                 : Integer.MAX_VALUE;
 
-        int res2 = countZeroAndOneAtEvenOddIndices[0][1] == countZeroAndOneAtEvenOddIndices[1][0]
-                ? countZeroAndOneAtEvenOddIndices[0][1]
+        int res2 = countZeroAndOne[evenIndex][1] == countZeroAndOne[oddIndex][0]
+                ? countZeroAndOne[evenIndex][1]
                 : Integer.MAX_VALUE;
 
         return Math.min(res1, res2);
@@ -6232,6 +6344,120 @@ public class DSA450Questions {
         }
         //output
         System.out.println("Total words matches that exists as subseq in main string: " + totalMatch);
+    }
+
+    public void minimumSwapsToMakeParenthesisStringBalanced(String str) {
+        //https://leetcode.com/problems/minimum-number-of-swaps-to-make-the-string-balanced/
+        //explanation: https://youtu.be/3YDBT9ZrfaU
+        int closingBrackets = 0;
+        int maxClosingBrackets = 0;
+        for (char bracket : str.toCharArray()) {
+            if (bracket == '[') {
+                closingBrackets -= 1;
+            } else {
+                closingBrackets += 1;
+            }
+            maxClosingBrackets = Math.max(maxClosingBrackets, closingBrackets);
+        }
+        //output
+        //each time we make a swap, we will be balance two brackets
+        int swaps = (maxClosingBrackets + 1) / 2;
+        System.out.println("Min swaps to make parenthesis string balanced : " + swaps);
+    }
+
+    public void minimumAdditionsToMakeParenthesisStringValid(String str) {
+        //https://leetcode.com/problems/minimum-add-to-make-parentheses-valid/
+        int balancedBrackets = 0;
+        int inserts = 0;
+        for (char bracket : str.toCharArray()) {
+            balancedBrackets += bracket == '(' ? 1 : -1;
+            if (balancedBrackets == -1) {
+                inserts++;
+                balancedBrackets++;
+            }
+        }
+        //output
+        System.out.println("Min additions to make parenthesis string valid: "
+                + (balancedBrackets + inserts));
+    }
+
+    public boolean areAlienWordsSorted(String[] words, String alienAlphabet) {
+        //https://leetcode.com/problems/verifying-an-alien-dictionary/
+        //explanation: https://youtu.be/OVgPAJIyX6o
+
+        //save the index of all the char in this alienAlphabet letter set
+        int[] alphabetIndex = new int[26];
+        for (int i = 0; i < alienAlphabet.length(); i++) {
+            char ch = alienAlphabet.charAt(i);
+            alphabetIndex[ch - 'a'] = i;
+        }
+
+        //iterate over all the adjacent words
+        for (int i = 0; i < words.length - 1; i++) {
+            //curr and next words are always adjacent
+            String currWord = words[i];
+            String nextWord = words[i + 1];
+
+            for (int j = 0; j < currWord.length(); j++) {
+                //since it is given that the words[] is lexcographically sorted 
+                //then in that case these words "app" & "apple" will be sorted like this
+                //but edge cases like "apple" & "app" they are not sorted as "app" is small
+                //so j loop running on "apple" there will come a iteration
+                //where j == 3 >= "app".length() till this point no char mismatch is found
+                //it will not be found later on as "app" will have no char to check
+                if (j >= nextWord.length()) {
+                    return false;
+                }
+
+                int currCharIndex = currWord.charAt(j) - 'a';
+                int nextCharIndex = nextWord.charAt(j) - 'a';
+                if (currCharIndex != nextCharIndex) {
+                    //since words are sorted so 
+                    //ex curr = "app", next = "cat" they are sorted first mismatch char is a & c
+                    //in normal english index/ascii index value is like a < c 
+                    //but suppose curr = "cat", next = "app" was given the c < a is a false condition
+                    //similary in given alienAplhabet nextChar should have higer index value that currChar
+                    //if this case comes opposite currChar have higer index value that nextChar
+                    //then alien word[] dictionary is not sorted.
+                    if (alphabetIndex[currCharIndex] > alphabetIndex[nextCharIndex]) {
+                        return false;
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    public void generateNumberFollowingPattern(String pattern) {
+        //https://practice.geeksforgeeks.org/problems/number-following-a-pattern3126/1#
+        //number pattern should contain digits[1 to 9]
+        //ex: "D" output "21" as 1 is dec from 2
+        //ex: "IIDDD" output "126543" as 1 < 2 < 6 > 5 > 4 > 3
+        int num = 1;
+        String numStr = "";
+        Stack<Integer> stack = new Stack<>();
+        for (char ch : pattern.toCharArray()) {
+            if (ch == 'D') {
+                //D == decreasing pattern in digits
+                stack.push(num);
+                num++;
+            } else {
+                //I == increasing pattern in digits
+                stack.push(num);
+                num++;
+                while (!stack.isEmpty()) {
+                    numStr += stack.pop();
+                }
+            }
+        }
+        stack.push(num);
+        while (!stack.isEmpty()) {
+            numStr += stack.pop();
+        }
+        //output
+        System.out.println(pattern + " number following this pattern: " + numStr);
     }
 
     public Node<Integer> reverseLinkedList_Iterative(Node<Integer> node) {
@@ -12279,6 +12505,8 @@ public class DSA450Questions {
     public int editDistance_Recursion(String s1, String s2, int m, int n) {
 
         //https://www.geeksforgeeks.org/edit-distance-dp-5/
+        //explanation: https://youtu.be/XYi2-LPrwm4
+        //https://youtu.be/MiqoA-yF-0M
         //if s1 is empty then whole s2 is to be inserted to convert s1 to s2
         if (m == 0) {
             return n;
@@ -12305,6 +12533,8 @@ public class DSA450Questions {
     public int editDistance_DP_Memoization(String s1, String s2) {
 
         //https://www.geeksforgeeks.org/edit-distance-dp-5/
+        //explanation: https://youtu.be/XYi2-LPrwm4
+        //https://youtu.be/MiqoA-yF-0M
         int m = s1.length();
         int n = s2.length();
         int[][] memo = new int[m + 1][n + 1];
@@ -13251,7 +13481,7 @@ public class DSA450Questions {
         //output
         System.out.println("Partitions : " + partition);
     }
-    
+
     public void efficientJanitor_Greedy(double[] arr) {
         //https://leetcode.com/problems/boats-to-save-people/
         //https://leetcode.com/discuss/interview-question/490066/Efficient-Janitor-Efficient-Vineet-(Hackerrank-OA)
@@ -13285,7 +13515,7 @@ public class DSA450Questions {
         //output
         System.out.println("Groups of item with sum at most 3(approach 1): " + groups);
     }
-    
+
     public void efficientJanitor2_Greedy(double[] arr) {
         //https://leetcode.com/problems/boats-to-save-people/
         //https://leetcode.com/discuss/interview-question/490066/Efficient-Janitor-Efficient-Vineet-(Hackerrank-OA)
@@ -13311,6 +13541,34 @@ public class DSA450Questions {
 
         //output
         System.out.println("Groups of item with sum at most 3(approach 2): " + groups);
+    }
+
+    public int farthestBuildingWeCanReachUsingBricksAndLadders_Greedy(
+            int[] heights, int bricks, int ladders) {
+        //https://leetcode.com/problems/furthest-building-you-can-reach/
+        int n = heights.length;
+        int bricksUsed = 0;
+        int index = 1;
+
+        PriorityQueue<Integer> minHeapHeightDiff = new PriorityQueue<>();
+
+        while (index < n) {
+
+            int buildingHeightDiff = heights[index] - heights[index - 1];
+
+            //if the curr ith building height is greater than its prev building
+            if (buildingHeightDiff > 0) {
+                minHeapHeightDiff.add(buildingHeightDiff);
+                if (minHeapHeightDiff.size() > ladders) {
+                    bricksUsed += minHeapHeightDiff.poll();
+                    if (bricksUsed > bricks) {
+                        return index - 1;
+                    }
+                }
+            }
+            index++;
+        }
+        return n - 1;
     }
 
     public void graphBFSAdjList_Graph(int V, List<List<Integer>> adjList) {
@@ -14047,6 +14305,8 @@ public class DSA450Questions {
     public void alienDictionary_Graph(String[] dict, int alphabets) {
 
         //.............................T: O(N + alphabets)
+        //https://www.geeksforgeeks.org/given-sorted-dictionary-find-precedence-characters/
+        //explanation: https://youtu.be/6kTZYvNNyps
         /*
          The first step to create a graph takes O(n + alhpa) time where n is 
          number of given words and alpha is number of characters in given 
@@ -14056,9 +14316,8 @@ public class DSA450Questions {
          O(n + aplha) here. So overall time complexity is 
          O(n + aplha) + O(n + aplha) which is O(n + aplha).
          */
-        //https://www.geeksforgeeks.org/given-sorted-dictionary-find-precedence-characters/
         //prepare input
-        Map<Integer, List<Integer>> adj = new HashMap<>();
+        Map<Integer, List<Integer>> graph = new HashMap<>();
         for (int i = 0; i < dict.length - 1; i++) {
             String wrd1 = dict[i];
             String wrd2 = dict[i + 1];
@@ -14066,27 +14325,97 @@ public class DSA450Questions {
             for (int j = 0; j < minLenWrd; j++) {
                 char chWrd1 = wrd1.charAt(j);
                 char chWrd2 = wrd2.charAt(j);
+                //this if will find the first non matching char in both the words
+                //ex: wrd1 = "wrt" wrd2 = "wrf" first non matching char be t & f
                 if (chWrd1 != chWrd2) {
-                    adj.putIfAbsent(chWrd1 - 'a', new ArrayList<>());
-                    adj.get(chWrd1 - 'a').add(chWrd2 - 'a');
+                    graph.putIfAbsent(chWrd1 - 'a', new ArrayList<>());
+                    graph.get(chWrd1 - 'a').add(chWrd2 - 'a');
                 }
             }
         }
 
         //do topo sort
-        boolean[] vis = new boolean[alphabets];
+        boolean[] visited = new boolean[alphabets];
         Stack<Integer> stack = new Stack<>();
 
         for (int u = 0; u < alphabets; u++) {
-            if (vis[u] != true) {
+            if (visited[u] != true) {
                 //just re-using map based topological sort algo done in course schedule probeln
-                courseSchedule2_TopoSort(adj, u, vis, stack);
+                courseSchedule2_TopoSort(graph, u, visited, stack);
             }
         }
 
         String orderOfAlienAlphabet = "";
         while (!stack.isEmpty()) {
             orderOfAlienAlphabet += (char) (stack.pop() + 'a') + ", ";
+        }
+
+        //output
+        //for removing last from string ", "
+        String res = orderOfAlienAlphabet.substring(0, orderOfAlienAlphabet.length() - 2);
+        System.out.println("Order of alphabet in alien language: " + res);
+    }
+
+    private boolean alienDictionary2_Graph_Cycle_Check_DFS(
+            Map<Character, Set<Character>> graph, char vertex,
+            Set<Character> visited, Stack<Character> topo) {
+
+        if (visited.contains(vertex)) {
+            return true;
+        }
+
+        visited.add(vertex);
+
+        for (char childVertex : graph.getOrDefault(vertex, new HashSet<>())) {
+            if (alienDictionary2_Graph_Cycle_Check_DFS(graph, childVertex, visited, topo)) {
+                return true;
+            }
+        }
+        visited.remove(vertex);
+        topo.push(vertex);
+        return false;
+    }
+
+    public void alienDictionary2_Graph(String[] dict) {
+
+        //.............................T: O(N + alphabets)
+        //https://www.geeksforgeeks.org/given-sorted-dictionary-find-precedence-characters/
+        //explanation: https://youtu.be/6kTZYvNNyps
+        //prepare input
+        Map<Character, Set<Character>> graph = new HashMap<>();
+        for (int i = 0; i < dict.length - 1; i++) {
+            String wrd1 = dict[i];
+            String wrd2 = dict[i + 1];
+            int minLenWrd = Math.min(wrd1.length(), wrd2.length());
+            for (int j = 0; j < minLenWrd; j++) {
+                char chWrd1 = wrd1.charAt(j);
+                char chWrd2 = wrd2.charAt(j);
+                //this if will find the first non matching char in both the words
+                //ex: wrd1 = "wrt" wrd2 = "wrf" first non matching char be t & f
+                if (chWrd1 != chWrd2) {
+                    graph.putIfAbsent(chWrd1, new HashSet<>());
+                    graph.get(chWrd1).add(chWrd2);
+                    break;
+                }
+            }
+        }
+
+        //do topo sort
+        Set<Character> visited = new HashSet<>();
+        Stack<Character> topo = new Stack<>();
+
+        for (char key : graph.keySet()) {
+            if (alienDictionary2_Graph_Cycle_Check_DFS(graph, key, visited, topo)) {
+                System.out.println("Order of alphabet in alien language: NOT POSSIBLE");
+                //return "";
+            }
+        }
+
+        String orderOfAlienAlphabet = "";
+        int charReq = graph.size();
+        while (!topo.isEmpty() && charReq != 0) {
+            orderOfAlienAlphabet += topo.pop() + ", ";
+            charReq--;
         }
 
         //output
@@ -14509,7 +14838,7 @@ public class DSA450Questions {
 
                     matrix[r][c] = Math.min(
                             //diagonal
-                            (matrix[r - 1][c - 1]),
+                            matrix[r - 1][c - 1],
                             Math.min(
                                     //up
                                     matrix[r - 1][c],
@@ -15107,7 +15436,8 @@ public class DSA450Questions {
         if (lengthX < 0 || lengthY < 0) {
             return false;
         }
-        //given 2 rectangles, if they are connected by any one corner or edge they are not overlapped.
+        //given 2 rectangles, if they are connected by any
+        //one corner or edge they are not overlapped.
         //area = length * bredth
         int area = lengthX * lengthY;
         System.out.println("Area of overlapped rectangle: " + area);
@@ -15144,6 +15474,182 @@ public class DSA450Questions {
             return;
         }
         System.out.println("Three consecutive number that sums to " + num + " : Not possible");
+    }
+
+    public void detectSquares(List<int[]> points, List<int[]> queryPoints) {
+        //Input is little bit modified from the actual question 
+        //https://leetcode.com/problems/detect-squares/
+        //explanation: https://youtu.be/bahebearrDc
+        //<"x,y", freq>
+        Map<String, Integer> pointMap = new HashMap<>();
+        for (int[] point : points) {
+            int x = point[0];
+            int y = point[1];
+            String key = x + "," + y;
+            pointMap.put(key, pointMap.getOrDefault(key, 0) + 1);
+        }
+
+        for (int[] query : queryPoints) {
+            int qX = query[0];
+            int qY = query[1];
+            int sqauresDetectedFromCurrQueryPoint = 0;
+            for (int[] point : points) {
+                int x = point[0];
+                int y = point[1];
+
+                //if curr point[x, y] is not forming a diagonal with query[qX, qY]
+                // or any of the curr x, y is same as qX, qY then they can't form diagnal
+                //with query[qX, qY]
+                boolean diagonal = Math.abs(x - qX) == Math.abs(y - qY);
+                if (!diagonal || x == qY || y == qY) {
+                    continue;
+                }
+
+                //otherwise now here find two coord points
+                //top-left such a way that its coord [x, qY]
+                //bottom-right such a way that its coord [qX, y]
+                //if they exists in out pointMap in some freq that much freq
+                //will form sqaures
+                String topLeftKey = x + "," + qY;
+                String bottomRightKey = qX + "," + y;
+
+                sqauresDetectedFromCurrQueryPoint
+                        += pointMap.getOrDefault(topLeftKey, 0) * pointMap.getOrDefault(bottomRightKey, 0);
+            }
+            System.out.println("Squares detected from query[qX, qY]: [" + qX + ", " + qY + "] : "
+                    + sqauresDetectedFromCurrQueryPoint);
+        }
+    }
+
+    public void serverAllocationToTasks(int[] servers, int[] tasks) {
+        //https://leetcode.com/problems/process-tasks-using-servers
+        //https://www.geeksforgeeks.org/google-interview-experience-for-software-engineer-l3-bangalore-6-years-experienced/
+        class Server {
+
+            int index;
+            int weight;
+            //taskArrivalTime + taskProcessingTime
+            int bookedTime;
+
+            public Server(int index, int weight) {
+                this.index = index;
+                this.weight = weight;
+            }
+        }
+
+        int serverLen = servers.length;
+        int taskLen = tasks.length;
+
+        int[] serverIdxAllotedPerTask = new int[taskLen];
+
+        PriorityQueue<Server> freeServer = new PriorityQueue<>(
+                //choose server with lowest weight, if weights are same
+                //choose server with lowest index value
+                (s1, s2) -> s1.weight == s2.weight
+                        ? s1.index - s2.index
+                        : s1.weight - s2.weight
+        );
+
+        PriorityQueue<Server> busyServer = new PriorityQueue<>(
+                //server's booked time(booked time == taskArrivalTime + taskProcessiingTime) are same
+                (s1, s2) -> s1.bookedTime == s2.bookedTime
+                        //choose server with lowest weight, if weights are same
+                        //choose server with lowest index value
+                        ? (s1.weight == s2.weight
+                                ? s1.index - s2.index
+                                : s1.weight - s2.weight)
+                        //if booked time was not same choose the lowest bookedtime
+                        //(i.e whoose task will finish early)
+                        : s1.bookedTime - s2.bookedTime
+        );
+
+        for (int idx = 0; idx < serverLen; idx++) {
+            freeServer.add(new Server(idx, servers[idx]));
+        }
+
+        for (int time = 0; time < taskLen; time++) {
+
+            int processTime = tasks[time];
+
+            while (!busyServer.isEmpty() && busyServer.peek().bookedTime <= time) {
+                freeServer.add(busyServer.poll());
+            }
+
+            if (freeServer.isEmpty()) {
+                Server currBusyServer = busyServer.poll();
+                currBusyServer.bookedTime += processTime;
+                busyServer.add(currBusyServer);
+                serverIdxAllotedPerTask[time] = currBusyServer.index;
+                continue;
+            }
+
+            Server currFreeServer = freeServer.poll();
+            currFreeServer.bookedTime = time + processTime;
+
+            busyServer.add(currFreeServer);
+
+            serverIdxAllotedPerTask[time] = currFreeServer.index;
+        }
+        //output:
+        for (int i = 0; i < taskLen; i++) {
+            System.out.println("For task: " + tasks[i] + " alloted server with index: " + serverIdxAllotedPerTask[i]);
+        }
+    }
+
+    public void maxPatientTreatedInGivenInAnyNRoom(int[][] patients, int totalRooms) {
+        //https://leetcode.com/problems/process-tasks-using-servers
+        //https://www.geeksforgeeks.org/google-interview-experience-for-software-engineer-l3-bangalore-6-years-experienced/
+        //approach simmilar to serverAllocationToTasks()
+        class Room {
+
+            int roomNo;
+            int patientTreated;
+            int bookedTime;
+
+            public Room(int roomNo) {
+                this.roomNo = roomNo;
+            }
+        }
+
+        int maxPatientTreated = 0;
+        int roomNoOfMaxpatientTreated = -1;
+
+        PriorityQueue<Room> filledRoomMinHeap = new PriorityQueue<>(
+                (r1, r2) -> r1.bookedTime - r2.bookedTime);
+        PriorityQueue<Room> freeRoomMinHeap = new PriorityQueue<>(
+                (r1, r2) -> r1.roomNo - r2.roomNo);
+
+        for (int roomNo = 1; roomNo <= totalRooms; roomNo++) {
+            freeRoomMinHeap.add(new Room(roomNo));
+        }
+
+        for (int[] patient : patients) {
+
+            int entry = patient[0];
+            int duration = patient[1];
+
+            while (!filledRoomMinHeap.isEmpty() && filledRoomMinHeap.peek().bookedTime < entry) {
+                freeRoomMinHeap.add(filledRoomMinHeap.poll());
+            }
+
+            if (freeRoomMinHeap.isEmpty()) {
+                continue;
+            }
+
+            Room currRoom = freeRoomMinHeap.poll();
+            currRoom.patientTreated++;
+            currRoom.bookedTime = entry + duration;
+
+            filledRoomMinHeap.add(currRoom);
+
+            if (currRoom.patientTreated > maxPatientTreated) {
+                maxPatientTreated = currRoom.patientTreated;
+                roomNoOfMaxpatientTreated = currRoom.roomNo;
+            }
+        }
+        //output
+        System.out.println("Room no in which max patient treated : "
+                + roomNoOfMaxpatientTreated + " max patient : " + maxPatientTreated);
     }
 
     public static void main(String[] args) {
@@ -18759,6 +19265,7 @@ public class DSA450Questions {
 //        //https://www.geeksforgeeks.org/given-sorted-dictionary-find-precedence-characters/
 //        obj.alienDictionary_Graph(new String[]{"caa", "aaa", "aab"}, 3);
 //        obj.alienDictionary_Graph(new String[]{"baa", "abcd", "abca", "cab", "cad"}, 4);
+//        obj.alienDictionary2_Graph(new String[]{"wrt", "wrf", "er", "ett", "rftt"});
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
 //        System.out.println("Range update and get queries");
@@ -19251,6 +19758,81 @@ public class DSA450Questions {
         //https://leetcode.com/problems/132-pattern/
         System.out.println("132 Pattern: " + obj.has132Pattern(new int[]{1, 2, 3, 4}));
         System.out.println("132 Pattern: " + obj.has132Pattern(new int[]{3, 1, 4, 2}));
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Minimum Number of Swaps to Make the String Balanced");
+        //https://leetcode.com/problems/minimum-number-of-swaps-to-make-the-string-balanced/
+        obj.minimumSwapsToMakeParenthesisStringBalanced("][][");
+        obj.minimumSwapsToMakeParenthesisStringBalanced("]]][[[");
+        obj.minimumSwapsToMakeParenthesisStringBalanced("[[]][]");
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Minimum Add to Make Parentheses Valid");
+        //https://leetcode.com/problems/minimum-add-to-make-parentheses-valid/
+        obj.minimumAdditionsToMakeParenthesisStringValid("())");
+        obj.minimumAdditionsToMakeParenthesisStringValid("(())");
+        obj.minimumAdditionsToMakeParenthesisStringValid(")))(((");
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Furthest Building You Can Reach");
+        //https://leetcode.com/problems/furthest-building-you-can-reach/
+        System.out.println("Index of the farthest building we can reach: "
+                + obj.farthestBuildingWeCanReachUsingBricksAndLadders_Greedy(new int[]{4, 2, 7, 6, 9, 14, 12}, 5, 1));
+        System.out.println("Index of the farthest building we can reach: "
+                + obj.farthestBuildingWeCanReachUsingBricksAndLadders_Greedy(new int[]{1, 5, 1, 2, 3, 4, 10000}, 4, 1));
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Verifying an Alien Dictionary");
+        //https://leetcode.com/problems/verifying-an-alien-dictionary/
+        System.out.println("Alien word dict are sorted acc to alien aplhabet: "
+                + obj.areAlienWordsSorted(new String[]{"hello", "leetcode"}, "hlabcdefgijkmnopqrstuvwxyz"));
+        System.out.println("Alien word dict are sorted acc to alien aplhabet: "
+                + obj.areAlienWordsSorted(new String[]{"apple", "app"}, "abcdefghijklmnopqrstuvwxyz"));
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Capacity To Ship Packages Within D Days");
+        //https://leetcode.com/problems/capacity-to-ship-packages-within-d-days/
+        obj.shipWeightsWithinGivenDays(new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, 1);
+        obj.shipWeightsWithinGivenDays(new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, 5);
+        obj.shipWeightsWithinGivenDays(new int[]{3, 2, 2, 4, 1, 4}, 3);
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+//        System.out.println("Detect Squares");
+//        //https://leetcode.com/problems/detect-squares/
+//        List<int[]> points = Arrays.asList(
+//                new int[]{3, 10},
+//                new int[]{11, 2},
+//                new int[]{3, 2}
+//        );
+//        List<int[]> queryPoints = Arrays.asList(
+//                new int[]{11, 10},
+//                new int[]{14, 8}
+//        );
+//        obj.detectSquares(points, queryPoints);
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Amount To Paint The Area");
+        //https://leetcode.com/problems/amount-of-new-area-painted-each-day/
+        //https://www.geeksforgeeks.org/google-interview-experience-for-software-engineer-l3-bangalore-6-years-experienced/
+        //https://leetcode.com/discuss/interview-question/2072036/Google-or-Onsite-or-banglore-or-May-2022-or-Paint-a-line
+        obj.amountToPaintTheArea(new int[][]{
+            {4, 10}, {7, 13}, {16, 20}, {1, 40}});
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Process Tasks Using Servers / Find Max Patient Treated In Any Given N Rooms");
+        //https://leetcode.com/problems/process-tasks-using-servers
+        //https://www.geeksforgeeks.org/google-interview-experience-for-software-engineer-l3-bangalore-6-years-experienced/
+        //https://leetcode.com/discuss/interview-question/2072047/Google-or-Onsite-or-Banglore-or-May-2022-or-Patient-Queue
+        obj.serverAllocationToTasks(new int[]{3, 3, 2}, new int[]{1, 2, 3, 2, 1, 2});
+        // room 2 as (1,2) will be alloted first and will go first then (6,4) will be alloted
+        obj.maxPatientTreatedInGivenInAnyNRoom(new int[][]{
+            {1, 8}, {1, 2}, {6, 4}}, 2);
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Number following a pattern");
+        //https://practice.geeksforgeeks.org/problems/number-following-a-pattern3126/1#
+        obj.generateNumberFollowingPattern("D");
+        obj.generateNumberFollowingPattern("IIDDD");
     }
 
 }
