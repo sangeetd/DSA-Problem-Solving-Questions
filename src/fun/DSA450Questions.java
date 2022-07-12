@@ -2818,16 +2818,21 @@ public class DSA450Questions {
     public int findPivotIndex(int[] nums) {
         //https://leetcode.com/problems/find-pivot-index/
         int arrSum = 0;
-        int leftSum = 0;
-        for (int x : nums) {
-            arrSum += x;
+        int leftPrefixSum = 0;
+        for (int val : nums) {
+            arrSum += val;
         }
+        //ex: [1,7,3,6,5,6] at index  = 3
+        //arrSum = 1 + 7 + 3 + 6 + 5 + 6 = 28
+        //leftPrefixSum till this is 1 + 7 + 3 = 11
+        //leftPrefixSum == arrSum - leftPrefixSum - arr[i]
+        //11 == 28 - 11 - 6 ==> 11 == 11 pivot found
         for (int i = 0; i < nums.length; i++) {
-            if (leftSum == arrSum - leftSum - nums[i]) {
+            if (leftPrefixSum == arrSum - leftPrefixSum - nums[i]) {
                 return i;
             }
             //prefixSum
-            leftSum += nums[i];
+            leftPrefixSum += nums[i];
         }
         return -1;
     }
@@ -2838,32 +2843,42 @@ public class DSA450Questions {
         //same as longest substring without repeating character, longestSubstringWithoutRepeatingChar()
         //SLIDING WIINDOW approach
         int n = arr.length;
-        Map<Integer, Integer> count = new HashMap<>();
+        Map<Integer, Integer> freq = new HashMap<>();
         int start = 0;
         int end = 0;
         int maxSum = 0;
         int currSum = 0;
-
+        int maxLenSubarray = 0;
         while (end < n) {
             int val = arr[end];
-            count.putIfAbsent(val, 0);
-            if (count.get(val) < 1) {
-                count.put(val, count.get(val) + 1);
+            freq.putIfAbsent(val, 0);
+            //in order to have unique elements, its atmost freq can only be 1
+            //if a val is coming more than 1 then we will have to slide the window
+            if (freq.get(val) < 1) {
+                freq.put(val, freq.get(val) + 1);
                 currSum += val;
                 maxSum = Math.max(maxSum, currSum);
+                maxLenSubarray = Math.max(maxLenSubarray, (end - start + 1));
                 end++;
             } else {
                 int startVal = arr[start++];
-                count.put(startVal, count.get(startVal) - 1);
+                freq.put(startVal, freq.get(startVal) - 1);
                 currSum -= startVal;
             }
         }
         //output
-        System.out.println("Maximum subarray sum with unique elements: " + maxSum);
+        System.out.println("Maximum subarray sum with unique elements: " + maxSum + " subarray length: " + maxLenSubarray);
     }
 
     public boolean partitionArrayIntoThreePartsWithEqualSum(int[] arr) {
         //https://leetcode.com/problems/partition-array-into-three-parts-with-equal-sum/
+        //ex arr[a,b,c,l,m,n,p,q,r,s]
+        //let say partition be sum1 = [a,b,c], sum2 = [l,m,n], sum3 = [p,q,r,s]
+        //we have to prove sum1 == sum2 == sum3
+        //total arrSum = sum
+        //sum1 + sum2 + sum3 = arrSum
+        //if sum1 == sum2 == sum3 then 3 * sum1 = arrSum ==> sum1 = arrSum / 3
+        //out total arrSum should be div by 3
         int sumArr = 0;
         for (int val : arr) {
             sumArr += val;
@@ -2873,14 +2888,15 @@ public class DSA450Questions {
             return false;
         }
 
-        int times = sumArr / 3;
-        int count = 0;
+        int sumPerPartition = sumArr / 3;
+        int times = 0;
         int sum = 0;
         for (int val : arr) {
             sum += val;
-            if (sum == times * (count + 1)) {
-                count++;
-                if (count == 3) {
+            if (sum == sumPerPartition * (times + 1)) {
+                System.out.println(sum);
+                times++;
+                if (times == 3) {
                     return true;
                 }
             }
@@ -2926,7 +2942,7 @@ public class DSA450Questions {
         //intutions: 
         //if sum are to be max in circular array i.e around the ends of array in that
         //case there should exists some min sum in between the max sum end and then
-        //totalArrSum - minSumSubArr = maxSumSubArr(circular)
+        //totalArrSum - -minSumSubArr = maxSumSubArr(circular)
         //ex: [5,-1,-2,5] = maxSumSubArr(circular) = 5]..[5 = 10
         //totalArrSum = 5 + -1 + -2 + 5 = 7
         //minSumSubArr = ]...minSumSubArr...[ => reverseAllSigns(arr[]) =>
@@ -3370,6 +3386,15 @@ public class DSA450Questions {
         System.out.println("Total cost to paint the given area points effectively : " + result);
     }
 
+    public void mThElementAfterKArrayRotation(int[] arr, int k, int m) {
+        //https://www.geeksforgeeks.org/cpp-program-to-find-the-mth-element-of-the-array-after-k-left-rotations/
+        int n = arr.length;
+        k %= n;
+        int mthIndex = (k + m - 1) % n;
+        //output
+        System.out.println("Mth element after k Array rtation : " + arr[mthIndex]);
+    }
+
     public void rotateMatrixClockWise90Deg(int[][] mat) {
         //https://leetcode.com/problems/rotate-image
         int col = mat[0].length;
@@ -3775,12 +3800,16 @@ public class DSA450Questions {
         for (int r = 0; r < R; r++) {
             for (int c = 0; c < C; c++) {
                 if (r == 0 && c == 0) {
+                    //skip the top-left corner
                     continue;
                 } else if (r == 0) {
+                    //curr row,col to be added with same-row, prev-col
                     grid[r][c] += grid[r][c - 1];
                 } else if (c == 0) {
+                    //curr row,col to be added with prev-row, same-col
                     grid[r][c] += grid[r - 1][c];
                 } else {
+                    //curr row,col to be added with min((prev-row, same-col) OR (same-row, prev-sol)) 
                     grid[r][c] += Math.min(grid[r - 1][c], grid[r][c - 1]);
                 }
             }
@@ -3912,6 +3941,56 @@ public class DSA450Questions {
 
         //output
         System.out.println("Decimal: " + decimal);
+    }
+
+    public void integerToRomanString(int num) {
+
+        Map<Integer, String> map = new HashMap<>();
+        map.put(null, "");
+        map.put(0, "");
+        map.put(1, "I");
+        map.put(2, "II");
+        map.put(3, "III");
+        map.put(4, "IV");
+        map.put(5, "V");
+        map.put(6, "VI");
+        map.put(7, "VII");
+        map.put(8, "VIII");
+        map.put(9, "IX");
+        map.put(10, "X");
+        map.put(20, "XX");
+        map.put(30, "XXX");
+        map.put(40, "XL");
+        map.put(50, "L");
+        map.put(60, "LX");
+        map.put(70, "LXX");
+        map.put(80, "LXXX");
+        map.put(90, "XC");
+        map.put(100, "C");
+        map.put(200, "CC");
+        map.put(300, "CCC");
+        map.put(400, "CD");
+        map.put(500, "D");
+        map.put(600, "DC");
+        map.put(700, "DCC");
+        map.put(800, "DCCC");
+        map.put(900, "CM");
+        map.put(1000, "M");
+        map.put(2000, "MM");
+        map.put(3000, "MMM");
+        int actualNum = num;
+        int pow = 0;
+        StringBuilder sb = new StringBuilder();
+        while (num != 0) {
+
+            // System.out.println(num +" -- " +(Math.pow(10, mul) * (num%10))+" -- "+map.get((int)(Math.pow(10, mul++) * (num%10))));
+            int remainder = num % 10;
+            int tens = (int) Math.pow(10, pow++);
+            sb.insert(0, map.get((int) (tens * remainder)));
+            num /= 10;
+        }
+        //output
+        System.out.println("Given " + actualNum + " as roman string: " + sb.toString());
     }
 
     public void longestCommonSubsequence(String a, String b) {
@@ -4528,21 +4607,26 @@ public class DSA450Questions {
         int start = 0;
         int end = 0;
         int maxLen = 0;
-        int[] count = new int[256];
+        Map<Character, Integer> freq = new HashMap<>();
         String substr = "";
         while (end < n) {
 
-            char ch = str.charAt(end);
-            if (count[ch] < 1) {
+            char chEnd = str.charAt(end);
 
-                count[ch]++;
+            freq.putIfAbsent(chEnd, 0);
+
+            if (freq.get(chEnd) < 1) {
+
+                freq.put(chEnd, freq.get(chEnd) + 1);
+
                 if (maxLen < (end - start + 1)) {
                     maxLen = end - start + 1;
                     substr = str.substring(start, start + maxLen);
                 }
                 end++;
             } else {
-                count[str.charAt(start)]--;
+                char chStart = str.charAt(start);
+                freq.put(chStart, freq.get(chStart) - 1);
                 start++;
             }
         }
@@ -4708,7 +4792,7 @@ public class DSA450Questions {
 
             char chEnd = str.charAt(end);
             charFreq[chEnd - 'A']++;
-            
+
             mostFreqCharTill = Math.max(mostFreqCharTill, charFreq[chEnd - 'A']);
             //let suppose curr win len (end - start + 1) has substr = ..."BABB"...
             //mostFreqCharTill = charFreq[B] = 3
@@ -5941,7 +6025,7 @@ public class DSA450Questions {
         //method paramters
         int N = str.length();
         int wordsLength = words.length;
-        //length of each word will be same ingiven words[]
+        //length of each word will be same in given words[]
         int lengthPerWord = words[0].length();
         //total length of the string formed from concatenating the words in words[]
         int subStringLength = wordsLength * lengthPerWord;
@@ -5991,7 +6075,7 @@ public class DSA450Questions {
                 isBrokenCharPresentInWord.add(charInWord);
             }
             for (char brokenChar : brokenChars) {
-                //a single brokenChar is goind to make the whole word broken
+                //a single brokenChar is going to make the whole word broken
                 //so count that word and break
                 if (isBrokenCharPresentInWord.contains(brokenChar)) {
                     brokenWordCount++;
@@ -6478,10 +6562,8 @@ public class DSA450Questions {
             curr = next;
         }
 
-        node = prev;
-
         //output
-        LinkedListUtil<Integer> output = new LinkedListUtil<>(node);
+        LinkedListUtil<Integer> output = new LinkedListUtil<>(prev);
         output.print();
 
         //to use by other methods when req 
@@ -6610,14 +6692,13 @@ public class DSA450Questions {
         new LinkedListUtil<Integer>(head).print();
     }
 
-    public void removeDuplicateFromSortedLinkedList(Node<Integer> node) {
+    public void removeDuplicateFromSortedLinkedList(Node<Integer> head) {
 
         //actual
-        LinkedListUtil<Integer> ll = new LinkedListUtil<>(node);
-        ll.print();
+        new LinkedListUtil<>(head).print();
 
-        Node<Integer> curr = node;
-        Node<Integer> temp = node.getNext();
+        Node<Integer> curr = head;
+        Node<Integer> temp = head.getNext();
 
         while (temp != null) {
             if (curr.getData() != temp.getData()) {
@@ -6630,8 +6711,7 @@ public class DSA450Questions {
         curr.setNext(temp);
 
         //output
-        ll = new LinkedListUtil<>(node);
-        ll.print();
+        new LinkedListUtil<>(head).print();
     }
 
     public void mergeKSortedLinkedList(Node<Integer>[] nodes) {
@@ -6687,20 +6767,20 @@ public class DSA450Questions {
         //time O(N) creating stack of N nodes from linked list + O(K) reaching out to Kth node
         //in the stack.
         //.......................space complexity O(N)
-        Stack<Node> s = new Stack<>();
+        Stack<Node> stack = new Stack<>();
         Node temp = node;
         //T: O(N)
         //S: O{N}
         while (temp != null) {
-            s.push(temp);
+            stack.push(temp);
             temp = temp.getNext();
         }
 
         //T: O(K)
-        while (!s.isEmpty()) {
+        while (!stack.isEmpty()) {
 
             K--;
-            Object element = s.pop().getData();
+            Object element = stack.pop().getData();
             if (K == 0) {
                 System.out.println("Kth node from end is: " + element);
             }
@@ -7915,37 +7995,80 @@ public class DSA450Questions {
         BinaryTree bt = new BinaryTree(root);
         bt.treeBFS();
 
-        Queue<TreeNode> q = new LinkedList<>();
-        q.add(root);
-        Queue<TreeNode> intQ = new LinkedList<>();
+        Queue<TreeNode> queue = new LinkedList<>();
+        queue.add(root);
+        Queue<TreeNode> childQueue = new LinkedList<>();
 
         List<List> levels = new ArrayList<>();
         List nodes = new ArrayList<>();
 
-        while (!q.isEmpty()) {
+        while (!queue.isEmpty()) {
 
-            TreeNode t = q.poll();
-            nodes.add(t.getData());
+            TreeNode curr = queue.poll();
+            nodes.add(curr.getData());
 
-            if (t.getLeft() != null) {
-                intQ.add(t.getLeft());
+            if (curr.getLeft() != null) {
+                childQueue.add(curr.getLeft());
             }
-            if (t.getRight() != null) {
-                intQ.add(t.getRight());
+            if (curr.getRight() != null) {
+                childQueue.add(curr.getRight());
             }
 
-            if (q.isEmpty()) {
+            if (queue.isEmpty()) {
                 levels.add(nodes);
                 nodes = new ArrayList<>();
-                q.addAll(intQ);
-                intQ.clear();
+                queue.addAll(childQueue);
+                childQueue.clear();
             }
         }
 
         //output
-        System.out.println("Level order iterative: ");
-        for (List l : levels) {
-            System.out.println(l);
+        System.out.println("Level order iterative (childQueue based approach): ");
+        for (List level : levels) {
+            System.out.println(level);
+        }
+    }
+
+    public void levelOrderTraversal_Iterative2(TreeNode root) {
+
+        if (root == null) {
+            return;
+        }
+
+        //actuals
+        BinaryTree bt = new BinaryTree(root);
+        bt.treeBFS();
+
+        Queue<TreeNode> queue = new LinkedList<>();
+        queue.add(root);
+
+        List<List> levels = new ArrayList<>();
+        List currLevelNodes;
+
+        while (!queue.isEmpty()) {
+
+            int size = queue.size();
+            currLevelNodes = new ArrayList<>();
+
+            for (int index = 0; index < size; index++) {
+                TreeNode curr = queue.poll();
+
+                currLevelNodes.add(curr.getData());
+
+                if (curr.getLeft() != null) {
+                    queue.add(curr.getLeft());
+                }
+                if (curr.getRight() != null) {
+                    queue.add(curr.getRight());
+                }
+            }
+            levels.add(currLevelNodes);
+        }
+
+        //output
+        System.out.println("Level order iterative (size based approach): ");
+        for (List level : levels) {
+            System.out.println(level);
         }
     }
 
@@ -8033,26 +8156,26 @@ public class DSA450Questions {
 
         while (!stack.isEmpty()) {
 
-            Pair<TreeNode, Integer> p = stack.pop();
-            TreeNode n = p.getKey();
-            int status = p.getValue();
+            Pair<TreeNode, Integer> currPair = stack.pop();
+            TreeNode currNode = currPair.getKey();
+            int status = currPair.getValue();
 
-            if (n == null || status == 3) {
+            if (currNode == null || status == 3) {
                 continue;
             }
 
-            stack.push(new Pair<>(n, status + 1));
+            stack.push(new Pair<>(currNode, status + 1));
 
             if (status == 0) {
-                stack.push(new Pair<>(n.getLeft(), 0));
+                stack.push(new Pair<>(currNode.getLeft(), 0));
             }
 
             if (status == 1) {
-                System.out.print(n.getData() + " ");
+                System.out.print(currNode.getData() + " ");
             }
 
             if (status == 2) {
-                stack.push(new Pair<>(n.getRight(), 0));
+                stack.push(new Pair<>(currNode.getRight(), 0));
             }
         }
 
@@ -8081,26 +8204,26 @@ public class DSA450Questions {
 
         while (!stack.isEmpty()) {
 
-            Pair<TreeNode, Integer> p = stack.pop();
-            TreeNode n = p.getKey();
-            int status = p.getValue();
+            Pair<TreeNode, Integer> currPair = stack.pop();
+            TreeNode currNode = currPair.getKey();
+            int status = currPair.getValue();
 
-            if (n == null || status == 3) {
+            if (currNode == null || status == 3) {
                 continue;
             }
 
-            stack.push(new Pair<>(n, status + 1));
+            stack.push(new Pair<>(currNode, status + 1));
 
             if (status == 0) {
-                System.out.print(n.getData() + " ");
+                System.out.print(currNode.getData() + " ");
             }
 
             if (status == 1) {
-                stack.push(new Pair<>(n.getLeft(), 0));
+                stack.push(new Pair<>(currNode.getLeft(), 0));
             }
 
             if (status == 2) {
-                stack.push(new Pair<>(n.getRight(), 0));
+                stack.push(new Pair<>(currNode.getRight(), 0));
             }
         }
 
@@ -8130,26 +8253,26 @@ public class DSA450Questions {
 
         while (!stack.isEmpty()) {
 
-            Pair<TreeNode, Integer> p = stack.pop();
-            TreeNode n = p.getKey();
-            int status = p.getValue();
+            Pair<TreeNode, Integer> currPair = stack.pop();
+            TreeNode currNode = currPair.getKey();
+            int status = currPair.getValue();
 
-            if (n == null || status == 3) {
+            if (currNode == null || status == 3) {
                 continue;
             }
 
-            stack.push(new Pair<>(n, status + 1));
+            stack.push(new Pair<>(currNode, status + 1));
 
             if (status == 0) {
-                stack.push(new Pair<>(n.getLeft(), 0));
+                stack.push(new Pair<>(currNode.getLeft(), 0));
             }
 
             if (status == 1) {
-                stack.push(new Pair<>(n.getRight(), 0));
+                stack.push(new Pair<>(currNode.getRight(), 0));
             }
 
             if (status == 2) {
-                System.out.print(n.getData() + " ");
+                System.out.print(currNode.getData() + " ");
             }
         }
 
@@ -8378,47 +8501,47 @@ public class DSA450Questions {
         System.out.println();
     }
 
-    public void zigZagTreeTraversal(TreeNode<Integer> root, boolean ltr) {
+    public void zigZagTreeTraversal(TreeNode<Integer> root, boolean isLeftToRight) {
 
-        Stack<TreeNode<Integer>> s = new Stack<>();
-        s.push(root);
-        Stack<TreeNode<Integer>> intS = new Stack<>();
+        Stack<TreeNode<Integer>> stack = new Stack<>();
+        stack.push(root);
+        Stack<TreeNode<Integer>> childStack = new Stack<>();
 
         List<List<Integer>> level = new ArrayList<>();
         List<Integer> zigZagNodes = new ArrayList<>();
 
-        while (!s.isEmpty()) {
+        while (!stack.isEmpty()) {
 
-            TreeNode<Integer> t = s.pop();
-            zigZagNodes.add(t.getData());
+            TreeNode<Integer> curr = stack.pop();
+            zigZagNodes.add(curr.getData());
 
-            if (ltr) {
+            if (isLeftToRight) {
 
-                if (t.getRight() != null) {
-                    intS.push(t.getRight());
+                if (curr.getRight() != null) {
+                    childStack.push(curr.getRight());
                 }
 
-                if (t.getLeft() != null) {
-                    intS.push(t.getLeft());
+                if (curr.getLeft() != null) {
+                    childStack.push(curr.getLeft());
                 }
             } else {
 
-                if (t.getLeft() != null) {
-                    intS.push(t.getLeft());
+                if (curr.getLeft() != null) {
+                    childStack.push(curr.getLeft());
                 }
 
-                if (t.getRight() != null) {
-                    intS.push(t.getRight());
+                if (curr.getRight() != null) {
+                    childStack.push(curr.getRight());
                 }
             }
 
-            if (s.isEmpty()) {
+            if (stack.isEmpty()) {
 
-                ltr = !ltr;
+                isLeftToRight = !isLeftToRight;
                 level.add(zigZagNodes);
                 zigZagNodes = new ArrayList<>();
-                s.addAll(intS);
-                intS.clear();
+                stack.addAll(childStack);
+                childStack.clear();
             }
         }
 
@@ -8572,30 +8695,31 @@ public class DSA450Questions {
         System.out.println(K + " largest node from BST: " + minHeap.poll());
     }
 
-    class Count {
-
-        int count;
-    }
     private int kTHLargestNodeInBSTWithoutHeap_Value;
+    private int kTHLargestNodeInBSTWithoutHeap_CurrK;
 
-    public void kTHLargestNodeInBSTWithoutHeap_Helper(TreeNode<Integer> root, int K, Count nodesCount) {
+    public void kTHLargestNodeInBSTWithoutHeap_Helper(TreeNode<Integer> root, int K) {
         if (root == null) {
             return;
         }
-        kTHLargestNodeInBSTWithoutHeap_Helper(root.getRight(), K, nodesCount);
-        nodesCount.count++;
-        if (nodesCount.count == K) {
+        //since it a BST the larger nodes are in right sub tree so 
+        //traversing the right subtree first to find the kth node
+        kTHLargestNodeInBSTWithoutHeap_Helper(root.getRight(), K);
+
+        kTHLargestNodeInBSTWithoutHeap_CurrK++;
+
+        if (kTHLargestNodeInBSTWithoutHeap_CurrK == K) {
             kTHLargestNodeInBSTWithoutHeap_Value = root.getData();
             return;
         }
-        kTHLargestNodeInBSTWithoutHeap_Helper(root.getLeft(), K, nodesCount);
+        kTHLargestNodeInBSTWithoutHeap_Helper(root.getLeft(), K);
     }
 
     public void kTHLargestNodeInBSTWithoutHeap(TreeNode<Integer> root, int K) {
-        Count nodesCount = new Count();
-        nodesCount.count = 0;
+
+        kTHLargestNodeInBSTWithoutHeap_CurrK = 0;
         kTHLargestNodeInBSTWithoutHeap_Value = Integer.MIN_VALUE;
-        kTHLargestNodeInBSTWithoutHeap_Helper(root, K, nodesCount);
+        kTHLargestNodeInBSTWithoutHeap_Helper(root, K);
         System.out.println(K + " largest node from BST without heap: " + kTHLargestNodeInBSTWithoutHeap_Value);
     }
 
@@ -11055,28 +11179,36 @@ public class DSA450Questions {
 
     private int longestPathArithemeticProgressionInBinaryTree_MaxLength;
 
-    private void longestPathArithemeticProgressionInBinaryTree_DFS(TreeNode<Integer> root, int currDifference, int currMaxLengthAP) {
+    private void longestPathArithemeticProgressionInBinaryTree_DFS(
+            TreeNode<Integer> root, int difference, int currMaxLengthAP) {
+
         if (root.getLeft() != null) {
-            int difference = root.getLeft().getData() - root.getData();
-            if (difference == currDifference) {
-                longestPathArithemeticProgressionInBinaryTree_DFS(root.getLeft(), currDifference, currMaxLengthAP + 1);
+            int currDifference = root.getLeft().getData() - root.getData();
+            if (currDifference == difference) {
+                longestPathArithemeticProgressionInBinaryTree_DFS(
+                        root.getLeft(), currDifference, currMaxLengthAP + 1);
+
                 longestPathArithemeticProgressionInBinaryTree_MaxLength = Math.max(
                         longestPathArithemeticProgressionInBinaryTree_MaxLength,
                         currMaxLengthAP + 1);
             } else {
-                longestPathArithemeticProgressionInBinaryTree_DFS(root.getLeft(), difference, currMaxLengthAP);
+                longestPathArithemeticProgressionInBinaryTree_DFS(
+                        root.getLeft(), currDifference, currMaxLengthAP);
             }
         }
 
         if (root.getRight() != null) {
-            int difference = root.getRight().getData() - root.getData();
-            if (difference == currDifference) {
-                longestPathArithemeticProgressionInBinaryTree_DFS(root.getRight(), currDifference, currMaxLengthAP + 1);
+            int currDifference = root.getRight().getData() - root.getData();
+            if (currDifference == difference) {
+                longestPathArithemeticProgressionInBinaryTree_DFS(
+                        root.getRight(), currDifference, currMaxLengthAP + 1);
+
                 longestPathArithemeticProgressionInBinaryTree_MaxLength = Math.max(
                         longestPathArithemeticProgressionInBinaryTree_MaxLength,
                         currMaxLengthAP + 1);
             } else {
-                longestPathArithemeticProgressionInBinaryTree_DFS(root.getRight(), difference, currMaxLengthAP);
+                longestPathArithemeticProgressionInBinaryTree_DFS(
+                        root.getRight(), currDifference, currMaxLengthAP);
             }
         }
     }
@@ -13056,25 +13188,6 @@ public class DSA450Questions {
         System.out.println("The maximum amount stickler thief can pick from alternate houses: " + memo[n]);
     }
 
-    public void longestIncreasingSubsequence_BruteForce(int[] arr, int n) {
-
-        int maxLengthLongestIncSubseq = 0;
-        for (int i = 0; i < n; i++) {
-            int currSeq = arr[i];
-            int currMaxLength = 1;
-            for (int j = i + 1; j < n; j++) {
-                if (arr[j] > currSeq) {
-                    currSeq = arr[j];
-                    currMaxLength++;
-                }
-            }
-            maxLengthLongestIncSubseq = Math.max(maxLengthLongestIncSubseq, currMaxLength);
-        }
-
-        //output:
-        System.out.println("Brute force Longest inc subseq of the given array is: " + maxLengthLongestIncSubseq);
-    }
-
     int longestIncreasingSubsequence_LongestSeqLength;
 
     private int longestIncreasingSubsequence_Recursion_Helper(int[] arr, int n) {
@@ -13095,7 +13208,9 @@ public class DSA450Questions {
             }
         }
 
-        longestIncreasingSubsequence_LongestSeqLength = Math.max(longestIncreasingSubsequence_LongestSeqLength, maxLengthHere);
+        longestIncreasingSubsequence_LongestSeqLength = Math.max(
+                longestIncreasingSubsequence_LongestSeqLength,
+                maxLengthHere);
 
         return maxLengthHere;
     }
@@ -13109,17 +13224,26 @@ public class DSA450Questions {
     }
 
     public void longestIncreasingSubsequence_DP_Memoization(int[] arr, int n) {
-
+        //https://leetcode.com/problems/longest-increasing-subsequence
+        //https://leetcode.com/problems/number-of-longest-increasing-subsequence
         //if array is empty no longest incr seq is possible hence -1,
         //otherwise atleast one element will be considered as incr seq hence 1
         int maxLengthLongestIncSubseq = n == 0 ? -1 : 1;
+        //memo[i] will hold the longest incr subseq for ith arr[i] calculated
         int[] memo = new int[n];
         //base cond
         //a single num is also an increasing seq, that's why 1
         Arrays.fill(memo, 1);
 
         for (int i = 1; i < n; i++) {
+            //we iterate over subarray [0 to i]
             for (int j = 0; j < i; j++) {
+                //j loop will run over the above subarray
+                //while looping in j will check what all 
+                //arr[j] are lesser than arr[i] (i.e arr[i] > arr[j])
+                //also need to have a check like, at any subarray if memo[i] 
+                //already have a longest incr length memo[j] should not modify that
+                //only when memo[i] <= memo[j]
                 if (arr[i] > arr[j] && memo[i] <= memo[j]) {
                     memo[i] = memo[j] + 1;
                 }
@@ -13129,6 +13253,46 @@ public class DSA450Questions {
 
         //output:
         System.out.println("DP Longest inc subseq of the given array is: " + maxLengthLongestIncSubseq);
+    }
+    
+    public void maxSumIncreasingSubsequence_DP_Memoization(int[] arr) {
+        //...............................T: O(N ^ 2), checking all subseq
+        //...............................T: O(N), memo[] space
+        //https://www.geeksforgeeks.org/maximum-sum-increasing-subsequence-dp-14/
+        //https://practice.geeksforgeeks.org/problems/maximum-sum-increasing-subsequence4749/1/
+        //approach similar to longestIncreasingSubsequence_DP_Memoization()
+        int n = arr.length;
+        //if array is empty no longest incr seq is possible hence -1,
+        //otherwise atleast one element will be considered as incr seq hence 1
+        int maxSumIncSubseq = n == 0 ? -1 : 1;
+        //memo[i] will hold the longest incr subseq for ith arr[i] calculated
+        int[] memoSum = new int[n];
+        //base cond
+        //a single num can also be a max sum incr seq, that's why arr[i]
+        for(int i = 0; i < n; i++){
+            memoSum[i] = arr[i];
+        }
+        
+
+        for (int i = 1; i < n; i++) {
+            //we iterate over subarray [0 to i]
+            for (int j = 0; j < i; j++) {
+                //j loop will run over the above subarray
+                //while looping in j will check what all 
+                //arr[j] are lesser than arr[i] (i.e arr[i] > arr[j])
+                //also need to have a check like, at any subarray if memo[i] 
+                //already have a max sum, memo[j] should not modify that
+                //only when memo[i] <= memo[j] + arr[i] that means max sum till 
+                //memo[j] plus value of arr[i] makes the max sum curr max sum at memo[i]
+                if (arr[i] > arr[j] && memoSum[i] <= memoSum[j] + arr[i]) {
+                    memoSum[i] = memoSum[j] + arr[i];
+                }
+            }
+            maxSumIncSubseq = Math.max(maxSumIncSubseq, memoSum[i]);
+        }
+
+        //output:
+        System.out.println("DP Max sum incr subseq of the given array is: " + maxSumIncSubseq);
     }
 
     public void maximumLengthOfRepeatedSubarray_DP_Problem(int[] arr1, int[] arr2) {
@@ -14640,6 +14804,103 @@ public class DSA450Questions {
         return -1;
     }
 
+    class Coord {
+
+        int row;
+        int col;
+
+        public Coord(int row, int col) {
+            this.row = row;
+            this.col = col;
+        }
+
+    }
+
+    private boolean pacificAtlanticWaterFlow_IsOutOfBounds(int row, int col, int ROW, int COL) {
+        return row < 0 || row >= ROW || col < 0 || col >= COL;
+    }
+
+    private void pacificAtlanticWaterFlow_HelperBFS(int[][] heights, Queue<Coord> queue,
+            boolean[][] visited, int[][] dirs, int ROW, int COL) {
+
+        while (!queue.isEmpty()) {
+
+            Coord curr = queue.poll();
+
+            visited[curr.row][curr.col] = true;
+
+            for (int[] dir : dirs) {
+                int newRow = curr.row + dir[0];
+                int newCol = curr.col + dir[1];
+
+                if (pacificAtlanticWaterFlow_IsOutOfBounds(newRow, newCol, ROW, COL)
+                        || visited[newRow][newCol]
+                        || heights[newRow][newCol] < heights[curr.row][curr.col]) {
+                    continue;
+                }
+                queue.add(new Coord(newRow, newCol));
+            }
+        }
+    }
+
+    public void pacificAtlanticWaterFlow(int[][] heights) {
+        //https://leetcode.com/problems/pacific-atlantic-water-flow/
+        //https://www.geeksforgeeks.org/atlantic-pacific-water-flow/
+
+        int ROW = heights.length;
+        int COL = heights[0].length;
+
+        List<List<Integer>> result = new ArrayList<>();
+
+        int topEdge = 0;
+        int bottomEdge = ROW - 1;
+        int leftEdge = 0;
+        int rightEdge = COL - 1;
+
+        int[][] dirs = {
+            {-1, 0},
+            {1, 0},
+            {0, -1},
+            {0, 1}
+        };
+
+        Queue<Coord> queueAtlantic = new LinkedList<>();
+        Queue<Coord> queuePacific = new LinkedList<>();
+
+        boolean[][] visitedAtlantic = new boolean[ROW][COL];
+        boolean[][] visitedPacific = new boolean[ROW][COL];
+
+        //save all the top & bottom row edges that are touched by atlantic and pacific ocean
+        for (int col = 0; col < COL; col++) {
+            queueAtlantic.add(new Coord(bottomEdge, col));
+            queuePacific.add(new Coord(topEdge, col));
+        }
+
+        //save all the left & right col edges that are touched by atlantic and pacific ocean
+        for (int row = 0; row < ROW; row++) {
+            queueAtlantic.add(new Coord(row, rightEdge));
+            queuePacific.add(new Coord(row, leftEdge));
+        }
+
+        //Do BFS from all the atlantic ocean are corrds
+        pacificAtlanticWaterFlow_HelperBFS(
+                heights, queueAtlantic, visitedAtlantic, dirs, ROW, COL);
+
+        //Do BFS from all the pacific ocean are corrds
+        pacificAtlanticWaterFlow_HelperBFS(
+                heights, queuePacific, visitedPacific, dirs, ROW, COL);
+
+        for (int row = 0; row < ROW; row++) {
+            for (int col = 0; col < COL; col++) {
+                if (visitedAtlantic[row][col] && visitedPacific[row][col]) {
+                    result.add(Arrays.asList(row, col));
+                }
+            }
+        }
+        //output
+        System.out.println("All coordinates form pacific to atlantic ocean water flow: " + result);
+    }
+
     public void minimumCostToFillGivenBag_DP_Memoization(int[] cost, int W) {
 
         //0-1Knapsack problem
@@ -14913,6 +15174,9 @@ public class DSA450Questions {
             int currWordLength = word.length();
             for (int i = 0; i < currWordLength; i++) {
                 //escape ith char from current word
+                //because question says 
+                //'we can insert exactly one letter anywhere in previousWord without
+                //changing the order of the other characters to make it equal to curr word'
                 String previousWord = word.substring(0, i) + word.substring(i + 1);
                 if (memo.containsKey(previousWord)) {
                     memo.put(word,
@@ -15652,6 +15916,100 @@ public class DSA450Questions {
                 + roomNoOfMaxpatientTreated + " max patient : " + maxPatientTreated);
     }
 
+    class SkylineProblemBuildingCoord {
+
+        int x;
+        int height;
+
+        public SkylineProblemBuildingCoord(int x, int height) {
+            this.x = x;
+            this.height = height;
+        }
+
+    }
+
+    private List<SkylineProblemBuildingCoord> skylineProblem_BreakBuildingInCoords(
+            int[][] buildings) {
+
+        List<SkylineProblemBuildingCoord> coords = new ArrayList<>();
+        for (int[] building : buildings) {
+            //for start points of building
+            int start = building[0]; //x
+            int height = building[2]; //height
+
+            coords.add(new SkylineProblemBuildingCoord(start, -height));
+
+            //for end points of building
+            int end = building[1]; //x
+            height = building[2]; //height
+
+            coords.add(new SkylineProblemBuildingCoord(end, height));
+        }
+
+        Collections.sort(coords, (c1, c2) -> c1.x == c2.x
+                ? c1.height - c2.height
+                : c1.x - c2.x);
+        return coords;
+    }
+
+    public void skylineProblem(int[][] buildings) {
+        //https://leetcode.com/problems/the-skyline-problem/
+        //https://leetcode.com/problems/the-skyline-problem/discuss/2257654/With-Algorithm-Java-Solution-O(NlogN)
+        //explanation: https://youtu.be/GSBLe8cKu0s
+        List<List<Integer>> skylinePoints = new ArrayList<>();
+        List<SkylineProblemBuildingCoord> coords = skylineProblem_BreakBuildingInCoords(buildings);
+
+        PriorityQueue<Integer> maxHeapHeights = new PriorityQueue<>(Collections.reverseOrder());
+        maxHeapHeights.add(0); // default building height
+
+        int prevMaxHeight = 0;
+
+        for (SkylineProblemBuildingCoord coord : coords) {
+
+            if (coord.height < 0) {
+                //height of building start point which we made -ve
+                maxHeapHeights.add(Math.abs(coord.height));
+            } else {
+                //removing object from PriorityQueue
+                //takes O(N) time as it search for the object first
+                maxHeapHeights.remove(coord.height);
+            }
+            int currMaxHeight = maxHeapHeights.peek();
+
+            if (currMaxHeight == prevMaxHeight) {
+                continue;
+            }
+
+            skylinePoints.add(Arrays.asList(coord.x, currMaxHeight));
+            prevMaxHeight = currMaxHeight;
+        }
+        //output;
+        System.out.println("Skyline coordinates of the given buildings: " + skylinePoints);
+    }
+
+    public void minAngleBetweeHourAndMinuteHands(int hour, int min){
+        //https://leetcode.com/problems/angle-between-hands-of-a-clock/
+        /*
+        In 12 hour, hour hand make 360deg
+        12hr = 360deg
+        1hr = 360/12deg = 30deg
+        1hr = 60min
+        60min = 30deg
+        1min = 30/60deg = 0.5deg
+        ..........
+        To complete 1hr, min hand makes 360deg
+        1hr = 60min = 360deg
+        1min = 360/60deg = 6deg
+        */
+        
+        double hourAngle = (30*hour) + (0.5 * min);
+        double minuteAngle = (0*hour) + (6 * min);
+        double angle = Math.abs(hourAngle - minuteAngle);
+        double minAngle = angle < 180 ? angle : 360.0 - angle;
+        //output
+        System.out.println("Min angle between hour and min hands: " + minAngle);
+    }
+    
     public static void main(String[] args) {
 
         //Object to access method
@@ -15711,6 +16069,7 @@ public class DSA450Questions {
 //        root1.getRight().setLeft(new TreeNode(7));
 //        root1.getRight().setRight(new TreeNode(9));
 //        obj.levelOrderTraversal_Iterative(root1);
+//        obj.levelOrderTraversal_Iterative2(root1); //size based approach
 //        obj.levelOrderTraversal_Recursive(root1);
         //......................................................................
 //        Row: 179
@@ -15931,6 +16290,9 @@ public class DSA450Questions {
 //        obj.romanStringToDecimal("XI");
 //        obj.romanStringToDecimal("IX");
 //        obj.romanStringToDecimal("IV");
+//        obj.integerToRomanString(100);
+//        obj.integerToRomanString(101);
+//        obj.integerToRomanString(4999);
         //......................................................................
 //        Row: 86
 //        System.out.println("Longest common subsequence");
@@ -17510,31 +17872,35 @@ public class DSA450Questions {
         //......................................................................
 //        Row: 425
 //        System.out.println("Longest increasing subsequence");
+//        //https://leetcode.com/problems/longest-increasing-subsequence
+//        //https://leetcode.com/problems/number-of-longest-increasing-subsequence
 //        //https://www.geeksforgeeks.org/longest-increasing-subsequence-dp-3/
 //        int[] arr = new int[]{10, 22, 9, 33, 21, 50, 41, 60}; //LONGEST INC SEQ 10, 22, 33, 50, 60: length = 5
-//        obj.longestIncreasingSubsequence_BruteForce(arr, arr.length);
 //        System.out.println("Recursion Longest increasing subsequnec in the givve array: " + obj.longestIncreasingSubsequence_Recursion(arr, arr.length));
 //        obj.longestIncreasingSubsequence_DP_Memoization(arr, arr.length);
 //        arr = new int[]{3, 10, 2, 1, 20};
-//        obj.longestIncreasingSubsequence_BruteForce(arr, arr.length);
 //        System.out.println("Recursion Longest increasing subsequnec in the givve array: " + obj.longestIncreasingSubsequence_Recursion(arr, arr.length));
 //        obj.longestIncreasingSubsequence_DP_Memoization(arr, arr.length);
 //        arr = new int[]{3, 2};
-//        obj.longestIncreasingSubsequence_BruteForce(arr, arr.length);
 //        System.out.println("Recursion Longest increasing subsequnec in the givve array: " + obj.longestIncreasingSubsequence_Recursion(arr, arr.length));
 //        obj.longestIncreasingSubsequence_DP_Memoization(arr, arr.length);
 //        arr = new int[]{0, 8, 4, 12, 2, 10, 6, 14, 1, 9, 5, 13, 3, 11, 7, 15}; //LONGEST INC SEQ 0, 2, 6, 9, 13, 15: length 6
-//        obj.longestIncreasingSubsequence_BruteForce(arr, arr.length); //FAIL CASE
 //        System.out.println("Recursion Longest increasing subsequnec in the givve array: " + obj.longestIncreasingSubsequence_Recursion(arr, arr.length));
 //        obj.longestIncreasingSubsequence_DP_Memoization(arr, arr.length);
 //        arr = new int[]{5,8,7,1,9}; //LONGEST INC SEQ 5,8,9 or 5,7,9
-//        obj.longestIncreasingSubsequence_BruteForce(arr, arr.length);
 //        System.out.println("Recursion Longest increasing subsequnec in the givve array: " + obj.longestIncreasingSubsequence_Recursion(arr, arr.length));
 //        obj.longestIncreasingSubsequence_DP_Memoization(arr, arr.length);
 //        arr = new int[]{5}; 
-//        obj.longestIncreasingSubsequence_BruteForce(arr, arr.length);
 //        System.out.println("Recursion Longest increasing subsequnec in the givve array: " + obj.longestIncreasingSubsequence_Recursion(arr, arr.length));
 //        obj.longestIncreasingSubsequence_DP_Memoization(arr, arr.length);
+        //......................................................................
+//        Row: 425
+//        System.out.println("Maximum sum increasing subsequence");
+//        //https://www.geeksforgeeks.org/maximum-sum-increasing-subsequence-dp-14/
+//        //Max sum & also Incr subseq: [1,2,4,100] = 106
+//        obj.maxSumIncreasingSubsequence_DP_Memoization(new int[]{1, 101, 2, 3, 100, 4, 5});
+//        //Max sum & also Incr subseq: [3,10,20] = 33
+//        obj.maxSumIncreasingSubsequence_DP_Memoization(new int[]{3, 10, 2, 1, 20});
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
 //        System.out.println("Pair of movie watching during a flight");
@@ -19409,7 +19775,9 @@ public class DSA450Questions {
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
 //        System.out.println("Find Pivot Index");
-//        //https://leetcode.com/problems/find-pivot-indexs/
+//        //https://leetcode.com/problems/find-pivot-index/
+//        //https://leetcode.com/problems/find-the-middle-index-in-array
+//        //https://leetcode.com/problems/number-of-ways-to-split-array
 //        System.out.println("Pivot index: " + obj.findPivotIndex(new int[]{1, 7, 3, 6, 5, 6}));
 //        System.out.println("Pivot index: " + obj.findPivotIndex(new int[]{1, 2, 3}));
 //        System.out.println("Pivot index: " + obj.findPivotIndex(new int[]{2, 1, -1}));
@@ -19480,24 +19848,24 @@ public class DSA450Questions {
 //        obj.removeZeroSumConsecutiveNodesFromLinkedList(head);
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Add two nums without usiing + or -");
-        //https://leetcode.com/problems/sum-of-two-integers
-        obj.addTwoNumsWithoutPlusOrMinus(4, 6);
-        obj.addTwoNumsWithoutPlusOrMinus(4, -6);
+//        System.out.println("Add two nums without usiing + or -");
+//        //https://leetcode.com/problems/sum-of-two-integers
+//        obj.addTwoNumsWithoutPlusOrMinus(4, 6);
+//        obj.addTwoNumsWithoutPlusOrMinus(4, -6);
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Top k frequent elements in an array");
-        //https://leetcode.com/problems/top-k-frequent-elements/
-        obj.topKFrequentElements(new int[]{1, 1, 1, 2, 2, 3}, 2);
-        obj.topKFrequentElements(new int[]{1}, 1);
+//        System.out.println("Top k frequent elements in an array");
+//        //https://leetcode.com/problems/top-k-frequent-elements/
+//        obj.topKFrequentElements(new int[]{1, 1, 1, 2, 2, 3}, 2);
+//        obj.topKFrequentElements(new int[]{1}, 1);
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Maximum words that you can type");
-        //https://leetcode.com/problems/maximum-number-of-words-you-can-type/
-        obj.maximumWordsThatYouCanType("hello world", "ad"); //hello can be typed, world is broken on char d
-        obj.maximumWordsThatYouCanType("world world", "ad"); //no words can be typed, world is broken on char d
-        obj.maximumWordsThatYouCanType("leet code", "lt"); //code can be typed, leet is broken on char l(even one char can make it broken)
-        obj.maximumWordsThatYouCanType("hello world", "xy"); //hello, world both can be typed, no words contains broken chars x & y
+//        System.out.println("Maximum words that you can type");
+//        //https://leetcode.com/problems/maximum-number-of-words-you-can-type/
+//        obj.maximumWordsThatYouCanType("hello world", "ad"); //hello can be typed, world is broken on char d
+//        obj.maximumWordsThatYouCanType("world world", "ad"); //no words can be typed, world is broken on char d
+//        obj.maximumWordsThatYouCanType("leet code", "lt"); //code can be typed, leet is broken on char l(even one char can make it broken)
+//        obj.maximumWordsThatYouCanType("hello world", "xy"); //hello, world both can be typed, no words contains broken chars x & y
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
 //        System.out.println("Maximum length AP in binary tree");
@@ -19528,11 +19896,11 @@ public class DSA450Questions {
 //        obj.longestPathArithemeticProgressionInBinaryTree(root1);
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Longest string chain");
-        //https://leetcode.com/problems/longest-string-chain/
-        obj.longestStringChain_DP_Memoization(new String[]{"a", "abc", "ab", "abcd"}); //4
-        obj.longestStringChain_DP_Memoization(new String[]{"a", "b", "ba", "bca", "bda", "bdca"});
-        obj.longestStringChain_DP_Memoization(new String[]{"l", "mn", "op", "qrst"}); //any string can be a single lengthed chain = 1
+//        System.out.println("Longest string chain");
+//        //https://leetcode.com/problems/longest-string-chain/
+//        obj.longestStringChain_DP_Memoization(new String[]{"a", "abc", "ab", "abcd"}); //4
+//        obj.longestStringChain_DP_Memoization(new String[]{"a", "b", "ba", "bca", "bda", "bdca"});
+//        obj.longestStringChain_DP_Memoization(new String[]{"l", "mn", "op", "qrst"}); //any string can be a single lengthed chain = 1
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
         System.out.println("maximum sum circular subarray");
@@ -19833,6 +20201,34 @@ public class DSA450Questions {
         //https://practice.geeksforgeeks.org/problems/number-following-a-pattern3126/1#
         obj.generateNumberFollowingPattern("D");
         obj.generateNumberFollowingPattern("IIDDD");
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Pacific Atlantic Water Flow");
+        //https://leetcode.com/problems/pacific-atlantic-water-flow/
+        obj.pacificAtlanticWaterFlow(new int[][]{
+            {1, 2, 2, 3, 5},
+            {3, 2, 3, 4, 4},
+            {2, 4, 5, 3, 1},
+            {6, 7, 1, 4, 5},
+            {5, 1, 1, 2, 4}});
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Mth Element After K Array Rotation");
+        //https://www.geeksforgeeks.org/cpp-program-to-find-the-mth-element-of-the-array-after-k-left-rotations/
+        obj.mThElementAfterKArrayRotation(new int[]{1, 2, 3, 4, 5}, 2, 3);
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("The Skyline Problem");
+        //https://leetcode.com/problems/the-skyline-problem/
+        obj.skylineProblem(new int[][]{
+            {2, 9, 10}, {3, 7, 15}, {5, 12, 12}, {15, 20, 10}, {19, 24, 8}
+        });
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Angle Between Hands of a Clock");
+        //https://leetcode.com/problems/angle-between-hands-of-a-clock/
+        obj.minAngleBetweeHourAndMinuteHands(12, 30);
+        obj.minAngleBetweeHourAndMinuteHands(2, 60); // 3:00
     }
 
 }

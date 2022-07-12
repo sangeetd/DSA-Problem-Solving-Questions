@@ -6935,7 +6935,8 @@ public class SomePracticeQuestion {
         if (a.charAt(aLen - 1) == b.charAt(bLen - 1)) {
             return memo[aLen][bLen] = 1 + shortestCommonSuperSequence_DP_Memoization(a, b, aLen - 1, bLen - 1, memo);
         } else {
-            return memo[aLen][bLen] = 1 + Math.min(shortestCommonSuperSequence_DP_Memoization(a, b, aLen - 1, bLen, memo),
+            return memo[aLen][bLen] = 1 + Math.min(
+                    shortestCommonSuperSequence_DP_Memoization(a, b, aLen - 1, bLen, memo),
                     shortestCommonSuperSequence_DP_Memoization(a, b, aLen, bLen - 1, memo));
         }
 
