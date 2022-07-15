@@ -199,14 +199,14 @@ public class DSA450Questions {
         //based on Dutch National Flag Algorithm
         //https://leetcode.com/problems/sort-colors/
         //https://www.geeksforgeeks.org/sort-an-array-of-0s-1s-and-2s/
-        int lo = 0;
-        int hi = a.length - 1;
+        int start = 0;
+        int end = a.length - 1;
         int mid = 0;
-        while (mid <= hi) {
+        while (mid <= end) {
             switch (a[mid]) {
                 case 0: {
-                    swapIntArray(a, lo, mid);
-                    lo++;
+                    swapIntArray(a, start, mid);
+                    start++;
                     mid++;
                     break;
                 }
@@ -214,8 +214,8 @@ public class DSA450Questions {
                     mid++;
                     break;
                 case 2: {
-                    swapIntArray(a, mid, hi);
-                    hi--;
+                    swapIntArray(a, mid, end);
+                    end--;
                     break;
                 }
             }
@@ -1033,7 +1033,8 @@ public class DSA450Questions {
 
     public void threeSum(int[] arr) {
 
-        //problem statement: https://leetcode.com/problems/3sum/
+        //https://leetcode.com/problems/3sum/
+        //https://www.geeksforgeeks.org/java-program-to-find-all-triplets-with-zero-sum/
         //explanation: https://youtu.be/qJSPYnS35SE
         int n = arr.length;
         Arrays.sort(arr);
@@ -2983,7 +2984,7 @@ public class DSA450Questions {
             //if curr ith value and its next value >= its prev value
             //then convert that ith value to next value nums[i + 1]
             //ex: i == 0 cases like [4, 2], other cond cases like [3,2,5]
-            if (i == 0 || nums[i + 1] >= nums[i - 1]) {
+            if (i == 0 || nums[i - 1] <= nums[i + 1]) {
                 //update nums[i] = 2 with nums[i + 1] = 5
                 nums[i] = nums[i + 1];
             } else {
@@ -3393,6 +3394,61 @@ public class DSA450Questions {
         int mthIndex = (k + m - 1) % n;
         //output
         System.out.println("Mth element after k Array rtation : " + arr[mthIndex]);
+    }
+
+    public void maximizeSumAfterRemovingValleys(int[] mountains) {
+        //https://www.geeksforgeeks.org/maximize-sum-of-given-array-after-removing-valleys/
+        int n = mountains.length;
+        int[] smallerInLeft = new int[n];
+        int[] smallerInRight = new int[n];
+
+        Stack<Integer> stack = new Stack<>();
+
+        //smller to left
+        for (int i = 0; i < n; i++) {
+            int val = mountains[i];
+            while (!stack.isEmpty()
+                    && mountains[stack.peek()] >= val) {
+                stack.pop();
+            }
+
+            if (stack.isEmpty()) {
+                //i + 1 == len upto ith element 
+                //like if arr supposed to [1,1,1] len = 3 and val = 1 then len * val = 3
+                smallerInLeft[i] = (i + 1) * val;
+            } else {
+                int smallIndex = stack.peek();
+                smallerInLeft[i] = smallerInLeft[smallIndex] + (i - smallIndex) * val;
+            }
+            stack.push(i);
+        }
+
+        stack.clear();
+
+        //smller in right
+        for (int i = n - 1; i >= 0; i--) {
+            int val = mountains[i];
+            while (!stack.isEmpty()
+                    && mountains[stack.peek()] >= val) {
+                stack.pop();
+            }
+
+            if (stack.isEmpty()) {
+                //n - i is same as len upto ith element
+                smallerInRight[i] = (n - i) * val;
+            } else {
+                int smallIndex = stack.peek();
+                smallerInRight[i] = smallerInRight[smallIndex] + (smallIndex - i) * val;
+            }
+            stack.push(i);
+        }
+        int maxSum = 0;
+        for (int i = 0; i < n; i++) {
+            int currSum = smallerInLeft[i] + smallerInRight[i] - mountains[i];
+            maxSum = Math.max(maxSum, currSum);
+        }
+        //output:
+        System.out.println("Max sum after removing valleys: " + maxSum);
     }
 
     public void rotateMatrixClockWise90Deg(int[][] mat) {
@@ -6218,6 +6274,7 @@ public class DSA450Questions {
                 } else if (!currFilesOrDirs.equals("") && !currFilesOrDirs.equals(".")) {
                     //cases when there // there will be currFilesOrDirs == "" and
                     //"." represent as current working dir, we don't to do anything with that
+                    //if currFilesOrDirs is none of that, push in stack
                     filesOrDirs.push(currFilesOrDirs);
                 }
                 //reset
@@ -6351,7 +6408,7 @@ public class DSA450Questions {
         int mainLen = main.length();
         int currLen = curr.length();
         for (int i = 0; i < mainLen; i++) {
-            if (currLenCovered == curr.length()) {
+            if (currLenCovered == currLen) {
                 return true;
             }
             if (main.charAt(i) == curr.charAt(currLenCovered)) {
@@ -6365,46 +6422,48 @@ public class DSA450Questions {
         //MY GOOGLE INTERVIEW QUESTION
         /*
          main = "aaaabbc"
-         curr = "abcbbbabc"
+         curr = "abcbbabc"
          partition in curr string should be 3 as abc | bb | abc
          */
         int partitions = 0;
-        String subseq = curr;
-        int prefixLengthMatchedInCurr = 0;
+        String prefixStr = curr;
+        int prefixLengthCurrCovered = 0;
         Set<String> cache = new HashSet<>();
-        while (subseq.length() > 0) {
-            //chechs if subseq is already processes before then we don't 
+        while (prefixStr.length() > 0) {
+            //checks if prefixStr is already processes before then we don't 
             //need to call the below fun again for same
             //ex: curr = "abcbbabc" first prefix abc will again going
             //to be checked later after bb
-            if (cache.contains(subseq)) {
-                prefixLengthMatchedInCurr = subseq.length();
-                subseq = subseq.substring(prefixLengthMatchedInCurr);
+            if (cache.contains(prefixStr)) {
+                prefixLengthCurrCovered = prefixStr.length();
+                prefixStr = prefixStr.substring(prefixLengthCurrCovered);
                 partitions++;
                 continue;
             }
-            //if subseq is not cached previously
+            //if prefixStr is not cached previously
             //we must find a prefix in curr that exists as subseq in main
-            prefixLengthMatchedInCurr = maximumLengthOfSubstringThatExistsAsSubseqInOtherString(main, subseq);
+            prefixLengthCurrCovered = maximumLengthOfSubstringThatExistsAsSubseqInOtherString(
+                    main, prefixStr);
             //if any prefix is not present as subseq the length will return as 0
-            //that means we can't divide curr string where it exists as subseq
-            if (prefixLengthMatchedInCurr == 0) {
+            //that means we can't divide curr string
+            if (prefixLengthCurrCovered == 0) {
                 System.out.println("No partition is possible");
                 return;
             }
             //if any prefix of curr found as subseq cache what prefix is that
             //ex: curr = "abcbbabc" first prefix = "abc" exists as subseq in "aaaabbc"
-            //save substring(0, prefixLengthMatchedInCurr) i.e, first "abc" and so on...
-            cache.add(subseq.substring(0, prefixLengthMatchedInCurr));
+            //save substring(0, prefixLengthCurrCovered) i.e, first "abc" and so on...
+            cache.add(prefixStr.substring(0, prefixLengthCurrCovered));
             //remove the prefix that has been found
-            //like above first "abc" is found as subseq now reduce our actual subseq
-            //substring(prefixLengthMatchedInCurr) ==> "bbabc" and so on...
-            subseq = subseq.substring(prefixLengthMatchedInCurr);
+            //like above first "abc" is found as subseq now reduce our actual prefixStr
+            //substring(prefixLengthCurrCovered) ==> "bbabc" and so on...
+            prefixStr = prefixStr.substring(prefixLengthCurrCovered);
             //if we can do all this we mean that we have a partition
             partitions++;
         }
         //output
-        System.out.println("Partitions of curr string where each substring exists as subseq in mains string: " + partitions);
+        System.out.println("Partitions of curr string where each substring"
+                + " exists as subseq in mains string: " + partitions);
     }
 
     public void numberOfMatchingSubseq(String main, String[] words) {
@@ -6542,6 +6601,107 @@ public class DSA450Questions {
         }
         //output
         System.out.println(pattern + " number following this pattern: " + numStr);
+    }
+
+    public void minMovesToMakeStringPallindrome(String str) {
+        //https://leetcode.com/problems/minimum-number-of-moves-to-make-palindrome/
+        //https://leetcode.com/problems/minimum-number-of-moves-to-make-palindrome/discuss/2191696/USING-TWO-POINTER-oror-SIMPLEST-SOLUTION
+
+        int n = str.length();
+
+        char[] charArr = str.toCharArray();
+
+        int start = 0;
+        int end = n - 1;
+
+        int currStart = start;
+        int currEnd = end;
+
+        int swaps = 0;
+
+        while (end > start) {
+            //greedily compare start and end char update pointer if they are same
+            if (charArr[start] == charArr[end]) {
+                start++;
+                end--;
+                continue;
+            }
+
+            currStart = start;
+            currEnd = end;
+            //if the start and end chars are not same, try to find the char
+            //eaual to char[start] from the end
+            while (charArr[currStart] != charArr[currEnd]) {
+                currEnd--;
+            }
+
+            //swap
+            //currEnd would be the char that match to char[start]
+            //nextToCurrEnd = currEnd + 1 == adjacent index
+            //swap(currEnd, nextToCurrEnd)
+            int nextToCurrEnd = currEnd + 1;
+            char temp = charArr[currEnd];
+            charArr[currEnd] = charArr[nextToCurrEnd];
+            charArr[nextToCurrEnd] = temp;
+
+            swaps++;
+        }
+        //output
+        System.out.println("Min moves(swaps) to make to the string pallindrome: " + swaps);
+    }
+
+    public void largestThreeSameDigitNumInString(String num) {
+        //https://leetcode.com/problems/largest-3-same-digit-number-in-string/
+        //SLIDING WINDOW approach
+        int n = num.length();
+        int start = 0;
+        int end = 0;
+        Map<Character, Integer> counter = new HashMap<>();
+        int maxEffectiveNum = Integer.MIN_VALUE;
+
+        String result = "";
+
+        while (end < n) {
+
+            char chEnd = num.charAt(end);
+            counter.put(chEnd, counter.getOrDefault(chEnd, 0) + 1);
+
+            //same digit and length to be 3
+            //so counter size should remain 1 for a single/same digit process
+            //like "777" map['7' = 3] size == 1
+            if (counter.size() == 1
+                    //window here req to be 3
+                    && (end - start + 1) == 3) {
+
+                int currEffectiveNum = chEnd - '0';
+                //incase we already have processed "777" 
+                //so currEffectiveNum = 7, maxEffectiveNum also be currEffectiveNum == 7
+                //later on we see "333"
+                //then currEffectiveNum = 3
+                //but we already have a maxEffectiveNum as 7
+                //so our result will not be updated to "333"
+                if (currEffectiveNum > maxEffectiveNum) {
+                    maxEffectiveNum = currEffectiveNum;
+                    //same digits of length 3
+                    result = currEffectiveNum + "" + currEffectiveNum + "" + currEffectiveNum;
+                }
+            }
+
+            //if we need same digit of length 3
+            //incase we added 2 different digit then map.size > 1
+            //so we will move our window from start
+            while (counter.size() > 1) {
+                char chStart = num.charAt(start);
+                counter.put(chStart, counter.getOrDefault(chStart, 0) - 1);
+                if (counter.get(chStart) <= 0) {
+                    counter.remove(chStart);
+                }
+                start++;
+            }
+            end++;
+        }
+        //output
+        System.out.println("Largest same digit num of length 3: " + result);
     }
 
     public Node<Integer> reverseLinkedList_Iterative(Node<Integer> node) {
@@ -8883,15 +9043,13 @@ public class DSA450Questions {
 
         //OPTIMISED
         //actual
-        BinaryTree<Integer> bt = new BinaryTree<>(root);
-        bt.treeBFS();
+        new BinaryTree<>(root).treeBFS();
+        System.out.println();
 
         convertTreeToSumTree_Recursion_Helper(root);
 
         //output
-        System.out.println();
-        bt = new BinaryTree<>(root);
-        bt.treeBFS();
+        new BinaryTree<>(root).treeBFS();
         System.out.println();
 
     }
@@ -12898,7 +13056,7 @@ public class DSA450Questions {
 
     }
 
-    public void longestCommonSubsequence_DP_Memoization(String s1, String s2, int m, int n) {
+    public int longestCommonSubsequence_DP_Memoization(String s1, String s2, int m, int n) {
 
         int[][] memo = new int[m + 1][n + 1];
 
@@ -12920,6 +13078,7 @@ public class DSA450Questions {
         }
 
         System.out.println("The longest common subsequence length for the given two string is: " + memo[m][n]);
+        return memo[m][n];
     }
 
     private int longestRepeatingSubsequence_Recursion_Helper(String a, String b, int m, int n) {
@@ -13254,7 +13413,7 @@ public class DSA450Questions {
         //output:
         System.out.println("DP Longest inc subseq of the given array is: " + maxLengthLongestIncSubseq);
     }
-    
+
     public void maxSumIncreasingSubsequence_DP_Memoization(int[] arr) {
         //...............................T: O(N ^ 2), checking all subseq
         //...............................T: O(N), memo[] space
@@ -13269,10 +13428,9 @@ public class DSA450Questions {
         int[] memoSum = new int[n];
         //base cond
         //a single num can also be a max sum incr seq, that's why arr[i]
-        for(int i = 0; i < n; i++){
+        for (int i = 0; i < n; i++) {
             memoSum[i] = arr[i];
         }
-        
 
         for (int i = 1; i < n; i++) {
             //we iterate over subarray [0 to i]
@@ -13295,7 +13453,7 @@ public class DSA450Questions {
         System.out.println("DP Max sum incr subseq of the given array is: " + maxSumIncSubseq);
     }
 
-    public void maximumLengthOfRepeatedSubarray_DP_Problem(int[] arr1, int[] arr2) {
+    public void maximumLengthOfRepeatedSubarray_DP_Memoization(int[] arr1, int[] arr2) {
 
         //Approach is similar to longest common substring
         int m = arr1.length;
@@ -13320,6 +13478,25 @@ public class DSA450Questions {
 
         //output
         System.out.println("Maximum length of repeated subarray: " + maxLen);
+    }
+
+    public int minInsertsToMakeStringPallindrome_DP_Memoization(String str) {
+        //https://leetcode.com/problems/minimum-insertion-steps-to-make-a-string-palindrome
+        //ref: SomePracticeQuestion.minNoOfInsertionInStringToMakeItPallindrome()
+        String revString = new StringBuilder(str).reverse().toString();
+        int len = str.length();
+        int longestCommonSubseq = longestCommonSubsequence_DP_Memoization(str, revString, len, len);
+        int inserts = len - longestCommonSubseq;
+        //output
+        System.out.println("Min inserts to make the string pallindrome: " + inserts);
+        return inserts;
+    }
+
+    public void minDeletesToMakeStringPallindrome_DP_Memoization(String str) {
+        //ref: SomePracticeQuestion.minNoOfDeletionInStringToMakeItPallindrome_LPSBasedApproach()
+        int deletes = minInsertsToMakeStringPallindrome_DP_Memoization(str);
+        //output
+        System.out.println("Min deletes to make the string pallindrome: " + deletes);
     }
 
     public void nMeetingRooms_Greedy(int[] startTime, int[] finishTime) {
@@ -14593,6 +14770,10 @@ public class DSA450Questions {
         //https://leetcode.com/problems/find-the-town-judge/discuss/2106467/Simple-yet-efficient-java-solution
         int[] inDegree = new int[n];
         for (int[] trust : trusts) {
+            //0th person(trust[0]) trust 1st person(trust[1])
+            //that way trust[1] got inDegree from trust[0]
+            //but if later on it is found that trust[1] is also trusting
+            //someone else that means we have to reduce its inDegree
             inDegree[trust[1] - 1]++;
             inDegree[trust[0] - 1]--;
         }
@@ -14677,6 +14858,7 @@ public class DSA450Questions {
             }
             System.out.println();
         }
+        System.out.println();
     }
 
     private int longestIncreasingPathInMatrixFromAnyPoint_Graph_Memoization_DFS(
@@ -14693,7 +14875,7 @@ public class DSA450Questions {
         }
 
         //for each value in matrix that value itself is a longest incr path
-        //atleast for length 1
+        //atleast of length 1
         int currLongestIncrPath = 1;
 
         //UP
@@ -15987,29 +16169,29 @@ public class DSA450Questions {
         System.out.println("Skyline coordinates of the given buildings: " + skylinePoints);
     }
 
-    public void minAngleBetweeHourAndMinuteHands(int hour, int min){
+    public void minAngleBetweeHourAndMinuteHands(int hour, int min) {
         //https://leetcode.com/problems/angle-between-hands-of-a-clock/
         /*
-        In 12 hour, hour hand make 360deg
-        12hr = 360deg
-        1hr = 360/12deg = 30deg
-        1hr = 60min
-        60min = 30deg
-        1min = 30/60deg = 0.5deg
-        ..........
-        To complete 1hr, min hand makes 360deg
-        1hr = 60min = 360deg
-        1min = 360/60deg = 6deg
-        */
-        
-        double hourAngle = (30*hour) + (0.5 * min);
-        double minuteAngle = (0*hour) + (6 * min);
+         In 12 hour, hour hand make 360deg
+         12hr = 360deg
+         1hr = 360/12deg = 30deg
+         1hr = 60min
+         60min = 30deg
+         1min = 30/60deg = 0.5deg
+         ..........
+         To complete 1hr, min hand makes 360deg
+         1hr = 60min = 360deg
+         1min = 360/60deg = 6deg
+         */
+
+        double hourAngle = (30 * hour) + (0.5 * min);
+        double minuteAngle = (0 * hour) + (6 * min);
         double angle = Math.abs(hourAngle - minuteAngle);
         double minAngle = angle < 180 ? angle : 360.0 - angle;
         //output
         System.out.println("Min angle between hour and min hands: " + minAngle);
     }
-    
+
     public static void main(String[] args) {
 
         //Object to access method
@@ -18408,8 +18590,8 @@ public class DSA450Questions {
 //        Row: SEPARATE QUESTION IMPORTANT
 //        System.out.println("Maximum length of repeated subarray (DP PROBLEM)");
 //        //https://leetcode.com/problems/maximum-length-of-repeated-subarray/
-//        obj.maximumLengthOfRepeatedSubarray_DP_Problem(new int[]{1,2,3,2,1}, new int[]{3,2,1,4,7});
-//        obj.maximumLengthOfRepeatedSubarray_DP_Problem(new int[]{0,1,1,1,1,1}, new int[]{0,1,0,1,0,1});
+//        obj.maximumLengthOfRepeatedSubarray_DP_Memoization(new int[]{1,2,3,2,1}, new int[]{3,2,1,4,7});
+//        obj.maximumLengthOfRepeatedSubarray_DP_Memoization(new int[]{0,1,1,1,1,1}, new int[]{0,1,0,1,0,1});
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
 //        System.out.println("Fix two swapped nodes of the BST");
@@ -19903,104 +20085,114 @@ public class DSA450Questions {
 //        obj.longestStringChain_DP_Memoization(new String[]{"l", "mn", "op", "qrst"}); //any string can be a single lengthed chain = 1
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("maximum sum circular subarray");
-        //https://leetcode.com/problems/maximum-sum-circular-subarray
-        obj.maximumSumCircularSubarray(new int[]{5, -1, -2, 5});
-        obj.maximumSumCircularSubarray(new int[]{-1, 5, 5, -2});
-        obj.maximumSumCircularSubarray(new int[]{-4, -3, -2, -1});
+//        System.out.println("maximum sum circular subarray");
+//        //https://leetcode.com/problems/maximum-sum-circular-subarray
+//        obj.maximumSumCircularSubarray(new int[]{5, -1, -2, 5});
+//        obj.maximumSumCircularSubarray(new int[]{-1, 5, 5, -2});
+//        obj.maximumSumCircularSubarray(new int[]{-4, -3, -2, -1});
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Find town judge Graph");
-        //https://leetcode.com/problems/find-the-town-judge/
-        System.out.println("Judge is : " + obj.findTownJudge_Graph(2, new int[][]{{1, 2}}));
-        System.out.println("Judge is : " + obj.findTownJudge_Graph(3, new int[][]{{1, 3}, {2, 3}}));
-        System.out.println("Judge is : " + obj.findTownJudge_Graph(3, new int[][]{{1, 3}, {2, 3}, {3, 1}}));
-        System.out.println("Judge is : " + obj.findTownJudge_Graph(4, new int[][]{{1, 2}, {2, 3}, {3, 4}}));
+//        System.out.println("Find town judge Graph");
+//        //https://leetcode.com/problems/find-the-town-judge/
+//        System.out.println("Judge is : " + obj.findTownJudge_Graph(2, new int[][]{{1, 2}}));
+//        System.out.println("Judge is : " + obj.findTownJudge_Graph(3, new int[][]{{1, 3}, {2, 3}}));
+//        System.out.println("Judge is : " + obj.findTownJudge_Graph(3, new int[][]{{1, 3}, {2, 3}, {3, 1}}));
+//        System.out.println("Judge is : " + obj.findTownJudge_Graph(4, new int[][]{{1, 2}, {2, 3}, {3, 4}}));
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Check if a Parentheses String Can Be Valid");
-        //https://leetcode.com/problems/check-if-a-parentheses-string-can-be-valid/
-        System.out.println("Valid parenthesis possible: " + obj.checkIfParenthesisStringCanBeValid("))()))", "010100"));
-        System.out.println("Valid parenthesis possible: " + obj.checkIfParenthesisStringCanBeValid(")))(((", "001100"));
-        System.out.println("Valid parenthesis possible: " + obj.checkIfParenthesisStringCanBeValid("()()", "0000"));
-        System.out.println("Valid parenthesis possible: " + obj.checkIfParenthesisStringCanBeValid(")", "0"));
+//        System.out.println("Check if a Parentheses String Can Be Valid");
+//        //https://leetcode.com/problems/check-if-a-parentheses-string-can-be-valid/
+//        System.out.println("Valid parenthesis possible: " + obj.checkIfParenthesisStringCanBeValid("))()))", "010100"));
+//        System.out.println("Valid parenthesis possible: " + obj.checkIfParenthesisStringCanBeValid(")))(((", "001100"));
+//        System.out.println("Valid parenthesis possible: " + obj.checkIfParenthesisStringCanBeValid("()()", "0000"));
+//        System.out.println("Valid parenthesis possible: " + obj.checkIfParenthesisStringCanBeValid(")", "0"));
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Largest Odd Number in String");
-        //https://leetcode.com/problems/largest-odd-number-in-string/
-        obj.largestOddNumInGivenNumString("52");
-        obj.largestOddNumInGivenNumString("4206");
-        obj.largestOddNumInGivenNumString("864278642");
+//        System.out.println("Largest Odd Number in String");
+//        //https://leetcode.com/problems/largest-odd-number-in-string/
+//        obj.largestOddNumInGivenNumString("52");
+//        obj.largestOddNumInGivenNumString("4206");
+//        obj.largestOddNumInGivenNumString("864278642");
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Non-decreasing Array");
-        //https://leetcode.com/problems/non-decreasing-array/
-        System.out.println("Non decreasing array with atmost one element change possible: "
-                + obj.nonDecreasingArrayWithAtmostOneChange(new int[]{4, 2, 3}));
-        System.out.println("Non decreasing array with atmost one element change possible: "
-                + obj.nonDecreasingArrayWithAtmostOneChange(new int[]{4, 2}));
-        System.out.println("Non decreasing array with atmost one element change possible: "
-                + obj.nonDecreasingArrayWithAtmostOneChange(new int[]{4, 2, 1}));
+//        System.out.println("Non-decreasing Array");
+//        //https://leetcode.com/problems/non-decreasing-array/
+//        System.out.println("Non decreasing array with atmost one element change possible: "
+//                + obj.nonDecreasingArrayWithAtmostOneChange(new int[]{4, 2, 3}));
+//        System.out.println("Non decreasing array with atmost one element change possible: "
+//                + obj.nonDecreasingArrayWithAtmostOneChange(new int[]{4, 2}));
+//        System.out.println("Non decreasing array with atmost one element change possible: "
+//                + obj.nonDecreasingArrayWithAtmostOneChange(new int[]{4, 2, 1}));
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Surrounded Regions");
-        //https://leetcode.com/problems/surrounded-regions/
-        obj.surroundedRegions_Graph(new char[][]{
-            {'X', 'X', 'X', 'X'}, {'X', 'O', 'O', 'X'}, {'X', 'X', 'O', 'X'}, {'X', 'O', 'X', 'X'}
-        });
+//        System.out.println("Surrounded Regions");
+//        //https://leetcode.com/problems/surrounded-regions/
+//        obj.surroundedRegions_Graph(new char[][]{
+//            {'X', 'X', 'X', 'X'},
+//            {'X', 'O', 'O', 'X'},
+//            {'X', 'X', 'O', 'X'},
+//            {'X', 'O', 'X', 'X'}
+//        });
+//        obj.surroundedRegions_Graph(new char[][]{
+//            {'X', 'O', 'X', 'X', 'X'},
+//            {'X', 'O', 'X', 'O', 'X'},
+//            {'X', 'O', 'X', 'O', 'X'},
+//            {'X', 'O', 'X', 'X', 'X'}
+//        });
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Longest Increasing Path in a Matrix");
-        //https://leetcode.com/problems/longest-increasing-path-in-a-matrix/
-        obj.longestIncreasingPathInMatrixFromAnyPoint_Graph_Memoization(new int[][]{
-            {9, 9, 4}, {6, 6, 8}, {2, 1, 1}
-        });
+//        System.out.println("Longest Increasing Path in a Matrix");
+//        //https://leetcode.com/problems/longest-increasing-path-in-a-matrix/
+//        obj.longestIncreasingPathInMatrixFromAnyPoint_Graph_Memoization(new int[][]{
+//            {9, 9, 4}, {6, 6, 8}, {2, 1, 1}
+//        });
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Two Sum/ Two Sum II - Input Array Is Sorted");
-        //https://leetcode.com/problems/two-sum/
-        //https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/
-        obj.twoSum_UnsortedArray(new int[]{2, 7, 11, 15}, 9);
-        obj.twoSum_UnsortedArray(new int[]{3, 2, 4}, 6);
-        obj.twoSum2_SortedArray(new int[]{2, 7, 11, 15}, 9);
-        obj.twoSum2_SortedArray(new int[]{-1, 0}, -1);
+//        System.out.println("Two Sum/ Two Sum II - Input Array Is Sorted");
+//        //https://leetcode.com/problems/two-sum/
+//        //https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/
+//        obj.twoSum_UnsortedArray(new int[]{2, 7, 11, 15}, 9);
+//        obj.twoSum_UnsortedArray(new int[]{3, 2, 4}, 6);
+//        obj.twoSum2_SortedArray(new int[]{2, 7, 11, 15}, 9);
+//        obj.twoSum2_SortedArray(new int[]{-1, 0}, -1);
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Smallest String With A Given Numeric Value");
-        //https://leetcode.com/problems/smallest-string-with-a-given-numeric-value/
-        obj.smallestStringWithGivenLengthNAndCharSumValueK(3, 27);
+//        System.out.println("Smallest String With A Given Numeric Value");
+//        //https://leetcode.com/problems/smallest-string-with-a-given-numeric-value/
+//        obj.smallestStringWithGivenLengthNAndCharSumValueK(3, 27);
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Replace All ?'s to Avoid Consecutive Repeating Characters");
-        //https://leetcode.com/problems/replace-all-s-to-avoid-consecutive-repeating-characters/
-        obj.replaceAllQuestionMarksWithACharAndNoConsecutiveRepeatingChar("?zs");
-        obj.replaceAllQuestionMarksWithACharAndNoConsecutiveRepeatingChar("ubv?w");
-        obj.replaceAllQuestionMarksWithACharAndNoConsecutiveRepeatingChar("?z?a?");
+//        System.out.println("Replace All ?'s to Avoid Consecutive Repeating Characters");
+//        //https://leetcode.com/problems/replace-all-s-to-avoid-consecutive-repeating-characters/
+//        obj.replaceAllQuestionMarksWithACharAndNoConsecutiveRepeatingChar("?zs");
+//        obj.replaceAllQuestionMarksWithACharAndNoConsecutiveRepeatingChar("ubv?w");
+//        obj.replaceAllQuestionMarksWithACharAndNoConsecutiveRepeatingChar("?z?a?");
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Simplify Path");
-        //https://leetcode.com/problems/simplify-path/
-        System.out.println("Canonical path: " + obj.simplifyPath("/home/"));
-        System.out.println("Canonical path: " + obj.simplifyPath("/../"));
-        System.out.println("Canonical path: " + obj.simplifyPath("/home///foo/./bar/zoo/./../"));
+//        System.out.println("Simplify Path");
+//        //https://leetcode.com/problems/simplify-path/
+//        System.out.println("Canonical path: " + obj.simplifyPath("/home/"));
+//        System.out.println("Canonical path: " + obj.simplifyPath("/../"));
+//        System.out.println("Canonical path: " + obj.simplifyPath("/home///foo/./bar/zoo/./../"));
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Maximum Length of Subarray With Positive Product");
-        //https://leetcode.com/problems/maximum-length-of-subarray-with-positive-product/
-        obj.maximumLengthOfSubarrayWithPositiveProduct(new int[]{1, -2, -3, 4}); //lenght = 4 as 1 * -2 * -3 * 4 > 0
-        obj.maximumLengthOfSubarrayWithPositiveProduct(new int[]{0, 1, -2, -3, -4});
+//        System.out.println("Maximum Length of Subarray With Positive Product");
+//        //https://leetcode.com/problems/maximum-length-of-subarray-with-positive-product/
+//        obj.maximumLengthOfSubarrayWithPositiveProduct(new int[]{1, -2, -3, 4}); //lenght = 4 as 1 * -2 * -3 * 4 > 0
+//        obj.maximumLengthOfSubarrayWithPositiveProduct(new int[]{0, 1, -2, -3, -4});
+//        obj.maximumLengthOfSubarrayWithPositiveProduct(new int[]{-1, 8, 8, -2});
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Swim in Rising Water");
-        //https://leetcode.com/problems/swim-in-rising-water/
-        System.out.println("Time taken to swim in rising water to bottom-right corner: "
-                + obj.swimInRisingWater_Graph(new int[][]{
-                    {0, 2}, {1, 3}}));
+//        System.out.println("Swim in Rising Water");
+//        //https://leetcode.com/problems/swim-in-rising-water/
+//        System.out.println("Time taken to swim in rising water to bottom-right corner: "
+//                + obj.swimInRisingWater_Graph(new int[][]{
+//                    {0, 2}, {1, 3}}));
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Find Common Characters");
-        //https://leetcode.com/problems/find-common-characters/
-        obj.findCommonCharacters(new String[]{"bella", "label", "roller"});
+//        System.out.println("Find Common Characters");
+//        //https://leetcode.com/problems/find-common-characters/
+//        obj.findCommonCharacters(new String[]{"bella", "label", "roller"});
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
         System.out.println("Minimum Interval to Include Each Query");
@@ -20229,6 +20421,36 @@ public class DSA450Questions {
         //https://leetcode.com/problems/angle-between-hands-of-a-clock/
         obj.minAngleBetweeHourAndMinuteHands(12, 30);
         obj.minAngleBetweeHourAndMinuteHands(2, 60); // 3:00
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Minimum Inserts/ Deletes To Make String Pallindrome");
+        //https://leetcode.com/problems/minimum-insertion-steps-to-make-a-string-palindrome/
+        //https://www.geeksforgeeks.org/java-program-to-find-minimum-insertions-to-form-a-palindrome-dp-28/
+        obj.minInsertsToMakeStringPallindrome_DP_Memoization("abcda"); //insert d,b like this abdcdba
+        obj.minInsertsToMakeStringPallindrome_DP_Memoization("aba");
+        obj.minDeletesToMakeStringPallindrome_DP_Memoization("abcda"); //deletes d,b like this aca
+        obj.minDeletesToMakeStringPallindrome_DP_Memoization("aba");
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Maximize sum of given array after removing valleys");
+        //https://www.geeksforgeeks.org/maximize-sum-of-given-array-after-removing-valleys/
+        obj.maximizeSumAfterRemovingValleys(new int[]{5, 1, 8}); //valley removed [1,1,8] = 10
+        obj.maximizeSumAfterRemovingValleys(new int[]{8, 1, 10, 1, 8}); // valley removed [1,1,10,1,1] = 14
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Minimum Number of Moves to Make Palindrome");
+        //https://leetcode.com/problems/minimum-number-of-moves-to-make-palindrome/
+        // a_swap(a,b)_b ==> abab ==> swap(a,b)_ab ==> baab == pallindrome in 2 swaps
+        obj.minMovesToMakeStringPallindrome("aabb");
+        obj.minMovesToMakeStringPallindrome("zzazz");
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Largest 3-Same-Digit Number in String");
+        //https://leetcode.com/problems/largest-3-same-digit-number-in-string/
+        obj.largestThreeSameDigitNumInString("6777133339");
+        obj.largestThreeSameDigitNumInString("2300019");
+        obj.largestThreeSameDigitNumInString("42352338");
+        obj.largestThreeSameDigitNumInString("00042352338");
     }
 
 }
