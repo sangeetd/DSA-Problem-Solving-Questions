@@ -3166,7 +3166,7 @@ public class DSA450Questions {
         int[] leftNeighbour = new int[n];
         int[] rightNeighbour = new int[n];
         int candiesNeeded = 0;
-        //atleast candy is given to each student
+        //atleast 1 candy is given to each student
         leftNeighbour[0] = 1;
         for (int i = 1; i < n; i++) {
             //if rating of curr ith student is greater than its prev left student
@@ -3176,7 +3176,7 @@ public class DSA450Questions {
                     ? leftNeighbour[i - 1] + 1
                     : 1;
         }
-        //atleast candy is given to each student
+        //atleast 1 candy is given to each student
         rightNeighbour[n - 1] = 1;
         for (int i = n - 2; i >= 0; i--) {
             //if rating of curr ith student is greater than its next right student
@@ -3357,7 +3357,7 @@ public class DSA450Questions {
             int end = point[1];
 
             int cost = 0;
-            //for each start to end value, paint each unit of are sequentially
+            //for each start to end value, paint each unit sequentially
             //and calculate the cost per unit
             //ex: [4, 10] = seq unit cost = start = 4, cost = 1
             //seq unit cost = start = 5, cost = 2
@@ -3377,6 +3377,7 @@ public class DSA450Questions {
                     start = paintMap.get(start);
                     continue;
                 }
+                //cost of painting per unit area (start to seq)
                 cost++;
                 paintMap.put(start, end);
                 start++;
@@ -3449,6 +3450,74 @@ public class DSA450Questions {
         }
         //output:
         System.out.println("Max sum after removing valleys: " + maxSum);
+    }
+    
+    public void numberOfVisiblePeopleInQueue(int[] heights){
+        //https://leetcode.com/problems/number-of-visible-people-in-a-queue/
+        //based on nextGreaterElementInRight
+        int n = heights.length;
+        Stack<Integer> stack = new Stack<>();
+        int[] personVisibilty = new int[n];
+        
+        for(int i = n - 1; i >= 0; i--){
+            while(!stack.isEmpty() && stack.peek() < heights[i]){
+                personVisibilty[i]++;
+                stack.pop();
+            }
+            
+            if(!stack.isEmpty()){
+                personVisibilty[i]++;
+            }
+            if(stack.isEmpty() || heights[i] != stack.peek()){
+                stack.push(heights[i]);
+            }
+        }
+        //output
+        for(int val : personVisibilty){
+            System.out.print(val + " ");
+        }
+        System.out.println();
+    }
+    
+    private boolean splitArrayInLargestSum_CanSplit(int[] nums, int largestSum, int m){
+        int subarrays = 1;
+        int currSum = 0;
+        for(int val : nums){
+            currSum += val;
+            if(currSum > largestSum){
+                currSum = val;
+                subarrays++;
+            }
+        }
+        return subarrays <= m;
+    }
+    
+    public void splitArrayInLargestSum(int[] nums, int m){
+        //https://leetcode.com/problems/split-array-largest-sum/
+        //explanation: https://youtu.be/YUF3_eBdzsk
+        int maxNum = nums[0];
+        int arrSum = 0;
+        for(int val : nums){
+            maxNum = Math.max(maxNum, val);
+            arrSum += val;
+        }
+        
+        //minimizing the largest sum would lie between [maxNum, arrSum]
+        //Binary search
+        int start = maxNum;
+        int end = arrSum;
+        int minimizedSum = 0;
+        while(end >= start){
+            int midSum = start + (end - start) / 2;
+            if(splitArrayInLargestSum_CanSplit(nums, midSum, m)){
+                minimizedSum = midSum;
+                end = midSum - 1;
+            } else {
+                start = midSum + 1;
+            }
+        }
+        //output
+        System.out.println("Minimized the largest sum among m subarrays: " + minimizedSum);
     }
 
     public void rotateMatrixClockWise90Deg(int[][] mat) {
@@ -6331,7 +6400,7 @@ public class DSA450Questions {
         //explanation: https://youtu.be/D4T2N0yAr20
 
         int n = words.length;
-        //this map is used for output purpose, nt req by question
+        //this map is used for output purpose, not req by question
         Map<Character, List<String>> wordsPerSearchedChar = new HashMap<>();
         List<List<String>> result = new ArrayList<>();
         //sort lexicographically order
@@ -6343,7 +6412,7 @@ public class DSA450Questions {
         for (int i = 0; i < search.length(); i++) {
             char searchChar = search.charAt(i);
             List<String> curr = new ArrayList<>();
-
+            
             while (end >= start
                     //cond is to skip all those words from start which are
                     //1. smaller than our search word ex: search = "apple", word[start] = "app"
@@ -6418,7 +6487,7 @@ public class DSA450Questions {
         return currLen == currLenCovered;
     }
 
-    public void minimumPartitionsInCurrStringWherePrefixExistsAsSubseqInMainString(String main, String curr) {
+    public void partitionsInCurrStringWherePrefixExistsAsSubseqInMainString(String main, String curr) {
         //MY GOOGLE INTERVIEW QUESTION
         /*
          main = "aaaabbc"
@@ -6915,8 +6984,7 @@ public class DSA450Questions {
         }
 
         //actual merged list starts with next of arbitary head pointer
-        LinkedListUtil<Integer> ll = new LinkedListUtil<>(head.getNext());
-        ll.print();
+        new LinkedListUtil<>(head.getNext()).print();
     }
 
     public void kThNodeFromEndOfLinkedList_1(Node node, int K) {
@@ -11525,7 +11593,8 @@ public class DSA450Questions {
     public void convertSortedArrayToHeightBalancedBinarySearchTree(int[] arr) {
         //https://leetcode.com/problems/convert-sorted-array-to-binary-search-tree/
         //explanation: https://youtu.be/0K0uCMYq5ng
-        TreeNode<Integer> root = convertSortedArrayToHeightBalancedBinarySearchTree_Helper(arr, 0, arr.length - 1);
+        TreeNode<Integer> root = convertSortedArrayToHeightBalancedBinarySearchTree_Helper(
+                arr, 0, arr.length - 1);
         //output
         new BinarySearchTree<>(root).treeInorder();
         System.out.println();
@@ -11984,7 +12053,7 @@ public class DSA450Questions {
         }
 
         int minTime = 0;
-        int[][] dir = {
+        int[][] dirs = {
             {-1, 0},
             {1, 0},
             {0, -1},
@@ -11993,15 +12062,15 @@ public class DSA450Questions {
         Set<String> infected = new HashSet<>();
         while (fresh.size() > 0) {
 
-            for (String coor : rotten) {
-                int x = coor.charAt(0) - '0';
-                int y = coor.charAt(1) - '0';
-                for (int[] r : dir) {
-                    int x_ = x + r[0];
-                    int y_ = y + r[1];
-                    if (fresh.contains(x_ + "" + y_)) {
-                        fresh.remove(x_ + "" + y_);
-                        infected.add(x_ + "" + y_);
+            for (String rottenPoint : rotten) {
+                int x = rottenPoint.charAt(0) - '0';
+                int y = rottenPoint.charAt(1) - '0';
+                for (int[] dir : dirs) {
+                    int newX = x + dir[0];
+                    int newY = y + dir[1];
+                    if (fresh.contains(newX + "" + newY)) {
+                        fresh.remove(newX + "" + newY);
+                        infected.add(newX + "" + newY);
                     }
                 }
             }
@@ -13520,15 +13589,15 @@ public class DSA450Questions {
         int meetingsCanBeConducted = 1; //at least one meeting can be held
         List<Integer> indexOfMeetingTimings = new ArrayList<>();
         indexOfMeetingTimings.add(input[0][2] + 1); // 1 based index
-        int endTime = input[0][1];
+        int prevEndTime = input[0][1];
         for (int i = 1; i < n; i++) {
 
-            int ithStartTime = input[i][0];
-            int ithEndTime = input[i][1];
+            int currStartTime = input[i][0];
+            int currEndTime = input[i][1];
 
-            if (endTime < ithStartTime) {
+            if (prevEndTime < currStartTime) {
                 meetingsCanBeConducted++;
-                endTime = ithEndTime;
+                prevEndTime = currEndTime;
                 indexOfMeetingTimings.add(input[i][2] + 1);
             }
         }
@@ -13789,13 +13858,16 @@ public class DSA450Questions {
         //https://leetcode.com/problems/minimum-number-of-arrows-to-burst-balloons/
         //sort on balloon end point
         Arrays.sort(balloonPoints, (a, b) -> a[1] - b[1]);
-        int prevStart = balloonPoints[0][0];
         int prevEnd = balloonPoints[0][1];
         int n = balloonPoints.length;
         int minArrow = 1;
         for (int i = 0; i < n; i++) {
             int currStart = balloonPoints[i][0];
             int currEnd = balloonPoints[i][1];
+            //curr start should be strictly greater than the prev end
+            //that way we know we need extra arrows to burst these curr ballons
+            //otherwise all the curr start that lesser than prev end falls under 
+            //the range of single arrow shot.
             if (currStart > prevEnd) {
                 minArrow++;
                 prevEnd = currEnd;
@@ -14985,6 +15057,66 @@ public class DSA450Questions {
         }
         return -1;
     }
+    
+    public void minCostToConnectAllPoints_Graph(int[][] points){
+        //https://leetcode.com/problems/min-cost-to-connect-all-points/
+        //explanation: https://youtu.be/f7JOBJIC-NA
+        //BASED on prim's algo
+        int n = points.length;
+        //<srcVertex, List<List<dist, destVertex>>>
+        Map<Integer, List<List<Integer>>> graph = new HashMap<>();
+        for(int node = 0; node < n; node++){
+            graph.put(node, new ArrayList<>());
+        }
+        for(int src = 0; src < n; src++){
+            int x1 = points[src][0];
+            int y1 = points[src][1];
+            for(int dest = src + 1; dest < n; dest++){
+                int x2 = points[dest][0];
+                int y2 = points[dest][1];
+                //manhattan dist
+                int dist = Math.abs(x1 - x2) + Math.abs(y1 - y2);
+                graph.get(src).add(Arrays.asList(dist, dest));
+                graph.get(dest).add(Arrays.asList(dist, src));
+            }
+        }
+        
+        int totalDist = 0;
+        int currSrc = 0;
+        int currDist = 0;
+        
+        Set<Integer> visited = new HashSet<>();
+        //List<dist, destVertex>
+        PriorityQueue<List<Integer>> minHeapDist = new PriorityQueue<>(
+                (l1, l2) -> l1.get(0) - l2.get(0)
+        );
+        
+        minHeapDist.add(Arrays.asList(currDist, currSrc));
+        
+        while(visited.size() < n){
+            
+            List<Integer> currEdge = minHeapDist.poll();
+            currDist = currEdge.get(0);
+            currSrc = currEdge.get(1);
+            
+            if(visited.contains(currSrc)){
+                continue;
+            }
+            
+            totalDist += currDist;
+            visited.add(currSrc);
+            
+            for(List<Integer> childEdge : graph.get(currSrc)){
+                int childVertex = childEdge.get(1);
+                if(visited.contains(childVertex)){
+                    continue;
+                }
+                minHeapDist.add(childEdge);
+            }
+        }
+        //output
+        System.out.println("Min cost to connect all points: " + totalDist);
+    }
 
     class Coord {
 
@@ -15203,7 +15335,7 @@ public class DSA450Questions {
         }
         return dp[b.length()];
     }
-
+ 
     public void minimumDiffPartition_DP_Memoization(int[] arr) {
 
         //https://practice.geeksforgeeks.org/problems/minimum-sum-partition3317/1#
@@ -19346,7 +19478,7 @@ public class DSA450Questions {
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
 //        System.out.println("Check if String C is interleaving of String A & B");
-//        ////https://leetcode.com/problems/interleaving-string/
+//        //https://leetcode.com/problems/interleaving-string/
 //        System.out.println("Third string is interleaving of other two: "
 //                + obj.checkIfStringCIsInterleavingOfStringAAndB_DP_Memoization("AB", "CD", "ACBG"));
 //        System.out.println("Third string is interleaving of other two: "
@@ -20201,10 +20333,10 @@ public class DSA450Questions {
             {1, 4}, {2, 4}, {3, 6}, {4, 4}}, new int[]{2, 3, 4, 5});
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Find Three Consecutive Integers That Sum to a Given Number");
-        //https://leetcode.com/problems/find-three-consecutive-integers-that-sum-to-a-given-number/
-        obj.threeConsecutiveNumberThatSumsToGivenNumber(33);
-        obj.threeConsecutiveNumberThatSumsToGivenNumber(4);
+//        System.out.println("Find Three Consecutive Integers That Sum to a Given Number");
+//        //https://leetcode.com/problems/find-three-consecutive-integers-that-sum-to-a-given-number/
+//        obj.threeConsecutiveNumberThatSumsToGivenNumber(33);
+//        obj.threeConsecutiveNumberThatSumsToGivenNumber(4);
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
 //        System.out.println("Merge Nodes in Between Zeros");
@@ -20220,35 +20352,35 @@ public class DSA450Questions {
 //        obj.mergeNodesInBetweenZeros(head);
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Search Suggestions System");
-        //https://leetcode.com/problems/search-suggestions-system/
-        obj.searchSuggestionSystem(new String[]{"mobile", "mouse", "moneypot", "monitor", "mousepad"}, "mouse");
+//        System.out.println("Search Suggestions System");
+//        //https://leetcode.com/problems/search-suggestions-system/
+//        obj.searchSuggestionSystem(new String[]{"mobile", "mouse", "moneypot", "monitor", "mousepad"}, "mouse");
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Maximum length prefix of one string that occurs as subsequence in another");
-        //https://www.geeksforgeeks.org/maximum-length-prefix-one-string-occurs-subsequence-another/?ref=rp
-        obj.maximumLengthOfSubstringThatExistsAsSubseqInOtherString("biggerdiagram", "digger");
-        obj.maximumLengthOfSubstringThatExistsAsSubseqInOtherString("abcdef", "xyz");
+//        System.out.println("Maximum length prefix of one string that occurs as subsequence in another");
+//        //https://www.geeksforgeeks.org/maximum-length-prefix-one-string-occurs-subsequence-another/?ref=rp
+//        obj.maximumLengthOfSubstringThatExistsAsSubseqInOtherString("biggerdiagram", "digger");
+//        obj.maximumLengthOfSubstringThatExistsAsSubseqInOtherString("abcdef", "xyz");
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Is Subsequence");
-        //https://leetcode.com/problems/is-subsequence/
-        System.out.println("Is string curr exists as any subseq in main: "
-                + obj.isSubsequence("ahbgdc", "abc"));
-        //whole digger string doesn't exists as any subseq in main string
-        System.out.println("Is string curr exists as any subseq in main: "
-                + obj.isSubsequence("biggerdiagram", "digger"));
+//        System.out.println("Is Subsequence");
+//        //https://leetcode.com/problems/is-subsequence/
+//        System.out.println("Is string curr exists as any subseq in main: "
+//                + obj.isSubsequence("ahbgdc", "abc"));
+//        //whole digger string doesn't exists as any subseq in main string
+//        System.out.println("Is string curr exists as any subseq in main: "
+//                + obj.isSubsequence("biggerdiagram", "digger"));
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT MY GOOGLE INTERVIEW QUESTION
-        System.out.println("Minimum partitions in curr string where its prefix exists as subseq in main string");
-        obj.minimumPartitionsInCurrStringWherePrefixExistsAsSubseqInMainString("aaaabbc", "aacbbabc");
-        obj.minimumPartitionsInCurrStringWherePrefixExistsAsSubseqInMainString("aaaabbc", "lmno");
-        obj.minimumPartitionsInCurrStringWherePrefixExistsAsSubseqInMainString("aaaabbc", "abcbbabc");
+//        System.out.println("Minimum partitions in curr string where its prefix exists as subseq in main string");
+//        obj.partitionsInCurrStringWherePrefixExistsAsSubseqInMainString("aaaabbc", "aacbbabc");
+//        obj.partitionsInCurrStringWherePrefixExistsAsSubseqInMainString("aaaabbc", "lmno");
+//        obj.partitionsInCurrStringWherePrefixExistsAsSubseqInMainString("aaaabbc", "abcbbabc");
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Number of Matching Subsequences");
-        //https://leetcode.com/problems/number-of-matching-subsequences/
-        obj.numberOfMatchingSubseq("abcde", new String[]{"a", "bb", "acd", "ace"});
+//        System.out.println("Number of Matching Subsequences");
+//        //https://leetcode.com/problems/number-of-matching-subsequences/
+//        obj.numberOfMatchingSubseq("abcde", new String[]{"a", "bb", "acd", "ace"});
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
 //        System.out.println("Binary Tree Cameras");
@@ -20260,45 +20392,47 @@ public class DSA450Questions {
 //        obj.binaryTreeCameras(root1);
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Convert Sorted Array to Height Balanced Binary Search Tree");
-        //https://leetcode.com/problems/convert-sorted-array-to-binary-search-tree/
-        obj.convertSortedArrayToHeightBalancedBinarySearchTree(new int[]{-10, -3, 0, 5, 9});
-        obj.convertSortedArrayToHeightBalancedBinarySearchTree(new int[]{1, 2, 3, 4, 5});
+//        System.out.println("Convert Sorted Array to Height Balanced Binary Search Tree");
+//        //https://leetcode.com/problems/convert-sorted-array-to-binary-search-tree/
+//        obj.convertSortedArrayToHeightBalancedBinarySearchTree(new int[]{-10, -3, 0, 5, 9});
+//        obj.convertSortedArrayToHeightBalancedBinarySearchTree(new int[]{1, 2, 3, 4, 5});
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Minimum Number of Arrows to Burst Balloons");
-        //https://leetcode.com/problems/minimum-number-of-arrows-to-burst-balloons/
-        obj.minimumArrowsToBurstBalloons_Greedy(new int[][]{
-            {10, 16}, {2, 8}, {1, 6}, {7, 12}});
-        obj.minimumArrowsToBurstBalloons_Greedy(new int[][]{
-            {1, 2}, {3, 4}, {5, 6}, {7, 8}});
+//        System.out.println("Minimum Number of Arrows to Burst Balloons");
+//        //https://leetcode.com/problems/minimum-number-of-arrows-to-burst-balloons/
+//        obj.minimumArrowsToBurstBalloons_Greedy(new int[][]{
+//            {1, 6}, {7, 12}});
+//        obj.minimumArrowsToBurstBalloons_Greedy(new int[][]{
+//            {10, 16}, {2, 8}, {1, 6}, {7, 12}});
+//        obj.minimumArrowsToBurstBalloons_Greedy(new int[][]{
+//            {1, 2}, {3, 4}, {5, 6}, {7, 8}});
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Triangle - minimum path sum from top to bottom");
-        //https://leetcode.com/problems/triangle/
-        List<List<Integer>> triangle = new ArrayList<>();
-        triangle.add(Arrays.asList(2));
-        triangle.add(Arrays.asList(3, 4));
-        triangle.add(Arrays.asList(6, 5, 7));
-        triangle.add(Arrays.asList(4, 1, 8, 3));
-        System.out.println("Min path sum top to bottom in triangle 2d matrix: "
-                + obj.triangleMinPathSumTopToBottom(triangle));
-        triangle = new ArrayList<>();
-        triangle.add(Arrays.asList(2));
-        System.out.println("Min path sum top to bottom in triangle 2d matrix: "
-                + obj.triangleMinPathSumTopToBottom(triangle));
+//        System.out.println("Triangle - minimum path sum from top to bottom");
+//        //https://leetcode.com/problems/triangle/
+//        List<List<Integer>> triangle = new ArrayList<>();
+//        triangle.add(Arrays.asList(2));
+//        triangle.add(Arrays.asList(3, 4));
+//        triangle.add(Arrays.asList(6, 5, 7));
+//        triangle.add(Arrays.asList(4, 1, 8, 3));
+//        System.out.println("Min path sum top to bottom in triangle 2d matrix: "
+//                + obj.triangleMinPathSumTopToBottom(triangle));
+//        triangle = new ArrayList<>();
+//        triangle.add(Arrays.asList(2));
+//        System.out.println("Min path sum top to bottom in triangle 2d matrix: "
+//                + obj.triangleMinPathSumTopToBottom(triangle));
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Candy Distribution");
-        //https://leetcode.com/problems/candy/
-        obj.candyDistributionToNStudent(new int[]{1, 0, 2}); //EASY UNDERSTANDING
-        obj.candyDistributionToNStudent2(new int[]{1, 0, 2}); //SPACE OPTIMISED
+//        System.out.println("Candy Distribution");
+//        //https://leetcode.com/problems/candy/
+//        obj.candyDistributionToNStudent(new int[]{1, 0, 2}); //EASY UNDERSTANDING
+//        obj.candyDistributionToNStudent2(new int[]{1, 0, 2}); //SPACE OPTIMISED
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Partition Array Such That Maximum Difference Is K");
-        //https://leetcode.com/problems/partition-array-such-that-maximum-difference-is-k/
-        obj.partitionArrSuchThatMaxDiffIsK_Greedy(new int[]{3, 6, 1, 2, 5}, 2);
-        obj.partitionArrSuchThatMaxDiffIsK_Greedy(new int[]{2, 2, 4, 5}, 0);
+//        System.out.println("Partition Array Such That Maximum Difference Is K");
+//        //https://leetcode.com/problems/partition-array-such-that-maximum-difference-is-k/
+//        obj.partitionArrSuchThatMaxDiffIsK_Greedy(new int[]{3, 6, 1, 2, 5}, 2);
+//        obj.partitionArrSuchThatMaxDiffIsK_Greedy(new int[]{2, 2, 4, 5}, 0);
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
         System.out.println("Find Triangular Sum of an Array");
@@ -20451,6 +20585,24 @@ public class DSA450Questions {
         obj.largestThreeSameDigitNumInString("2300019");
         obj.largestThreeSameDigitNumInString("42352338");
         obj.largestThreeSameDigitNumInString("00042352338");
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Number of Visible People in a Queue");
+        //https://leetcode.com/problems/number-of-visible-people-in-a-queue/
+        obj.numberOfVisiblePeopleInQueue(new int[]{10,6,8,5,11,9});
+        obj.numberOfVisiblePeopleInQueue(new int[]{5,1,2,3,10});
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Min Cost to Connect All Points/ Prim's Algo Based");
+        //https://leetcode.com/problems/min-cost-to-connect-all-points/
+        obj.minCostToConnectAllPoints_Graph(new int[][]{
+            {0,0},{2,2},{3,10},{5,2},{7,0}});
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Split Array Largest Sum");
+        //https://leetcode.com/problems/split-array-largest-sum/
+        obj.splitArrayInLargestSum(new int[]{7,2,5,10,8}, 2);
+        obj.splitArrayInLargestSum(new int[]{1,2,3,4,5}, 2);
     }
 
 }
