@@ -3297,54 +3297,6 @@ public class DSA450Questions {
         return false;
     }
 
-    private int shipWeightsWithinGivenDays_CheckDays(int[] weights, int maxWeight) {
-        int day = 1;
-        int currWeightSum = 0;
-        for (int weight : weights) {
-            currWeightSum += weight;
-            if (currWeightSum > maxWeight) {
-                day++;
-                currWeightSum = weight;
-            }
-        }
-        return day;
-    }
-
-    private int shipWeightsWithinGivenDays_BinarySearch(
-            int[] weights, int days, int startWeight, int endWeight) {
-        int capacity = -1;
-        while (endWeight >= startWeight) {
-            int midWeight = startWeight + (endWeight - startWeight) / 2;
-            int dayCount = shipWeightsWithinGivenDays_CheckDays(weights, midWeight);
-
-            if (dayCount <= days) {
-                capacity = midWeight;
-                endWeight = midWeight - 1;
-            } else {
-                startWeight = midWeight + 1;
-            }
-        }
-        return capacity;
-    }
-
-    public void shipWeightsWithinGivenDays(int[] weights, int days) {
-        //https://leetcode.com/problems/capacity-to-ship-packages-within-d-days/
-        int totalWeight = 0;
-        int maxShipmentWeight = 0;
-        for (int weight : weights) {
-            totalWeight += weight;
-            maxShipmentWeight = Math.max(maxShipmentWeight, weight);
-        }
-
-        int weightPerDay = totalWeight / days;
-        int maxWeight = Math.max(maxShipmentWeight, weightPerDay);
-
-        int capacityOfShipNeeded = shipWeightsWithinGivenDays_BinarySearch(
-                weights, days, maxWeight, totalWeight);
-        //output:
-        System.out.println("Capacity of ship required to ship all weights in given days: " + capacityOfShipNeeded);
-    }
-
     public void amountToPaintTheArea(int[][] areaPoints) {
         //https://leetcode.com/problems/amount-of-new-area-painted-each-day/
         //https://leetcode.com/discuss/interview-question/2072036/Google-or-Onsite-or-banglore-or-May-2022-or-Paint-a-line
@@ -3451,65 +3403,110 @@ public class DSA450Questions {
         //output:
         System.out.println("Max sum after removing valleys: " + maxSum);
     }
-    
-    public void numberOfVisiblePeopleInQueue(int[] heights){
+
+    public void numberOfVisiblePeopleInQueue(int[] heights) {
         //https://leetcode.com/problems/number-of-visible-people-in-a-queue/
         //based on nextGreaterElementInRight
         int n = heights.length;
         Stack<Integer> stack = new Stack<>();
         int[] personVisibilty = new int[n];
-        
-        for(int i = n - 1; i >= 0; i--){
-            while(!stack.isEmpty() && stack.peek() < heights[i]){
+
+        for (int i = n - 1; i >= 0; i--) {
+            while (!stack.isEmpty() && stack.peek() < heights[i]) {
                 personVisibilty[i]++;
                 stack.pop();
             }
-            
-            if(!stack.isEmpty()){
+
+            if (!stack.isEmpty()) {
                 personVisibilty[i]++;
             }
-            if(stack.isEmpty() || heights[i] != stack.peek()){
+            if (stack.isEmpty() || heights[i] != stack.peek()) {
                 stack.push(heights[i]);
             }
         }
         //output
-        for(int val : personVisibilty){
+        for (int val : personVisibilty) {
             System.out.print(val + " ");
         }
         System.out.println();
     }
-    
-    private boolean splitArrayInLargestSum_CanSplit(int[] nums, int largestSum, int m){
+
+    private boolean shipWeightsWithinGivenDays_CheckDays(int[] weights, int maxWeight, int days) {
+        int day = 1;
+        int currWeightSum = 0;
+        for (int weight : weights) {
+            currWeightSum += weight;
+            if (currWeightSum > maxWeight) {
+                day++;
+                currWeightSum = weight;
+            }
+        }
+        return day <= days;
+    }
+
+    private int shipWeightsWithinGivenDays_BinarySearch(
+            int[] weights, int days, int startWeight, int endWeight) {
+        int capacity = -1;
+        while (endWeight >= startWeight) {
+            int midWeight = startWeight + (endWeight - startWeight) / 2;
+
+            if (shipWeightsWithinGivenDays_CheckDays(weights, midWeight, days)) {
+                capacity = midWeight;
+                endWeight = midWeight - 1;
+            } else {
+                startWeight = midWeight + 1;
+            }
+        }
+        return capacity;
+    }
+
+    public void shipWeightsWithinGivenDays(int[] weights, int days) {
+        //https://leetcode.com/problems/capacity-to-ship-packages-within-d-days/
+        ////explanation: https://youtu.be/YUF3_eBdzsk | https://youtu.be/bcAwHkL7A3A
+        int totalWeight = 0;
+        int maxShipmentWeight = 0;
+        for (int weight : weights) {
+            totalWeight += weight;
+            maxShipmentWeight = Math.max(maxShipmentWeight, weight);
+        }
+
+        int capacityOfShipNeeded = shipWeightsWithinGivenDays_BinarySearch(
+                weights, days, maxShipmentWeight, totalWeight);
+        //output:
+        System.out.println("Capacity of ship required to ship all weights in given days: " + capacityOfShipNeeded);
+    }
+
+    private boolean splitArrayInLargestSum_CanSplit(int[] nums, int largestSum, int m) {
         int subarrays = 1;
         int currSum = 0;
-        for(int val : nums){
+        for (int val : nums) {
             currSum += val;
-            if(currSum > largestSum){
+            if (currSum > largestSum) {
                 currSum = val;
                 subarrays++;
             }
         }
         return subarrays <= m;
     }
-    
-    public void splitArrayInLargestSum(int[] nums, int m){
+
+    public void splitArrayInLargestSum(int[] nums, int m) {
         //https://leetcode.com/problems/split-array-largest-sum/
-        //explanation: https://youtu.be/YUF3_eBdzsk
+        //explanation: https://youtu.be/YUF3_eBdzsk | https://youtu.be/bcAwHkL7A3A
         int maxNum = nums[0];
         int arrSum = 0;
-        for(int val : nums){
+        for (int val : nums) {
             maxNum = Math.max(maxNum, val);
             arrSum += val;
         }
-        
+
         //minimizing the largest sum would lie between [maxNum, arrSum]
         //Binary search
         int start = maxNum;
         int end = arrSum;
         int minimizedSum = 0;
-        while(end >= start){
+        while (end >= start) {
             int midSum = start + (end - start) / 2;
-            if(splitArrayInLargestSum_CanSplit(nums, midSum, m)){
+            if (splitArrayInLargestSum_CanSplit(nums, midSum, m)) {
                 minimizedSum = midSum;
                 end = midSum - 1;
             } else {
@@ -3520,6 +3517,46 @@ public class DSA450Questions {
         System.out.println("Minimized the largest sum among m subarrays: " + minimizedSum);
     }
 
+    public void subseqOgLengthKWithLargestSum(int[] nums, int k){
+        //......................T: O(N.LogK)
+        //https://leetcode.com/problems/find-subsequence-of-length-k-with-the-largest-sum/
+        class Pair{
+            int val;
+            int index;
+
+            public Pair(int val, int index) {
+                this.val = val;
+                this.index = index;
+            }
+        }
+        
+        //first find the K largest elements, so sort by value
+        PriorityQueue<Pair> minHeap = new PriorityQueue<>((a, b) -> a.val - b.val);
+        
+        //K largest elements
+        for(int i = 0; i < nums.length; i++){
+            minHeap.add(new Pair(nums[i], i));
+            if(minHeap.size() > k){
+                minHeap.poll();
+            }
+        }
+        
+        //after above loop, we will left with k largest elements in the heap
+        //now sort the values by min index to maintain subseq
+        List<Pair> values = new ArrayList<>(minHeap);
+        Collections.sort(values, (a ,b) -> a.index - b.index);
+        
+        int[] subseq = new int[k]; // values.size == k
+        for(int i = 0; i < values.size(); i++){
+            subseq[i] = values.get(i).val;
+        }
+        //output
+        for(int val : subseq){
+            System.out.print(val + " ");
+        }
+        System.out.println();
+    }
+    
     public void rotateMatrixClockWise90Deg(int[][] mat) {
         //https://leetcode.com/problems/rotate-image
         int col = mat[0].length;
@@ -6412,7 +6449,7 @@ public class DSA450Questions {
         for (int i = 0; i < search.length(); i++) {
             char searchChar = search.charAt(i);
             List<String> curr = new ArrayList<>();
-            
+
             while (end >= start
                     //cond is to skip all those words from start which are
                     //1. smaller than our search word ex: search = "apple", word[start] = "app"
@@ -6625,10 +6662,10 @@ public class DSA450Questions {
                 int nextCharIndex = nextWord.charAt(j) - 'a';
                 if (currCharIndex != nextCharIndex) {
                     //since words are sorted so 
-                    //ex curr = "app", next = "cat" they are sorted first mismatch char is a & c
+                    //ex curr = "app", next = "cat" they are sorted, first mismatch char is a & c
                     //in normal english index/ascii index value is like a < c 
-                    //but suppose curr = "cat", next = "app" was given the c < a is a false condition
-                    //similary in given alienAplhabet nextChar should have higer index value that currChar
+                    //but suppose curr = "cat", next = "app" was given then c < a is a false condition
+                    //similary in given alienAplhabet nextChar should have higer index value than currChar
                     //if this case comes opposite currChar have higer index value that nextChar
                     //then alien word[] dictionary is not sorted.
                     if (alphabetIndex[currCharIndex] > alphabetIndex[nextCharIndex]) {
@@ -13970,10 +14007,21 @@ public class DSA450Questions {
             int buildingHeightDiff = heights[index] - heights[index - 1];
 
             //if the curr ith building height is greater than its prev building
+            //that means we have used either bricks or ladder to reach here
             if (buildingHeightDiff > 0) {
+                //add diff of heights in min heap
                 minHeapHeightDiff.add(buildingHeightDiff);
+                //here we greedily wants to use ladder
+                //if all the diff of heights in heap, is more than the ladders
+                //we can use, that means we now have to use brick for further move
                 if (minHeapHeightDiff.size() > ladders) {
+                    //we want to use bricks as min as possible
+                    //from min heap we get the min diff of heights
+                    //that means we have consumed that much of bricks
                     bricksUsed += minHeapHeightDiff.poll();
+                    //if our brickUsed is more than the brick given
+                    //that means we could not have reached curr index
+                    //so return index - 1;
                     if (bricksUsed > bricks) {
                         return index - 1;
                     }
@@ -15057,21 +15105,21 @@ public class DSA450Questions {
         }
         return -1;
     }
-    
-    public void minCostToConnectAllPoints_Graph(int[][] points){
+
+    public void minCostToConnectAllPoints_Graph(int[][] points) {
         //https://leetcode.com/problems/min-cost-to-connect-all-points/
         //explanation: https://youtu.be/f7JOBJIC-NA
         //BASED on prim's algo
         int n = points.length;
         //<srcVertex, List<List<dist, destVertex>>>
         Map<Integer, List<List<Integer>>> graph = new HashMap<>();
-        for(int node = 0; node < n; node++){
+        for (int node = 0; node < n; node++) {
             graph.put(node, new ArrayList<>());
         }
-        for(int src = 0; src < n; src++){
+        for (int src = 0; src < n; src++) {
             int x1 = points[src][0];
             int y1 = points[src][1];
-            for(int dest = src + 1; dest < n; dest++){
+            for (int dest = src + 1; dest < n; dest++) {
                 int x2 = points[dest][0];
                 int y2 = points[dest][1];
                 //manhattan dist
@@ -15080,35 +15128,35 @@ public class DSA450Questions {
                 graph.get(dest).add(Arrays.asList(dist, src));
             }
         }
-        
+
         int totalDist = 0;
         int currSrc = 0;
         int currDist = 0;
-        
+
         Set<Integer> visited = new HashSet<>();
         //List<dist, destVertex>
         PriorityQueue<List<Integer>> minHeapDist = new PriorityQueue<>(
                 (l1, l2) -> l1.get(0) - l2.get(0)
         );
-        
+
         minHeapDist.add(Arrays.asList(currDist, currSrc));
-        
-        while(visited.size() < n){
-            
+
+        while (visited.size() < n) {
+
             List<Integer> currEdge = minHeapDist.poll();
             currDist = currEdge.get(0);
             currSrc = currEdge.get(1);
-            
-            if(visited.contains(currSrc)){
+
+            if (visited.contains(currSrc)) {
                 continue;
             }
-            
+
             totalDist += currDist;
             visited.add(currSrc);
-            
-            for(List<Integer> childEdge : graph.get(currSrc)){
+
+            for (List<Integer> childEdge : graph.get(currSrc)) {
                 int childVertex = childEdge.get(1);
-                if(visited.contains(childVertex)){
+                if (visited.contains(childVertex)) {
                     continue;
                 }
                 minHeapDist.add(childEdge);
@@ -15335,7 +15383,7 @@ public class DSA450Questions {
         }
         return dp[b.length()];
     }
- 
+
     public void minimumDiffPartition_DP_Memoization(int[] arr) {
 
         //https://practice.geeksforgeeks.org/problems/minimum-sum-partition3317/1#
@@ -16148,24 +16196,44 @@ public class DSA450Questions {
         for (int time = 0; time < taskLen; time++) {
 
             int processTime = tasks[time];
-
+            
+            //at any time 'time' if we have some busy servers that can finish their task
+            //before this 'time' that means it will get free by time 'time' comes.
+            //add it back to free server heap, so that we can utilize it later
             while (!busyServer.isEmpty() && busyServer.peek().bookedTime <= time) {
                 freeServer.add(busyServer.poll());
             }
 
             if (freeServer.isEmpty()) {
+                //if there are no free servers, we have to use the most optimal
+                //busy server (i.e, either that currBusyServer has lowest bookedTime
+                //and if bookedTime are same then it should have
+                //lowest weight and if weights are same then it should have lowest index)
+                //purpose of taking the optimal busy server is, it will finish early
+                //and when it will finish, we want to assign curr processTime to it.
+                //that's why (currBusyServer.bookedTime += processTime) this simulates
+                //this curr task[time] will be immediately be assigned to it.
                 Server currBusyServer = busyServer.poll();
                 currBusyServer.bookedTime += processTime;
+                //add in our currBusyServer back to all busy servers
                 busyServer.add(currBusyServer);
+                //we need to tell that this curr task[time] is assigned
+                //to which server(based on its index), so task at time 'time' is assigned
+                //currBusyServer.index server
                 serverIdxAllotedPerTask[time] = currBusyServer.index;
                 continue;
             }
 
+            //if we have free servers available, take the optimal currFreeServer
+            //book this server's bookedTime upto total time of time + processTime
+            //since we have used one free server that means it is busy now
             Server currFreeServer = freeServer.poll();
             currFreeServer.bookedTime = time + processTime;
-
+            //so move our currFreeServer to busy server
             busyServer.add(currFreeServer);
-
+            //as our result we need to tell which curr task[time] is assigned
+            //to which server(based on its index), so task at time 'time' is assigned
+            //currFreeServer.index server
             serverIdxAllotedPerTask[time] = currFreeServer.index;
         }
         //output:
@@ -16214,15 +16282,15 @@ public class DSA450Questions {
                 continue;
             }
 
-            Room currRoom = freeRoomMinHeap.poll();
-            currRoom.patientTreated++;
-            currRoom.bookedTime = entry + duration;
+            Room currFreeRoom = freeRoomMinHeap.poll();
+            currFreeRoom.patientTreated++;
+            currFreeRoom.bookedTime = entry + duration;
 
-            filledRoomMinHeap.add(currRoom);
+            filledRoomMinHeap.add(currFreeRoom);
 
-            if (currRoom.patientTreated > maxPatientTreated) {
-                maxPatientTreated = currRoom.patientTreated;
-                roomNoOfMaxpatientTreated = currRoom.roomNo;
+            if (currFreeRoom.patientTreated > maxPatientTreated) {
+                maxPatientTreated = currFreeRoom.patientTreated;
+                roomNoOfMaxpatientTreated = currFreeRoom.roomNo;
             }
         }
         //output
@@ -16250,13 +16318,13 @@ public class DSA450Questions {
             //for start points of building
             int start = building[0]; //x
             int height = building[2]; //height
-
+            //all start points have height -ve
             coords.add(new SkylineProblemBuildingCoord(start, -height));
 
             //for end points of building
             int end = building[1]; //x
             height = building[2]; //height
-
+            //all end points have height +ve
             coords.add(new SkylineProblemBuildingCoord(end, height));
         }
 
@@ -16279,16 +16347,73 @@ public class DSA450Questions {
         int prevMaxHeight = 0;
 
         for (SkylineProblemBuildingCoord coord : coords) {
-
+            //System.out.println(coord.x + " " + coord.height + " " + maxHeapHeights.peek());
+            //if curr height is -ve that means its a start point
+            //so put that height in maxHeap heights as original == abs(height)
             if (coord.height < 0) {
                 //height of building start point which we made -ve
                 maxHeapHeights.add(Math.abs(coord.height));
             } else {
                 //removing object from PriorityQueue
                 //takes O(N) time as it search for the object first
+                //if the height is here that means its a end point
+                //any time we reach the end point we will remove the height
+                //associated with this end point
                 maxHeapHeights.remove(coord.height);
             }
+            //after adding or removing the heights from maxHeap heights
+            //we will have a new max height
             int currMaxHeight = maxHeapHeights.peek();
+
+            if (currMaxHeight == prevMaxHeight) {
+                continue;
+            }
+
+            skylinePoints.add(Arrays.asList(coord.x, currMaxHeight));
+            prevMaxHeight = currMaxHeight;
+        }
+        //output;
+        System.out.println("Skyline coordinates of the given buildings: " + skylinePoints);
+    }
+    
+    public void skylineProblem_TreeMap(int[][] buildings) {
+        //..........................T: O(LogN), as treemap supports all operations in LogN time
+        //OPTIMIZED much faster as compared to above priority queue approach,
+        //as priority queue remove operation is O(N) time
+        //https://leetcode.com/problems/the-skyline-problem/
+        //https://leetcode.com/problems/the-skyline-problem/discuss/2257654/With-Algorithm-Java-Solution-O(NlogN)
+        //explanation: https://youtu.be/GSBLe8cKu0s
+        List<List<Integer>> skylinePoints = new ArrayList<>();
+        List<SkylineProblemBuildingCoord> coords = skylineProblem_BreakBuildingInCoords(buildings);
+        
+        //<height, freq> = will store keys in maxHeap way, that means max heights on root
+        //freq is required because there may be multiple buildings with same height
+        TreeMap<Integer, Integer> maxHeapHeights = new TreeMap<>(Collections.reverseOrder());
+        maxHeapHeights.put(0, 1); // default building height and its freq
+
+        int prevMaxHeight = 0;
+
+        for (SkylineProblemBuildingCoord coord : coords) {
+            //System.out.println(coord.x + " " + coord.height + " " + maxHeapHeights.firstKey());
+            //if curr height is -ve that means its a start point
+            //so put that height in maxHeap heights as original == abs(height)
+            if (coord.height < 0) {
+                //height of building start point which we made -ve
+                int startHeight = Math.abs(coord.height);
+                //each time we see same height just increase freq if already exist
+                maxHeapHeights.put(startHeight, maxHeapHeights.getOrDefault(startHeight, 0) + 1);
+            } else {
+                //if the height is here that means its a end point
+                //any time we reach the end point we will remove the height
+                //associated with this end point
+                maxHeapHeights.put(coord.height, maxHeapHeights.getOrDefault(coord.height, 0) - 1);
+                if(maxHeapHeights.get(coord.height) <= 0){
+                    maxHeapHeights.remove(coord.height);
+                }
+            }
+            //after adding or removing the heights from maxHeap heights
+            //we will have a new max height
+            int currMaxHeight = maxHeapHeights.firstKey();
 
             if (currMaxHeight == prevMaxHeight) {
                 continue;
@@ -20435,11 +20560,11 @@ public class DSA450Questions {
 //        obj.partitionArrSuchThatMaxDiffIsK_Greedy(new int[]{2, 2, 4, 5}, 0);
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Find Triangular Sum of an Array");
-        //https://leetcode.com/problems/find-triangular-sum-of-an-array/
-        //https://leetcode.com/problems/min-max-game/
-        obj.findTriangularSumOfArray(new int[]{1, 2, 3, 4, 5});
-        obj.findTriangularSumOfArray(new int[]{5});
+//        System.out.println("Find Triangular Sum of an Array");
+//        //https://leetcode.com/problems/find-triangular-sum-of-an-array/
+//        //https://leetcode.com/problems/min-max-game/
+//        obj.findTriangularSumOfArray(new int[]{1, 2, 3, 4, 5});
+//        obj.findTriangularSumOfArray(new int[]{5});
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
 //        System.out.println("Fair Distribution of Cookies");
@@ -20448,47 +20573,40 @@ public class DSA450Questions {
 //        obj.minimumUnfairDistributionOfCookiesToKStudent_Backtracking(new int[]{6, 1, 3, 2, 2, 4, 1, 2}, 3);
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("132 Pattern");
-        //https://leetcode.com/problems/132-pattern/
-        System.out.println("132 Pattern: " + obj.has132Pattern(new int[]{1, 2, 3, 4}));
-        System.out.println("132 Pattern: " + obj.has132Pattern(new int[]{3, 1, 4, 2}));
+//        System.out.println("132 Pattern");
+//        //https://leetcode.com/problems/132-pattern/
+//        System.out.println("132 Pattern: " + obj.has132Pattern(new int[]{1, 2, 3, 4}));
+//        System.out.println("132 Pattern: " + obj.has132Pattern(new int[]{3, 1, 4, 2}));
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Minimum Number of Swaps to Make the String Balanced");
-        //https://leetcode.com/problems/minimum-number-of-swaps-to-make-the-string-balanced/
-        obj.minimumSwapsToMakeParenthesisStringBalanced("][][");
-        obj.minimumSwapsToMakeParenthesisStringBalanced("]]][[[");
-        obj.minimumSwapsToMakeParenthesisStringBalanced("[[]][]");
+//        System.out.println("Minimum Number of Swaps to Make the String Balanced");
+//        //https://leetcode.com/problems/minimum-number-of-swaps-to-make-the-string-balanced/
+//        obj.minimumSwapsToMakeParenthesisStringBalanced("][][");
+//        obj.minimumSwapsToMakeParenthesisStringBalanced("]]][[[");
+//        obj.minimumSwapsToMakeParenthesisStringBalanced("[[]][]");
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Minimum Add to Make Parentheses Valid");
-        //https://leetcode.com/problems/minimum-add-to-make-parentheses-valid/
-        obj.minimumAdditionsToMakeParenthesisStringValid("())");
-        obj.minimumAdditionsToMakeParenthesisStringValid("(())");
-        obj.minimumAdditionsToMakeParenthesisStringValid(")))(((");
+//        System.out.println("Minimum Add to Make Parentheses Valid");
+//        //https://leetcode.com/problems/minimum-add-to-make-parentheses-valid/
+//        obj.minimumAdditionsToMakeParenthesisStringValid("())");
+//        obj.minimumAdditionsToMakeParenthesisStringValid("(())");
+//        obj.minimumAdditionsToMakeParenthesisStringValid(")))(((");
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Furthest Building You Can Reach");
-        //https://leetcode.com/problems/furthest-building-you-can-reach/
-        System.out.println("Index of the farthest building we can reach: "
-                + obj.farthestBuildingWeCanReachUsingBricksAndLadders_Greedy(new int[]{4, 2, 7, 6, 9, 14, 12}, 5, 1));
-        System.out.println("Index of the farthest building we can reach: "
-                + obj.farthestBuildingWeCanReachUsingBricksAndLadders_Greedy(new int[]{1, 5, 1, 2, 3, 4, 10000}, 4, 1));
+//        System.out.println("Furthest Building You Can Reach");
+//        //https://leetcode.com/problems/furthest-building-you-can-reach/
+//        System.out.println("Index of the farthest building we can reach: "
+//                + obj.farthestBuildingWeCanReachUsingBricksAndLadders_Greedy(new int[]{4, 2, 7, 6, 9, 14, 12}, 5, 1));
+//        System.out.println("Index of the farthest building we can reach: "
+//                + obj.farthestBuildingWeCanReachUsingBricksAndLadders_Greedy(new int[]{1, 5, 1, 2, 3, 4, 10000}, 4, 1));
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Verifying an Alien Dictionary");
-        //https://leetcode.com/problems/verifying-an-alien-dictionary/
-        System.out.println("Alien word dict are sorted acc to alien aplhabet: "
-                + obj.areAlienWordsSorted(new String[]{"hello", "leetcode"}, "hlabcdefgijkmnopqrstuvwxyz"));
-        System.out.println("Alien word dict are sorted acc to alien aplhabet: "
-                + obj.areAlienWordsSorted(new String[]{"apple", "app"}, "abcdefghijklmnopqrstuvwxyz"));
-        //......................................................................
-//        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Capacity To Ship Packages Within D Days");
-        //https://leetcode.com/problems/capacity-to-ship-packages-within-d-days/
-        obj.shipWeightsWithinGivenDays(new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, 1);
-        obj.shipWeightsWithinGivenDays(new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, 5);
-        obj.shipWeightsWithinGivenDays(new int[]{3, 2, 2, 4, 1, 4}, 3);
+//        System.out.println("Verifying an Alien Dictionary");
+//        //https://leetcode.com/problems/verifying-an-alien-dictionary/
+//        System.out.println("Alien word dict are sorted acc to alien aplhabet: "
+//                + obj.areAlienWordsSorted(new String[]{"hello", "leetcode"}, "hlabcdefgijkmnopqrstuvwxyz"));
+//        System.out.println("Alien word dict are sorted acc to alien aplhabet: "
+//                + obj.areAlienWordsSorted(new String[]{"apple", "app"}, "abcdefghijklmnopqrstuvwxyz"));
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
 //        System.out.println("Detect Squares");
@@ -20505,28 +20623,28 @@ public class DSA450Questions {
 //        obj.detectSquares(points, queryPoints);
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Amount To Paint The Area");
-        //https://leetcode.com/problems/amount-of-new-area-painted-each-day/
-        //https://www.geeksforgeeks.org/google-interview-experience-for-software-engineer-l3-bangalore-6-years-experienced/
-        //https://leetcode.com/discuss/interview-question/2072036/Google-or-Onsite-or-banglore-or-May-2022-or-Paint-a-line
-        obj.amountToPaintTheArea(new int[][]{
-            {4, 10}, {7, 13}, {16, 20}, {1, 40}});
+//        System.out.println("Amount To Paint The Area");
+//        //https://leetcode.com/problems/amount-of-new-area-painted-each-day/
+//        //https://www.geeksforgeeks.org/google-interview-experience-for-software-engineer-l3-bangalore-6-years-experienced/
+//        //https://leetcode.com/discuss/interview-question/2072036/Google-or-Onsite-or-banglore-or-May-2022-or-Paint-a-line
+//        obj.amountToPaintTheArea(new int[][]{
+//            {4, 10}, {7, 13}, {16, 20}, {1, 40}});
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Process Tasks Using Servers / Find Max Patient Treated In Any Given N Rooms");
-        //https://leetcode.com/problems/process-tasks-using-servers
-        //https://www.geeksforgeeks.org/google-interview-experience-for-software-engineer-l3-bangalore-6-years-experienced/
-        //https://leetcode.com/discuss/interview-question/2072047/Google-or-Onsite-or-Banglore-or-May-2022-or-Patient-Queue
-        obj.serverAllocationToTasks(new int[]{3, 3, 2}, new int[]{1, 2, 3, 2, 1, 2});
-        // room 2 as (1,2) will be alloted first and will go first then (6,4) will be alloted
-        obj.maxPatientTreatedInGivenInAnyNRoom(new int[][]{
-            {1, 8}, {1, 2}, {6, 4}}, 2);
+//        System.out.println("Process Tasks Using Servers / Find Max Patient Treated In Any Given N Rooms");
+//        //https://leetcode.com/problems/process-tasks-using-servers
+//        //https://www.geeksforgeeks.org/google-interview-experience-for-software-engineer-l3-bangalore-6-years-experienced/
+//        //https://leetcode.com/discuss/interview-question/2072047/Google-or-Onsite-or-Banglore-or-May-2022-or-Patient-Queue
+//        obj.serverAllocationToTasks(new int[]{3, 3, 2}, new int[]{1, 2, 3, 2, 1, 2});
+//        // room 2 as (1,2) will be alloted first and will go first then (6,4) will be alloted
+//        obj.maxPatientTreatedInGivenInAnyNRoom(new int[][]{
+//            {1, 8}, {1, 2}, {6, 4}}, 2);
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Number following a pattern");
-        //https://practice.geeksforgeeks.org/problems/number-following-a-pattern3126/1#
-        obj.generateNumberFollowingPattern("D");
-        obj.generateNumberFollowingPattern("IIDDD");
+//        System.out.println("Number following a pattern");
+//        //https://practice.geeksforgeeks.org/problems/number-following-a-pattern3126/1#
+//        obj.generateNumberFollowingPattern("D");
+//        obj.generateNumberFollowingPattern("IIDDD");
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
         System.out.println("Pacific Atlantic Water Flow");
@@ -20539,37 +20657,41 @@ public class DSA450Questions {
             {5, 1, 1, 2, 4}});
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Mth Element After K Array Rotation");
-        //https://www.geeksforgeeks.org/cpp-program-to-find-the-mth-element-of-the-array-after-k-left-rotations/
-        obj.mThElementAfterKArrayRotation(new int[]{1, 2, 3, 4, 5}, 2, 3);
+//        System.out.println("Mth Element After K Array Rotation");
+//        //https://www.geeksforgeeks.org/cpp-program-to-find-the-mth-element-of-the-array-after-k-left-rotations/
+//        obj.mThElementAfterKArrayRotation(new int[]{1, 2, 3, 4, 5}, 2, 3);
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("The Skyline Problem");
-        //https://leetcode.com/problems/the-skyline-problem/
-        obj.skylineProblem(new int[][]{
-            {2, 9, 10}, {3, 7, 15}, {5, 12, 12}, {15, 20, 10}, {19, 24, 8}
-        });
+//        System.out.println("The Skyline Problem");
+//        //https://leetcode.com/problems/the-skyline-problem/
+//        obj.skylineProblem(new int[][]{
+//            {2, 9, 10}, {3, 7, 15}, {5, 12, 12}, {15, 20, 10}, {19, 24, 8}
+//        });
+//        //OPTIMIZED with tree map
+//        obj.skylineProblem_TreeMap(new int[][]{
+//            {2, 9, 10}, {3, 7, 15}, {5, 12, 12}, {15, 20, 10}, {19, 24, 8}
+//        });
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Angle Between Hands of a Clock");
-        //https://leetcode.com/problems/angle-between-hands-of-a-clock/
-        obj.minAngleBetweeHourAndMinuteHands(12, 30);
-        obj.minAngleBetweeHourAndMinuteHands(2, 60); // 3:00
+//        System.out.println("Angle Between Hands of a Clock");
+//        //https://leetcode.com/problems/angle-between-hands-of-a-clock/
+//        obj.minAngleBetweeHourAndMinuteHands(12, 30);
+//        obj.minAngleBetweeHourAndMinuteHands(2, 60); // 3:00
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Minimum Inserts/ Deletes To Make String Pallindrome");
-        //https://leetcode.com/problems/minimum-insertion-steps-to-make-a-string-palindrome/
-        //https://www.geeksforgeeks.org/java-program-to-find-minimum-insertions-to-form-a-palindrome-dp-28/
-        obj.minInsertsToMakeStringPallindrome_DP_Memoization("abcda"); //insert d,b like this abdcdba
-        obj.minInsertsToMakeStringPallindrome_DP_Memoization("aba");
-        obj.minDeletesToMakeStringPallindrome_DP_Memoization("abcda"); //deletes d,b like this aca
-        obj.minDeletesToMakeStringPallindrome_DP_Memoization("aba");
+//        System.out.println("Minimum Inserts/ Deletes To Make String Pallindrome");
+//        //https://leetcode.com/problems/minimum-insertion-steps-to-make-a-string-palindrome/
+//        //https://www.geeksforgeeks.org/java-program-to-find-minimum-insertions-to-form-a-palindrome-dp-28/
+//        obj.minInsertsToMakeStringPallindrome_DP_Memoization("abcda"); //insert d,b like this abdcdba
+//        obj.minInsertsToMakeStringPallindrome_DP_Memoization("aba");
+//        obj.minDeletesToMakeStringPallindrome_DP_Memoization("abcda"); //deletes d,b like this aca
+//        obj.minDeletesToMakeStringPallindrome_DP_Memoization("aba");
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Maximize sum of given array after removing valleys");
-        //https://www.geeksforgeeks.org/maximize-sum-of-given-array-after-removing-valleys/
-        obj.maximizeSumAfterRemovingValleys(new int[]{5, 1, 8}); //valley removed [1,1,8] = 10
-        obj.maximizeSumAfterRemovingValleys(new int[]{8, 1, 10, 1, 8}); // valley removed [1,1,10,1,1] = 14
+//        System.out.println("Maximize sum of given array after removing valleys");
+//        //https://www.geeksforgeeks.org/maximize-sum-of-given-array-after-removing-valleys/
+//        obj.maximizeSumAfterRemovingValleys(new int[]{5, 1, 8}); //valley removed [1,1,8] = 10
+//        obj.maximizeSumAfterRemovingValleys(new int[]{8, 1, 10, 1, 8}); // valley removed [1,1,10,1,1] = 14
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
         System.out.println("Minimum Number of Moves to Make Palindrome");
@@ -20589,20 +20711,34 @@ public class DSA450Questions {
 //        Row: SEPARATE QUESTION IMPORTANT
         System.out.println("Number of Visible People in a Queue");
         //https://leetcode.com/problems/number-of-visible-people-in-a-queue/
-        obj.numberOfVisiblePeopleInQueue(new int[]{10,6,8,5,11,9});
-        obj.numberOfVisiblePeopleInQueue(new int[]{5,1,2,3,10});
+        obj.numberOfVisiblePeopleInQueue(new int[]{10, 6, 8, 5, 11, 9});
+        obj.numberOfVisiblePeopleInQueue(new int[]{5, 1, 2, 3, 10});
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
         System.out.println("Min Cost to Connect All Points/ Prim's Algo Based");
         //https://leetcode.com/problems/min-cost-to-connect-all-points/
         obj.minCostToConnectAllPoints_Graph(new int[][]{
-            {0,0},{2,2},{3,10},{5,2},{7,0}});
+            {0, 0}, {2, 2}, {3, 10}, {5, 2}, {7, 0}});
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Capacity To Ship Packages Within D Days");
+        //https://leetcode.com/problems/capacity-to-ship-packages-within-d-days/
+        //https://leetcode.com/problems/minimized-maximum-of-products-distributed-to-any-store
+        obj.shipWeightsWithinGivenDays(new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, 1);
+        obj.shipWeightsWithinGivenDays(new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, 5);
+        obj.shipWeightsWithinGivenDays(new int[]{3, 2, 2, 4, 1, 4}, 3);
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
         System.out.println("Split Array Largest Sum");
         //https://leetcode.com/problems/split-array-largest-sum/
-        obj.splitArrayInLargestSum(new int[]{7,2,5,10,8}, 2);
-        obj.splitArrayInLargestSum(new int[]{1,2,3,4,5}, 2);
+        obj.splitArrayInLargestSum(new int[]{7, 2, 5, 10, 8}, 2);
+        obj.splitArrayInLargestSum(new int[]{1, 2, 3, 4, 5}, 2);
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Find Subsequence of Length K With the Largest Sum");
+        //https://leetcode.com/problems/find-subsequence-of-length-k-with-the-largest-sum/
+        obj.subseqOgLengthKWithLargestSum(new int[]{2,1,3,3}, 2);
+        obj.subseqOgLengthKWithLargestSum(new int[]{-1,-2,3,4}, 3);
     }
 
 }
