@@ -368,8 +368,7 @@ public class DSA450Questions {
     }
 
     public void rainWaterTrappingUsingTwoPointers(int[] height) {
-
-        //https://leetcode.com/problems/trapping-rain-water/solution/
+        //https://leetcode.com/problems/trapping-rain-water
         //OPTIMISED than stack
         //..................T: O(N)
         //..................S: O(1)
@@ -378,7 +377,7 @@ public class DSA450Questions {
         int ans = 0;
         int leftMax = 0;
         int rightMax = 0;
-        while (left < right) {
+        while (right > left) {
             if (height[left] < height[right]) {
 
                 if (height[left] >= leftMax) {
@@ -405,9 +404,8 @@ public class DSA450Questions {
     }
 
     public void findMaximumProductSubarray(int[] arr) {
-
-        //Explanation: https://www.youtube.com/watch?v=lXVy6YWFcRM
         //https://leetcode.com/problems/maximum-product-subarray/
+        //Explanation: https://www.youtube.com/watch?v=lXVy6YWFcRM
         int result = arr[0];
         int currMax = 1;
         int currMin = 1;
@@ -691,17 +689,17 @@ public class DSA450Questions {
     public void bestProfitToBuySellStock(int[] prices) {
 
         //https://leetcode.com/problems/best-time-to-buy-and-sell-stock/
-        int minPrice = Integer.MAX_VALUE;
+        int buy = Integer.MAX_VALUE;
         int maxProfit = 0;
         for (int i = 0; i < prices.length; i++) {
             //buy any stock at min price, so find a price < minPrice
-            if (prices[i] < minPrice) {
-                minPrice = prices[i];
+            if (prices[i] < buy) {
+                buy = prices[i];
             }
 
             //if any price > minPrice, we can sell that stock to earn profit
             //maxProfit = max(maxProfit, price - minPrice)
-            maxProfit = Math.max(maxProfit, prices[i] - minPrice);
+            maxProfit = Math.max(maxProfit, prices[i] - buy);
         }
 
         //output:
@@ -729,17 +727,15 @@ public class DSA450Questions {
         //.......................T: O(N)
         //.......................S: O(N)
         Map<Integer, Integer> map = new HashMap<>();
-        for (int element : arr) {
-            map.put(element, map.getOrDefault(element, 0) + 1);
+        for (int val : arr) {
+            map.put(val, map.getOrDefault(val, 0) + 1);
         }
 
         int pairCount = 0;
-        for (int element : arr) {
-            if (map.containsKey(K - element)) {
-                pairCount += map.get(K - element);
-            }
+        for (int val : arr) {
+            pairCount += map.getOrDefault(K - val, 0);
 
-            if (K - element == element) {
+            if (K - val == val) {
                 pairCount--;
             }
         }
@@ -764,7 +760,6 @@ public class DSA450Questions {
     }
 
     public void bestProfitToBuySellStockCanHoldAtmostOneStock(int[] prices) {
-
         //https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii/
         //https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii/discuss/2058747/JAVA-or-Single-loop-solution
         int n = prices.length;
@@ -790,24 +785,31 @@ public class DSA450Questions {
         int n = prices.length;
         int[] maxProfits = new int[n];
 
-        int currMaxPrice = prices[n - 1];
+        int maxSellingPrice = prices[n - 1];
+        //looping all prices and checking if currBuyPrice will
+        //give max profit from if sold at maxSellingPrice
         for (int i = n - 2; i >= 0; i--) {
-
-            if (prices[i] > currMaxPrice) {
-                currMaxPrice = prices[i];
+            int currBuyPrice = prices[i];
+            if (currBuyPrice > maxSellingPrice) {
+                maxSellingPrice = currBuyPrice;
             }
-
-            maxProfits[i] = Math.max(maxProfits[i + 1], currMaxPrice - prices[i]);
+            //choosing the max profits, that we already have seen(maxProfit[i + 1])
+            //or if we buy at currBuyPrice and sell at maxSellingPrice
+            maxProfits[i] = Math.max(maxProfits[i + 1], maxSellingPrice - currBuyPrice);
         }
 
-        int currMinPrice = prices[0];
+        int minBuyPrice = prices[0];
+        //looping all prices and checking if currSellPrice will
+        //give max profit from if previously bought at minBuyPrice
         for (int i = 1; i < n; i++) {
-
-            if (currMinPrice > prices[i]) {
-                currMaxPrice = prices[i];
+            int currSellPrice = prices[i];
+            if (minBuyPrice > currSellPrice) {
+                minBuyPrice = currSellPrice;
             }
-
-            maxProfits[i] = Math.max(maxProfits[i - 1], maxProfits[i] + (prices[i] - currMinPrice));
+            //choosing the max profits, that we already have seen(maxProfit[i - 1])
+            //or if we sell at currSellPrice that was bought at minBuyPrice
+            //in addition with the previous max profit((bought and sold from above loop)maxProfit[i])
+            maxProfits[i] = Math.max(maxProfits[i - 1], maxProfits[i] + (currSellPrice - minBuyPrice));
         }
 
         //output:
@@ -3668,6 +3670,7 @@ public class DSA450Questions {
         }
 
         //first find the K largest elements, so sort by value
+        //by finding K largest elements, we will have largest sum
         PriorityQueue<Pair> minHeap = new PriorityQueue<>((a, b) -> a.val - b.val);
 
         //K largest elements
@@ -3678,7 +3681,7 @@ public class DSA450Questions {
             }
         }
 
-        //after above loop, we will left with k largest elements in the heap
+        //after above loop, we will left with K largest elements in the heap
         //now sort the values by min index to maintain subseq order
         List<Pair> values = new ArrayList<>(minHeap);
         Collections.sort(values, (a, b) -> a.index - b.index);
@@ -4202,6 +4205,140 @@ public class DSA450Questions {
         int areaThatEncloseAllBlackPixels = length * breadth;
         //output
         System.out.println("Area that enclose all balck pixels: " + areaThatEncloseAllBlackPixels);
+    }
+
+    private boolean checkIfMoveIsLegal_IsOutOfBound(int row, int col, int ROW, int COL) {
+        return row < 0 || row >= ROW || col < 0 || col >= COL;
+    }
+
+    private boolean checkIfMoveIsLegal_IsLegal(
+            String[][] board, int row, int col,
+            String color, int[] dir) {
+
+        int ROW = board.length;
+        int COL = board[0].length;
+        //passed in row and col already have start point with
+        //given color so need now to find a end point with same color
+        //so we can simply start from next point in same dir
+        row += dir[0];
+        col += dir[1];
+
+        int length = 1;
+
+        while (!checkIfMoveIsLegal_IsOutOfBound(row, col, ROW, COL)) {
+            //incr length for good line
+            length++;
+            String currCell = board[row][col];
+            //if in the curr path in given dir[] from given row and col
+            //we see any empty space(.) then that path is not valid
+            if (currCell.equals(".")) {
+                return false;
+            }
+            //if in the curr path in given dir[] from given row and col
+            //we see same color in the endpoint then that path is a good line
+            //like start point = [B W...W B] OR [W B...B W] == end point same as start
+            if (currCell.equals(color)) {
+                //but that good line should have a lenght of atleast 3
+                return length >= 3;
+            }
+            //update row and col, straight in given dir[]
+            row += dir[0];
+            col += dir[1];
+        }
+        return false;
+    }
+
+    public void checkIfMoveIsLegal(String[][] board, int row, int col, String color) {
+        //https://leetcode.com/problems/check-if-move-is-legal/
+        //explanation: https://youtu.be/KxK33AcQZpQ
+        board[row][col] = color;
+        //need to check in all 8 dirs
+        int[][] dirs = {
+            {-1, 0},
+            {1, 0},
+            {0, -1},
+            {0, 1},
+            {-1, -1},
+            {-1, 1},
+            {1, -1},
+            {1, 1}
+        };
+
+        for (int[] dir : dirs) {
+            //move curr row and col in same curr dir[]
+            //and check if in that particular dir move is legal or not
+            //if from any one dir we get legal move == true, answer is legal
+            //for each dir we will be starting from same row and col point
+            if (checkIfMoveIsLegal_IsLegal(board, row, col, color, dir)) {
+                System.out.println("Move is legal");
+                return;
+            }
+        }
+        System.out.println("Move is not legal");
+    }
+
+    public void islandPerimeter(int[][] grid) {
+        //https://leetcode.com/problems/island-perimeter/
+        /*
+         4-edged perimeter
+         -----
+         | 1 |
+         -----
+        
+         if curr cell also have cell at upper row
+         total perimeter for both cell are 8 but we see
+         there is common edge in between that should be removed (i.e -2)
+         -----
+         | 1 |
+         -----
+         -----
+         | 1 |
+         -----
+         like this and now the actual perimeter will be 6
+         -----
+         | 1 |
+         | 1 |
+         -----
+        
+         if curr cell also have cell at left col
+         total perimeter for both cell are 8 but we see
+         there is common edge in between that should be removed (i.e -2)
+         ----- -----
+         | 1 | | 1 |
+         ----- -----
+         like this and now the actual perimeter will be 6
+         ----- ----
+         | 1    1 |
+         ----- ----
+         */
+        int ROW = grid.length;
+        int COL = grid[0].length;
+
+        int perimeter = 0;
+
+        for (int r = 0; r < ROW; r++) {
+            for (int c = 0; c < COL; c++) {
+                //a single cell of 1 is 4-edged island
+                if (grid[r][c] == 1) {
+                    perimeter += 4;
+
+                    //if upper cell also has 1 that means the curr cell and
+                    //cell above will form 6-edged perimeter and both of them sharing
+                    //one edge in common so removing the common edge from both cell
+                    if (r > 0 && grid[r - 1][c] == 1) {
+                        perimeter -= 2;
+                    }
+                    //if left cell also has 1 that means the curr cell and
+                    //cell at left will form 6-edged perimeter and both of them sharing
+                    //one edge in common so removing the common edge from both cell
+                    if (c > 0 && grid[r][c - 1] == 1) {
+                        perimeter -= 2;
+                    }
+                }
+            }
+        }
+        //output:
+        System.out.println("Island perimeter: " + perimeter);
     }
 
     public String reverseString(String str) {
@@ -4899,21 +5036,21 @@ public class DSA450Questions {
     public void firstNonRepeatingCharacterFromStream(String stream) {
 
         List<Character> list = new ArrayList<>();
-        Set<Character> vis = new HashSet<>();
+        Set<Character> visited = new HashSet<>();
         for (int i = 0; i < stream.length(); i++) {
             char ch = stream.charAt(i);
-            if (!vis.contains(ch)) {
+            if (!visited.contains(ch)) {
 
                 if (list.contains(ch)) {
                     list.remove((Character) ch);
-                    vis.add(ch);
+                    visited.add(ch);
                 } else {
                     list.add(ch);
                 }
             }
 
             System.out.println("First non repeating character till " + stream.substring(0, i + 1));
-            if (list.size() != 0) {
+            if (!list.isEmpty()) {
                 System.out.println(list.get(0) + " ");
             } else {
                 //when there are no non repeating char print #
@@ -4939,8 +5076,9 @@ public class DSA450Questions {
     }
 
     public boolean wordBreak_DP_Problem(String str, Set<String> set) {
-
+        //https://leetcode.com/problems/word-break/
         //https://leetcode.com/problems/word-break/discuss/1068441/Detailed-Explanation-of-Top-Down-and-Bottom-Up-DP
+        //similar to longestIncreasingSubseq()
         boolean[] memo = new boolean[str.length() + 1];
         //base cond
         memo[0] = true; // str with no length is also true
@@ -7072,7 +7210,93 @@ public class DSA450Questions {
         }
         //output
         System.out.println("Min flips to make binary string alternating: " + minFlips);
+    }
 
+    private boolean decodedString_IsStringDigit(String str) {
+        char ch = str.charAt(0);
+        return ch >= '0' && ch <= '9';
+    }
+
+    public void decodedString(String expression) {
+        //https://leetcode.com/problems/decode-string/
+        //explanation: https://youtu.be/qB0zZpBJlh8
+        int n = expression.length();
+        Stack<String> stack = new Stack<>();
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < n; i++) {
+            char ch = expression.charAt(i);
+
+            if (ch == ']') {
+
+                String substr = "";
+                //ex stack be like [ '[', 'b', 'c' ] then closing bracket comes ']'
+                //then form this inner sub string "bc" until we meet its opening bracket '[' in stack
+                while (!stack.isEmpty() && !stack.peek().equals("[")) {
+                    substr = stack.pop() + substr;
+                }
+
+                //pop the opening bracket '[' from the above loop check
+                stack.pop();
+
+                String numStr = "";
+                //each decoded string has some num K as "K[substr]", where we need to
+                //repeat this substr * K time. In the loop below we will form this num K
+                //as numStr
+                while (!stack.isEmpty() && decodedString_IsStringDigit(stack.peek())) {
+                    numStr = stack.pop() + numStr;
+                }
+
+                int num = Integer.parseInt(numStr);
+                String repeatSubStrNumTimes = "";
+                for (int rep = 0; rep < num; rep++) {
+                    repeatSubStrNumTimes += substr;
+                }
+
+                //till here we have processed the sub-expression
+                //in format "num[substr]", we will push this sub-expression
+                stack.push(repeatSubStrNumTimes);
+
+            } else {
+                //stringified form of curr char ch
+                stack.push(ch + "");
+            }
+        }
+        
+        //forming result from all the processed sub-expressions
+        String joined = String.join("", stack);
+//        while (!stack.isEmpty()) {
+//            sb.insert(0, stack.pop());
+//        }
+        
+        //output:
+//        System.out.println("Decoded string: " + sb.toString());
+        System.out.println("Decoded string: " + joined);
+    }
+
+    public boolean validPallindromeTwo(String str) {
+        //https://leetcode.com/problems/valid-palindrome-ii/
+        //explanation: https://youtu.be/JrxRYBwG6EI
+        int n = str.length();
+        int start = 0;
+        int end = n - 1;
+
+        while (end > start) {
+            if (str.charAt(start) == str.charAt(end)) {
+                start++;
+                end--;
+                continue;
+            }
+
+            //not include char at start-th index ==> start + 1
+            //include end char do end + 1
+            String skipStart = str.substring(start + 1, end + 1);
+            //skip end char
+            String skipEnd = str.substring(start, end);
+
+            return isStringPallindrome(skipStart) || isStringPallindrome(skipEnd);
+        }
+        return true;
     }
 
     public Node<Integer> reverseLinkedList_Iterative(Node<Integer> node) {
@@ -7417,19 +7641,19 @@ public class DSA450Questions {
         // prev is now head of input list 
         return prev;
     }
-    
+
     public Node<Integer> reverseLinkedListInKGroups(Node<Integer> head, int K) {
         //https://www.geeksforgeeks.org/reverse-a-list-in-groups-of-given-size/
         //https://leetcode.com/problems/reverse-nodes-in-k-group/
         Node current = head;
         //in case the passed LinkedList length is less than k
-        for(int i = 0; i < K; i++){
-            if(current == null){
+        for (int i = 0; i < K; i++) {
+            if (current == null) {
                 return head;
             }
             current = current.getNext();
         }
-        
+
         current = head;
         Node next = null;
         Node prev = null;
@@ -8002,6 +8226,23 @@ public class DSA450Questions {
 
         //output:
         System.out.println("Two linked list are intersected at (hashbased): " + intersectedData);
+    }
+
+    public void intersectionPointOfTwoLinkedListByRef_Iterative(Node<Integer> headA, Node<Integer> headB) {
+        //................................T: O(N + M)
+        //................................S: O(1)
+        //https://leetcode.com/problems/intersection-of-two-linked-lists
+        //explanation: https://youtu.be/D0X0BONOQhI
+        Node<Integer> currA = headA;
+        Node<Integer> currB = headB;
+
+        while (currA != currB) {
+            currA = currA == null ? headB : currA.getNext();
+            currB = currB == null ? headA : currB.getNext();
+        }
+
+        //output:
+        System.out.println("Two linked list are intersected at (iterative): " + currA.getData());
     }
 
     public boolean checkIfLinkedListPallindrome_1(Node<Integer> node) {
@@ -9634,7 +9875,7 @@ public class DSA450Questions {
         //key is less than root data so move to whole left sub tree
         //ex: root = 2, key = 4
         //2 > 4 -> else
-        if (root.getData() > key) {
+        if (key < root.getData()) {
             result[1] = root; //succ
             findPredecessorAndSuccessorInBST_Helper(root.getLeft(), key, result);
         } else {
@@ -12046,32 +12287,32 @@ public class DSA450Questions {
         System.out.println();
     }
 
-    public void largestAreaInHistogram(int[] hist) {
-
+    public void largestAreaInHistogram(int[] heights) {
+        //https://leetcode.com/problems/largest-rectangle-in-histogram/
         // Create an empty stack. The stack holds indexes of hist[] array 
         // The bars stored in stack are always in increasing order of their 
         // heights. 
-        Stack<Integer> st = new Stack<>();
-        int n = hist.length;
+        Stack<Integer> stack = new Stack<>();
+        int n = heights.length;
         int maxArea = 0; // Initialize max area 
         int top;  // To store top of stack 
         int areaWithTop; // To store area with top bar as the smallest bar 
 
         // Run through all bars of given histogram 
-        int i = 0;
-        while (i < n) {
+        int index = 0;
+        while (index < n) {
             // If this bar is higher than the bar on top stack, push it to stack 
-            if (st.isEmpty() || hist[st.peek()] <= hist[i]) {
-                st.push(i++);
+            if (stack.isEmpty() || heights[stack.peek()] <= heights[index]) {
+                stack.push(index++);
 
                 // If this bar is lower than top of stack, then calculate area of rectangle  
                 // with stack top as the smallest (or minimum height) bar. 'i' is  
                 // 'right index' for the top and element before top in stack is 'left index' 
             } else {
 
-                top = st.pop();  // store the top index 
+                top = stack.pop();  // store the top index 
                 // Calculate the area with hist[tp] stack as smallest bar 
-                areaWithTop = hist[top] * (st.isEmpty() ? i : i - st.peek() - 1);
+                areaWithTop = heights[top] * (stack.isEmpty() ? index : index - stack.peek() - 1);
                 // update max area, if needed 
                 maxArea = Math.max(maxArea, areaWithTop);
             }
@@ -12079,9 +12320,9 @@ public class DSA450Questions {
 
         // Now pop the remaining bars from stack and calculate area with every 
         // popped bar as the smallest bar 
-        while (!st.isEmpty()) {
-            top = st.pop();
-            areaWithTop = hist[top] * (st.isEmpty() ? i : i - st.peek() - 1);
+        while (!stack.isEmpty()) {
+            top = stack.pop();
+            areaWithTop = heights[top] * (stack.isEmpty() ? index : index - stack.peek() - 1);
             maxArea = Math.max(maxArea, areaWithTop);
         }
 
@@ -12400,24 +12641,36 @@ public class DSA450Questions {
         };
         Set<String> infected = new HashSet<>();
         while (fresh.size() > 0) {
-
+            //loop over all the rotten oranges
             for (String rottenPoint : rotten) {
+                //get coord of all the curr rotten orange
                 int x = rottenPoint.charAt(0) - '0';
                 int y = rottenPoint.charAt(1) - '0';
+                //find all the adjacent 4-directions from the 
+                //curr rotten orange
                 for (int[] dir : dirs) {
                     int newX = x + dir[0];
                     int newY = y + dir[1];
+                    //if any adjacent 4-directions contains a fresh orange
+                    //that means the curr rotten orange has infected it(in 1 unit time)
                     if (fresh.contains(newX + "" + newY)) {
+                        //fresh is now infected by curr rotten orange
+                        //so remove from fresh coords
                         fresh.remove(newX + "" + newY);
+                        //move this newly infected orange into infected coord
                         infected.add(newX + "" + newY);
                     }
                 }
             }
-
+            
+            //if at any point, we are unable to infect any fresh oranges
+            //out infected coord will remain empty, so return -1
             if (infected.isEmpty()) {
                 return -1;
             }
-
+            
+            //put all the infected oranges into rotten coords and clear infected
+            //for next time
             rotten.addAll(infected);
             infected.clear();
             minTime++;
@@ -12717,7 +12970,8 @@ public class DSA450Questions {
     }
 
     public int searchInRotatedSortedArray(int[] arr, int K) {
-
+        //https://leetcode.com/problems/search-in-rotated-sorted-array
+        //explanation: https://youtu.be/oTfPJKGEHcc
         int start = 0;
         int end = arr.length - 1;
         int N = arr.length;
@@ -12729,9 +12983,11 @@ public class DSA450Questions {
             if (arr[mid] == K) {
                 return mid;
             }
-
+            //left sorted section
             if (arr[start] <= arr[mid]) {
-
+                //if target lie in left sorted section
+                //then reduce end and search in this particular region
+                //else move to right sorted section
                 if (K >= arr[start] && K < arr[mid]) {
                     end = mid - 1;
                 } else {
@@ -12739,6 +12995,10 @@ public class DSA450Questions {
                 }
 
             } else {
+                //right sorted section
+                //if target lie in right sorted section 
+                //then update start and search in this particular region
+                //else move to left sorted section
                 if (K > arr[mid] && K <= arr[end]) {
                     start = mid + 1;
                 } else {
@@ -12913,8 +13173,7 @@ public class DSA450Questions {
                 //i = 2 sqr = 2*2 = 4
                 //4 > n i.e 4 > 3 that means sqrt(3) lie in b/w 1 and 2
                 //so we will do binary search i-1, i (1, 2)
-                double res = squareRootOfANumber_PreciseDoubleValue_BinarySearch(n, i - 1, i);
-                return res;
+                return squareRootOfANumber_PreciseDoubleValue_BinarySearch(n, i - 1, i);
             }
             i++;
         }
@@ -13472,7 +13731,7 @@ public class DSA450Questions {
     }
 
     public int longestCommonSubsequence_DP_Memoization(String s1, String s2, int m, int n) {
-
+        //https://leetcode.com/problems/longest-common-subsequence
         int[][] memo = new int[m + 1][n + 1];
 
         //base cond
@@ -13494,6 +13753,36 @@ public class DSA450Questions {
 
         System.out.println("The longest common subsequence length for the given two string is: " + memo[m][n]);
         return memo[m][n];
+    }
+
+    public void longestPallindromicSubsequence_DP_Memoization(String s) {
+        //https://leetcode.com/problems/longest-palindromic-subsequence/
+        int len = s.length();
+        String rev = new StringBuilder(s).reverse().toString();
+        int longestPallindromicSubseq = longestCommonSubsequence_DP_Memoization(s, rev, len, len);
+        System.out.println("The longest pallindromic subsequences: "
+                + longestPallindromicSubseq);
+    }
+
+    public void deleteOperationOfTwoStrings_DP_Memoization(String str1, String str2) {
+        //https://leetcode.com/problems/delete-operation-for-two-strings/
+        /*
+         how many char we need to delete of insert to make str1 transformed to str2
+         //ex: str1 = "sea", str2 = "eat"
+         longest common subseq = 2 ==> (ea)
+         if both strings are combined = str1 + str2 = sea = eat ==> seaeat
+         you can see in merges=d form of both strings the lcs come 2 times and if we
+         remove these 2 occurences of lcs we will left with those chars
+         that we either need to delete or insert
+         seaeat - 2 * (ea) ==> st ==> delete(s) and insert(t)
+         that's why len1 + len2 - 2 * lcs 
+         */
+        int len1 = str1.length();
+        int len2 = str2.length();
+        int longestCommonSubseq = longestCommonSubsequence_DP_Memoization(str1, str2, len1, len2);
+        int deleteOprn = len1 + len2 - 2 * longestCommonSubseq;
+        System.out.println("Delete operation of two strings: "
+                + deleteOprn);
     }
 
     private int longestRepeatingSubsequence_Recursion_Helper(String a, String b, int m, int n) {
@@ -13535,7 +13824,7 @@ public class DSA450Questions {
     }
 
     public void longestCommonSubstring_DP_Memoization(String a, String b) {
-
+        //https://leetcode.com/problems/maximum-length-of-repeated-subarray/
         int m = a.length();
         int n = b.length();
 
@@ -13595,17 +13884,18 @@ public class DSA450Questions {
         //........................S: O(1)
         Arrays.sort(pairs, (a, b) -> a[1] - b[1]); //T: O(N.LogN)
         int prevEnd = Integer.MIN_VALUE;
-        int ans = 0;
+        int chain = 0;
         for (int[] currPair : pairs) { //T: O(N)
-
-            if (prevEnd < currPair[0]) {
-                prevEnd = currPair[1];
-                ans++;
+            int currStart = currPair[0];
+            int currEnd = currPair[1];
+            if (prevEnd < currStart) {
+                prevEnd = currEnd;
+                chain++;
             }
         }
 
         //overall T: O(N.LogN) as, N.LogN > N
-        return ans;
+        return chain;
     }
 
     public int findBinomialCoefficient_Recursion(int n, int r) {
@@ -13738,8 +14028,8 @@ public class DSA450Questions {
 
         //2 choices
         //1. we choose not to pick a house and we simply move to next house
-        //2. we choose to pick that house then we have to add the amount in that house in our result and move to 
-        //alternate house (which is not adjacent(n-2))
+        //2. we choose to pick that house then we have to add the amount 
+        //in that house in our result and move to alternate house (which is not adjacent(n-2))
         //just choose the max of these choices
         return Math.max(sticklerThief_Recursion(houses, n - 1),
                 houses[n - 1] + sticklerThief_Recursion(houses, n - 2));
@@ -13800,7 +14090,7 @@ public class DSA450Questions {
     public void longestIncreasingSubsequence_DP_Memoization(int[] arr, int n) {
         //https://leetcode.com/problems/longest-increasing-subsequence
         //https://leetcode.com/problems/number-of-longest-increasing-subsequence
-        //if array is empty no longest incr seq is possible hence -1,
+        //if array is empty, no longest incr seq is possible hence -1,
         //otherwise atleast one element will be considered as incr seq hence 1
         int maxLengthLongestIncSubseq = n == 0 ? -1 : 1;
         //memo[i] will hold the longest incr subseq for ith arr[i] calculated
@@ -13839,10 +14129,10 @@ public class DSA450Questions {
         //if array is empty no longest incr seq is possible hence -1,
         //otherwise atleast one element will be considered as incr seq hence 1
         int maxSumIncSubseq = n == 0 ? -1 : 1;
-        //memo[i] will hold the longest incr subseq for ith arr[i] calculated
+        //memo[i] will hold the max sum incr subseq for ith arr[i] calculated
         int[] memoSum = new int[n];
         //base cond
-        //a single num can also be a max sum incr seq, that's why arr[i]
+        //a single num can be a max sum incr seq, that's why arr[i]
         for (int i = 0; i < n; i++) {
             memoSum[i] = arr[i];
         }
@@ -13934,6 +14224,89 @@ public class DSA450Questions {
         //output
         System.out.println("No of ways to paint fences such that adjacent fence are painted with same color: "
                 + ways);
+    }
+
+    private int decodeWays_Recursive_Memoization_Helper(
+            int index, String str, Map<Integer, Integer> cache) {
+
+        int n = str.length();
+        //if we have successfully crossed the string
+        if (index >= n) {
+            return 1;
+        }
+        //if we already cached the values previously retunn that
+        if (cache.containsKey(index)) {
+            return cache.get(index);
+        }
+
+        int ways = 0;
+
+        int singleDigitNum = str.charAt(index) - '0';
+        int twoDigitNum = 0;
+        //we can form two digit num only when we are allowed to take (index + 1)th char
+        //it should be less than n
+        if (index + 1 < n) {
+            //this two digit num should be formed with the index-th char which is singleDigitNum
+            twoDigitNum = singleDigitNum * 10 + (str.charAt(index + 1) - '0');
+        }
+
+        //we have two decision to make to decode our nums in str
+        //either 1. we can take the first single digit that is mapped to char[A == 1 to I == 9]
+        //Or 2. we can take first two digit num that is mapped to char[J == 10 to Z == 26]
+        if (singleDigitNum > 0) {
+            //if we are considering just a single digit, then we simply move to next index val(index + 1)
+            ways += decodeWays_Recursive_Memoization_Helper(index + 1, str, cache);
+        }
+        //to handle cases like "06" cond(singleDigitNum > 0 && twoDigitNum > 0)
+        if (singleDigitNum > 0 && twoDigitNum > 0 && twoDigitNum <= 26) {
+            //if we are considering first two digit, that means we took index-th & (index + 1)-th char
+            //then we simply move to (index + 2)
+            ways += decodeWays_Recursive_Memoization_Helper(index + 2, str, cache);
+        }
+        //cache the values
+        cache.put(index, ways);
+        return ways;
+    }
+
+    public void decodeWays_Recursive_Memoization(String str) {
+        //https://leetcode.com/problems/decode-ways/
+        //explanation: https://youtu.be/N5i7ySYQcgM
+        //<index, ways>
+        Map<Integer, Integer> cache = new HashMap<>();
+        int ways = decodeWays_Recursive_Memoization_Helper(0, str, cache);
+        //output
+        System.out.println("Ways to decode string into alphabets(Recursive-Memoization): " + ways);
+    }
+
+    public void decodeWays_DP_Memoization(String str) {
+        //https://leetcode.com/problems/decode-ways/
+        //explanation: https://youtu.be/N5i7ySYQcgM
+        int n = str.length();
+        Map<Integer, Integer> cache = new HashMap<>();
+        cache.put(n + 1, 1);
+        cache.put(n, 1);
+        for (int index = n - 1; index >= 0; index--) {
+            int singleDigitNum = str.charAt(index) - '0';
+            int twoDigitNum = 0;
+            //we can form two digit num only when we are allowed to take (index + 1)th char
+            //it should be less than n
+            if (index + 1 < n) {
+                //this two digit num should be formed with the index-th char which is singleDigitNum
+                twoDigitNum = singleDigitNum * 10 + (str.charAt(index + 1) - '0');
+            }
+            
+            if (singleDigitNum > 0) {
+                int ways = cache.getOrDefault(index , 0) + cache.getOrDefault(index + 1, 0);
+                cache.put(index, ways);
+            }
+
+            if (singleDigitNum > 0 && twoDigitNum > 0 && twoDigitNum <= 26) {
+                int ways = cache.getOrDefault(index , 0) + cache.getOrDefault(index + 2, 0);
+                cache.put(index, ways);
+            }
+        }
+        //output
+        System.out.println("Ways to decode string into alphabets(DP): " + cache.getOrDefault(0, 0));
     }
 
     public void nMeetingRooms_Greedy(int[] startTime, int[] finishTime) {
@@ -14057,44 +14430,40 @@ public class DSA450Questions {
         for (int i = 0; i < n; i++) {
             int currPlatform = 1;
             for (int j = i + 1; j < n; j++) {
-
                 if ((arr[i] >= arr[j] && arr[i] <= dep[j])
                         || (arr[j] >= arr[i] && arr[j] <= dep[i])) {
                     currPlatform++;
                 }
-
                 maxPlatform = Math.max(maxPlatform, currPlatform);
-
             }
         }
 
         //output:
         System.out.println("max platfrm needed: " + maxPlatform);
-
     }
 
-    public void minimumPlatformNeeded_Greedy(int[] arr, int[] dep) {
+    public void minimumPlatformNeeded_Greedy(int[] arrival, int[] depart) {
 
         //.......................T: O(N.LogN)
-        int n = arr.length;
+        int n = arrival.length;
 
         //.................T: O(N.LogN)
-        Arrays.sort(arr);
-        Arrays.sort(dep);
+        Arrays.sort(arrival);
+        Arrays.sort(depart);
 
-        int i = 1;
-        int j = 0;
+        int arrivalIndex = 1;
+        int departIndex = 0;
         int maxPlatform = 1;
         int currPlatform = 1;
 
-        while (i < n && j < n) {
+        while (arrivalIndex < n && departIndex < n) {
 
-            if (arr[i] <= dep[j]) {
+            if (arrival[arrivalIndex] <= depart[departIndex]) {
                 currPlatform++;
-                i++;
-            } else if (arr[i] > dep[j]) {
+                arrivalIndex++;
+            } else if (arrival[arrivalIndex] > depart[departIndex]) {
                 currPlatform--;
-                j++;
+                departIndex++;
             }
 
             maxPlatform = Math.max(maxPlatform, currPlatform);
@@ -14387,7 +14756,7 @@ public class DSA450Questions {
     public void graphBFSAdjList_Graph(int V, List<List<Integer>> adjList) {
 
         List<Integer> result = new ArrayList<>();
-        if (adjList == null || adjList.size() == 0) {
+        if (adjList == null || adjList.isEmpty()) {
             return;
         }
 
@@ -14427,7 +14796,7 @@ public class DSA450Questions {
     public void graphDFSAdjList_Graph(int V, List<List<Integer>> adjList) {
 
         List<Integer> result = new ArrayList<>();
-        if (adjList == null || adjList.size() == 0) {
+        if (adjList == null || adjList.isEmpty()) {
             return;
         }
 
@@ -14575,7 +14944,8 @@ public class DSA450Questions {
         System.out.println("Number of separated islands: " + islandCount);
     }
 
-    private boolean detectCycleInUndirectedGraphDFS_Helper(List<List<Integer>> adjList, int vertex, int parent, boolean[] visited) {
+    private boolean detectCycleInUndirectedGraphDFS_Helper(
+            List<List<Integer>> adjList, int vertex, int parent, boolean[] visited) {
 
         visited[vertex] = true;
         List<Integer> childrens = adjList.get(vertex);
@@ -17851,6 +18221,7 @@ public class DSA450Questions {
         //......................................................................
 //        Row: 423
 //        System.out.println("Longest common sub sequence of 2 strings DP problem");
+//        //https://leetcode.com/problems/longest-common-subsequence
 //        String s1 = "ABCDGH";
 //        String s2 = "AEDFHR";
 //        System.out.println("The longest common sub sequence length for the given 2 strings: "+obj.longestCommonSubsequence_Recursion(s1, s2, s1.length(), s2.length()));
@@ -17859,6 +18230,19 @@ public class DSA450Questions {
 //        s2 = "";
 //        System.out.println("The longest common sub sequence length for the given 2 strings: "+obj.longestCommonSubsequence_Recursion(s1, s2, s1.length(), s2.length()));
 //        obj.longestCommonSubsequence_DP_Memoization(s1, s2, s1.length(), s2.length());
+        //......................................................................
+//        Row: SEPARATE IMPORTANT QUESTION
+//        System.out.println("Longest Pallindromic Subsequence DP problem");
+//        //https://leetcode.com/problems/longest-palindromic-subsequence
+//        obj.longestPallindromicSubsequence_DP_Memoization("bbbab");
+//        obj.longestPallindromicSubsequence_DP_Memoization("cbbs");
+        //......................................................................
+//        Row: SEPARATE IMPORTANT QUESTION
+//        System.out.println("Delete Operation for Two Strings DP problem");
+//        //https://leetcode.com/problems/delete-operation-for-two-strings/
+//        // delete s from sea ==> "ea" insert t to "ea"  ==> eat
+//        obj.deleteOperationOfTwoStrings_DP_Memoization("sea", "eat"); 
+//        obj.deleteOperationOfTwoStrings_DP_Memoization("leetcode", "etco");
         //......................................................................
 //        Row: 97
 //        System.out.println("Check two strings are isomorphic or not");
@@ -17925,7 +18309,7 @@ public class DSA450Questions {
         //......................................................................
 //        Row: 20, 70
 //        System.out.println("Next permutation");
-//        //https://leetcode.com/problems/next-permutation/solution/
+//        //https://leetcode.com/problems/next-permutation
 //        obj.nextPermutation(new int[]{1,2,3});
 //        obj.nextPermutation(new int[]{4,3,2,1});
 //        obj.nextPermutation(new int[]{1,3,1,4,7,6,2});
@@ -17942,6 +18326,7 @@ public class DSA450Questions {
         //......................................................................
 //        Row: 103
 //        System.out.println("Search in rotated sorted array");
+//        //https://leetcode.com/problems/search-in-rotated-sorted-array
 //        System.out.println("The target is found at location: "+ obj.searchInRotatedSortedArray(new int[]{4,5,6,7,0,1,2}, 0));
 //        System.out.println("The target is found at location: "+ obj.searchInRotatedSortedArray(new int[]{4,5,6,7,0,1,2}, 4));
 //        System.out.println("The target is found at location: "+ obj.searchInRotatedSortedArray(new int[]{4,5,6,7,0,1,2}, 3));
@@ -18014,6 +18399,7 @@ public class DSA450Questions {
         //......................................................................
 //        Row: 34
 //        System.out.println("Rain water trapping 2 approaches");
+//        //https://leetcode.com/problems/trapping-rain-water/
 //        obj.rainWaterTrappingUsingStack(new int[]{3,0,0,2,0,4});
 //        obj.rainWaterTrappingUsingTwoPointers(new int[]{3,0,0,2,0,4});
 //        obj.rainWaterTrappingUsingStack(new int[]{6,9,9});
@@ -18058,6 +18444,7 @@ public class DSA450Questions {
         //......................................................................
 //        Row: 441
 //        System.out.println("Longest common substring DP problem");
+//        //https://leetcode.com/problems/maximum-length-of-repeated-subarray/
 //        obj.longestCommonSubstring_DP_Memoization("ABCDGH", "ACDGHR");
         //......................................................................
 //        Row: 441
@@ -18067,14 +18454,12 @@ public class DSA450Questions {
 //                obj.maximumLengthOfPairChain_DP_Approach(new int[][]{
 //                    {1,2},
 //                    {3,4},
-//                    {2,3}
-//                }));
+//                    {2,3}}));
 //        System.out.println("maximum length of pair chain Greedy approach: "+
 //                obj.maximumLengthOfPairChain_Greedy_Approach(new int[][]{
 //                    {1,2},
 //                    {3,4},
-//                    {2,3}
-//                }));
+//                    {2,3}}));
         //......................................................................
 //        Row: 412
 //        System.out.println("Binomial coefficient DP problem");
@@ -18351,6 +18736,20 @@ public class DSA450Questions {
 //        obj.bestProfitToBuySellStock(new int[]{7,1,5,3,6,4});
 //        obj.bestProfitToBuySellStock(new int[]{7,6,4,3,1});
         //......................................................................
+//        System.out.println("Maximum profit by buying seling stocks,"
+//                + "can hold stock atmost one but can buy/sell same stock in same day");
+//        //https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii/
+//        obj.bestProfitToBuySellStockCanHoldAtmostOneStock(new int[]{2, 30, 15, 10, 8, 25, 80});
+//        obj.bestProfitToBuySellStockCanHoldAtmostOneStock(new int[]{2, 30, 80, 10, 8, 25, 60});
+//        obj.bestProfitToBuySellStockCanHoldAtmostOneStock(new int[]{3, 3, 5, 0, 0, 3, 1, 4});
+        //......................................................................
+//        Row: 31
+//        System.out.println("Maximum profit by buying seling stocks atmost twice");
+//        //https://leetcode.com/problems/best-time-to-buy-and-sell-stock-iii/
+//        obj.bestProfitToBuySellStockAtMostTwice(new int[]{2, 30, 15, 10, 8, 25, 80});
+//        obj.bestProfitToBuySellStockAtMostTwice(new int[]{2, 30, 80, 10, 8, 25, 60});
+//        obj.bestProfitToBuySellStockAtMostTwice(new int[]{3, 3, 5, 0, 0, 3, 1, 4});
+        //......................................................................
 //        Row: 23
 //        System.out.println("Find all pairs in array whose sum is given to K");
 //        //https://www.geeksforgeeks.org/count-pairs-with-given-sum/
@@ -18499,20 +18898,6 @@ public class DSA450Questions {
 //        System.out.println("Is there with subarray sum 0 "+obj.checkIfSubarrayWithSum0(new int[]{2, -3, 1}));
 //        System.out.println("Is there with subarray sum 0 "+obj.checkIfSubarrayWithSum0(new int[]{4, 2, 0, -1}));
         //......................................................................
-//        System.out.println("Maximum profit by buying seling stocks,"
-//                + "can hold stock atmost one but can buy/sell same stock in same day");
-//        //https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii/
-//        obj.bestProfitToBuySellStockCanHoldAtmostOneStock(new int[]{2, 30, 15, 10, 8, 25, 80});
-//        obj.bestProfitToBuySellStockCanHoldAtmostOneStock(new int[]{2, 30, 80, 10, 8, 25, 60});
-//        obj.bestProfitToBuySellStockCanHoldAtmostOneStock(new int[]{3, 3, 5, 0, 0, 3, 1, 4});
-        //......................................................................
-//        Row: 31
-//        System.out.println("Maximum profit by buying seling stocks atmost twice");
-//        //https://leetcode.com/problems/best-time-to-buy-and-sell-stock-iii/
-//        obj.bestProfitToBuySellStockAtMostTwice(new int[]{2, 30, 15, 10, 8, 25, 80});
-//        obj.bestProfitToBuySellStockAtMostTwice(new int[]{2, 30, 80, 10, 8, 25, 60});
-//        obj.bestProfitToBuySellStockAtMostTwice(new int[]{3, 3, 5, 0, 0, 3, 1, 4});
-        //......................................................................
 //        Row: 107, 16
 //        System.out.println("Find repeating and missing in unsorted array");
 //        //https://leetcode.com/problems/find-all-numbers-disappeared-in-an-array/
@@ -18543,6 +18928,7 @@ public class DSA450Questions {
 //        node2.setNext(common);
 //        obj.intersectionPointOfTwoLinkedListByRef(node1, node2);
 //        obj.intersectionPointOfTwoLinkedListByRef_HashBased(node1, node2);
+//        obj.intersectionPointOfTwoLinkedListByRef_Iterative(node1, node2);
 //        common = new Node<>(4);
 //        common.setNext(new Node<>(5));
 //        common.getNext().setNext(new Node<>(6));
@@ -18555,6 +18941,7 @@ public class DSA450Questions {
 //        node2.getNext().setNext(common);
 //        obj.intersectionPointOfTwoLinkedListByRef(node1, node2);
 //        obj.intersectionPointOfTwoLinkedListByRef_HashBased(node1, node2);
+//        obj.intersectionPointOfTwoLinkedListByRef_Iterative(node1, node2);
         //......................................................................
 //        Row: 359
 //        System.out.println("Detect cycle in directed graph using DFS");
@@ -18921,6 +19308,7 @@ public class DSA450Questions {
         //......................................................................
 //        Row: 72
 //        System.out.println("Word break");
+//        //https://leetcode.com/problems/word-break/
 //        Set<String> set = new HashSet<>();
 //        set.addAll(Arrays.asList("mobile","samsung","sam","sung","man","mango","icecream","and",  
 //                            "go","i","like","ice","cream"));
@@ -21337,6 +21725,57 @@ public class DSA450Questions {
         //https://leetcode.com/problems/task-scheduler/
         obj.taskSchedular_Greedy(new char[]{'A', 'A', 'A', 'B', 'B', 'B'}, 2);
         obj.taskSchedular_Greedy(new char[]{'A', 'A', 'A', 'B', 'B', 'B'}, 0);
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Check If A Move Is Legal");
+        //https://leetcode.com/problems/check-if-move-is-legal/
+        obj.checkIfMoveIsLegal(
+                new String[][]{
+                    {".", ".", ".", "B", ".", ".", ".", "."},
+                    {".", ".", ".", "W", ".", ".", ".", "."},
+                    {".", ".", ".", "W", ".", ".", ".", "."},
+                    {".", ".", ".", "W", ".", ".", ".", "."},
+                    {"W", "B", "B", ".", "W", "W", "W", "B"},
+                    {".", ".", ".", "B", ".", ".", ".", "."},
+                    {".", ".", ".", "B", ".", ".", ".", "."},
+                    {".", ".", ".", "W", ".", ".", ".", "."}
+                }, 4, 3, "B"
+        );
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Island Perimeter");
+        //https://leetcode.com/problems/island-perimeter/
+        obj.islandPerimeter(new int[][]{{0, 1, 0}, {0, 1, 0}});
+        obj.islandPerimeter(new int[][]{{1, 1, 0}});
+        obj.islandPerimeter(new int[][]{
+            {0, 1, 0, 0}, {1, 1, 1, 0}, {0, 1, 0, 0}, {1, 1, 0, 0}});
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Decode String");
+        //https://leetcode.com/problems/decode-string/
+        obj.decodedString("3[a]2[bc]");
+        obj.decodedString("3[a2[c]]");
+        obj.decodedString("2[abc]3[cd]ef");
+        obj.decodedString("20[abc]3[cd]ef");
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Valid Palindrome II");
+        //https://leetcode.com/problems/valid-palindrome-ii/
+        System.out.println("Valid pallindrome two: " + obj.validPallindromeTwo("abc"));
+        System.out.println("Valid pallindrome two: " + obj.validPallindromeTwo("aba"));
+        System.out.println("Valid pallindrome two: " + obj.validPallindromeTwo("abca"));
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Decode Ways DP Problem");
+        //https://leetcode.com/problems/decode-ways/
+        obj.decodeWays_Recursive_Memoization("12");
+        obj.decodeWays_Recursive_Memoization("226");
+        obj.decodeWays_Recursive_Memoization("06");
+        obj.decodeWays_Recursive_Memoization("11106");
+        obj.decodeWays_DP_Memoization("12");
+        obj.decodeWays_DP_Memoization("226");
+        obj.decodeWays_DP_Memoization("06");
+        obj.decodeWays_DP_Memoization("11106");
     }
 
 }
