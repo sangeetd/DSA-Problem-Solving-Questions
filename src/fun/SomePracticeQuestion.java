@@ -6569,16 +6569,23 @@ public class SomePracticeQuestion {
 //        }
         //now consider the last row of the memo[][] i.e, x = nth row
         //that row signifies all the elements in array is taken to form y = sum = [0 -> sumArray+1]
-        int min = Integer.MAX_VALUE;
-        for (int i = (sumArray + 1) / 2; i >= 0; i--) {
-            if (memo[n][i]) {
-                min = Math.abs(sumArray - 2 * i);
+        //if sum of two subsets are s1 and s2 and we need to minimize it in that case
+        //s1 and s2 should be large and close to each other like (s1 = 12, s2 = 11)
+        //of all the possible subsset sums in range[0 to sumArray], s1 and s2 should lie
+        //in middle of the range (and also that sum be a subset sum thats why cond: memo[n][i])
+        //s1 - s2 = minDiff ==> s2 = s1 - minDiff
+        //s1 + s2 = sumArrays
+        //==> s1 + (s1 - minDiff) = sumArray ==> 2*s1 - minDiff = sumArray ==> abs(2*s1 - sumArray) = minDiff
+        
+        int minDiff = Integer.MAX_VALUE;
+        for (int sum1 = sumArray / 2; sum1 >= 0; sum1--) {
+            if (memo[n][sum1]) {
+                minDiff = Math.abs(sumArray - 2 * sum1);
                 break;
             }
         }
 
-        return min;
-
+        return minDiff;
     }
 
     public static int subsetSumToAGivenDifference(int[] a, int n, int diff) {

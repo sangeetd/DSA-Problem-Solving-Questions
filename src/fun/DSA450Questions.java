@@ -3377,12 +3377,12 @@ public class DSA450Questions {
          */
         class Pair {
 
-            int val;
-            int prevMin;
+            int numJ;
+            int numI;
 
-            public Pair(int val, int prevMin) {
-                this.val = val;
-                this.prevMin = prevMin;
+            public Pair(int numJ, int numI) {
+                this.numJ = numJ;
+                this.numI = numI;
             }
 
         }
@@ -3393,20 +3393,20 @@ public class DSA450Questions {
 
         for (int k = 1; k < n; k++) {
 
-            int currVal = nums[k];
+            int numK = nums[k];
             //when the loop break at stack.peek().val greater than currVal that 
             //stack.peek().val = nums[j] as nums[k](here currVal) < nums[j]
-            while (!stack.isEmpty() && stack.peek().val <= currVal) {
+            while (!stack.isEmpty() && stack.peek().numJ <= numK) {
                 stack.pop();
             }
             //here, stack.peek().prevMin = nums[i]
             //currVal = nums[k]
             //stack.peek().val = nums[j]
-            if (!stack.isEmpty() && currVal > stack.peek().prevMin) {
+            if (!stack.isEmpty() && numK > stack.peek().numI) {
                 return true;
             }
-            stack.push(new Pair(currVal, currMin));
-            currMin = Math.min(currMin, currVal);
+            stack.push(new Pair(numK, currMin));
+            currMin = Math.min(currMin, numK);
         }
         return false;
     }
@@ -3695,6 +3695,57 @@ public class DSA450Questions {
             System.out.print(val + " ");
         }
         System.out.println();
+    }
+
+    public void rangeSumQueries_BruteForce(int[] nums, int[][] queries) {
+        //.........................T: O(M*N), for processing M queries it will
+        //take in worst case O(N) time (if for mth query left = 0 and right = N - 1)
+        //https://leetcode.com/problems/range-sum-query-immutable/
+        List<Integer> sumsInQueryRange = new ArrayList<>();
+        //T: O(M)
+        for (int[] query : queries) {
+
+            int left = query[0];
+            int right = query[1];
+            int sum = 0;
+            //T: O(N) in worst case
+            for (int i = left; i <= right; i++) {
+                sum += nums[i];
+            }
+            sumsInQueryRange.add(sum);
+        }
+        //output
+        System.out.println("Sums from all the queries (Brute Force): " + sumsInQueryRange);
+    }
+
+    public void rangeSumQueries(int[] nums, int[][] queries) {
+        //.........................T: O(N + M), for finding prefix sum,
+        //for processing M queries it will take O(1)
+        //https://leetcode.com/problems/range-sum-query-immutable/
+        //explanation: https://youtu.be/k5Im14rNUFA
+        //OPTIMISED
+        //based on PREFIX SUM
+        //convert nums array to its prefix sum array
+        int prefix = nums[0];
+        int n = nums.length;
+        for (int i = 1; i < n; i++) {
+            prefix += nums[i];
+            nums[i] = prefix;
+        }
+        List<Integer> sumsInQueryRange = new ArrayList<>();
+        for (int[] query : queries) {
+
+            int left = query[0];
+            int right = query[1];
+
+            int sum = left - 1 < 0
+                    ? nums[right]
+                    : nums[right] - nums[left - 1];
+
+            sumsInQueryRange.add(sum);
+        }
+        //output
+        System.out.println("Sums from all the queries: " + sumsInQueryRange);
     }
 
     public void rotateMatrixClockWise90Deg(int[][] mat) {
@@ -4339,6 +4390,43 @@ public class DSA450Questions {
         }
         //output:
         System.out.println("Island perimeter: " + perimeter);
+    }
+
+    public void rangeSumQuery2D(int[][] matrix, int[][] queries) {
+        //https://leetcode.com/problems/range-sum-query-2d-immutable/
+        //explanation: https://youtu.be/KE8MQuwE2yA
+        int ROW = matrix.length;
+        int COL = matrix[0].length;
+
+        //convert matrix to prefix sum matrix
+        for (int r = 0; r < ROW; r++) {
+            int prefix = 0;
+            for (int c = 0; c < COL; c++) {
+                prefix += matrix[r][c];
+                int aboveRow = r - 1 < 0 ? 0 : matrix[r - 1][c];
+                matrix[r][c] = prefix + aboveRow;
+            }
+        }
+
+        List<Integer> queriesSum = new ArrayList<>();
+        for (int[] query : queries) {
+
+            int topLeftX = query[0];
+            int topLeftY = query[1];
+            int bottomRightX = query[2];
+            int bottomRightY = query[3];
+
+            int bottomRightSum = matrix[bottomRightX][bottomRightY];
+            int aboveRowSum = topLeftX - 1 < 0 ? 0 : matrix[topLeftX - 1][bottomRightY];
+            int leftColSum = topLeftY - 1 < 0 ? 0 : matrix[bottomRightX][topLeftY - 1];
+            int cornerValAboveTopLeft = (topLeftX - 1 < 0 || topLeftY - 1 < 0)
+                    ? 0
+                    : matrix[topLeftX - 1][topLeftY - 1];
+            int sum = bottomRightSum - aboveRowSum - leftColSum + cornerValAboveTopLeft;
+            queriesSum.add(sum);
+        }
+        //output
+        System.out.println("Range sum queries in 2D: " + queriesSum);
     }
 
     public String reverseString(String str) {
@@ -7262,13 +7350,13 @@ public class DSA450Questions {
                 stack.push(ch + "");
             }
         }
-        
+
         //forming result from all the processed sub-expressions
         String joined = String.join("", stack);
 //        while (!stack.isEmpty()) {
 //            sb.insert(0, stack.pop());
 //        }
-        
+
         //output:
 //        System.out.println("Decoded string: " + sb.toString());
         System.out.println("Decoded string: " + joined);
@@ -12180,6 +12268,16 @@ public class DSA450Questions {
         System.out.println();
     }
 
+    public void binarySearchTreeIterator(TreeNode<Integer> root) {
+        //..............T: O(H), at most using addNodes() we are just travelling
+        //tree upto the height of tree and not the complete N nodes of tree
+        //https://leetcode.com/problems/binary-search-tree-iterator
+        BinarySearchTreeIterator<Integer> iterator = new BinarySearchTreeIterator<>(root);
+        while (iterator.hasNext()) {
+            System.out.println(iterator.next());
+        }
+    }
+
     // STACK
     int middleElementInStack_Element = Integer.MIN_VALUE;
 
@@ -12662,13 +12760,13 @@ public class DSA450Questions {
                     }
                 }
             }
-            
+
             //if at any point, we are unable to infect any fresh oranges
             //out infected coord will remain empty, so return -1
             if (infected.isEmpty()) {
                 return -1;
             }
-            
+
             //put all the infected oranges into rotten coords and clear infected
             //for next time
             rotten.addAll(infected);
@@ -14035,8 +14133,8 @@ public class DSA450Questions {
                 houses[n - 1] + sticklerThief_Recursion(houses, n - 2));
     }
 
-    public void sticklerThief_DP_Memoization(int[] houses) {
-
+    public int sticklerThief_DP_Memoization(int[] houses) {
+        //https://leetcode.com/problems/house-robber
         int n = houses.length;
         int[] memo = new int[n + 1];
 
@@ -14049,7 +14147,33 @@ public class DSA450Questions {
         }
 
         //output;
-        System.out.println("The maximum amount stickler thief can pick from alternate houses: " + memo[n]);
+        return memo[n];
+    }
+
+    public void sticklerThiefTwo_DP_Memoization(int[] houses) {
+        //https://leetcode.com/problems/house-robber-ii/
+        int n = houses.length;
+        int result = Integer.MIN_VALUE;
+
+        int[] currHouses = new int[n - 1];
+        //house[0] to house[n - 2] in which last house (n - 1)-th will not be covered
+        for (int i = 0; i < n - 1; i++) {
+            currHouses[i] = houses[i];
+        }
+
+        result = Math.max(result, sticklerThief_DP_Memoization(currHouses));
+
+        currHouses = new int[n];
+        //house[1] to house[n - 1] in which first house(0-th) will not be covered
+        for (int i = 1; i < n; i++) {
+            currHouses[i] = houses[i];
+        }
+
+        result = Math.max(result, sticklerThief_DP_Memoization(currHouses));
+
+        //output;
+        System.out.println("The maximum amount stickler thief can pick from alternate but circular houses: "
+                + result);
     }
 
     int longestIncreasingSubsequence_LongestSeqLength;
@@ -14294,19 +14418,159 @@ public class DSA450Questions {
                 //this two digit num should be formed with the index-th char which is singleDigitNum
                 twoDigitNum = singleDigitNum * 10 + (str.charAt(index + 1) - '0');
             }
-            
+
             if (singleDigitNum > 0) {
-                int ways = cache.getOrDefault(index , 0) + cache.getOrDefault(index + 1, 0);
+                int ways = cache.getOrDefault(index, 0) + cache.getOrDefault(index + 1, 0);
                 cache.put(index, ways);
             }
 
             if (singleDigitNum > 0 && twoDigitNum > 0 && twoDigitNum <= 26) {
-                int ways = cache.getOrDefault(index , 0) + cache.getOrDefault(index + 2, 0);
+                int ways = cache.getOrDefault(index, 0) + cache.getOrDefault(index + 2, 0);
                 cache.put(index, ways);
             }
         }
         //output
         System.out.println("Ways to decode string into alphabets(DP): " + cache.getOrDefault(0, 0));
+    }
+
+    private int fillingBooksInShelves_DP_Recusrive_Memoization_Helper(
+            int[][] books, int shelfWidth, int index, Map<Integer, Integer> memo) {
+
+        if (index >= books.length) {
+            return 0;
+        }
+
+        if (memo.containsKey(index)) {
+            return memo.get(index);
+        }
+
+        int currWidth = 0;
+        int maxHeight = 0;
+
+        for (int i = index; i < books.length; i++) {
+            currWidth += books[i][0];
+            maxHeight = Math.max(maxHeight, books[i][1]);
+
+            if (currWidth > shelfWidth) {
+                break;
+            }
+
+            int minHeight = Math.min(memo.getOrDefault(index, Integer.MAX_VALUE),
+                    maxHeight + fillingBooksInShelves_DP_Recusrive_Memoization_Helper(
+                            books, shelfWidth, i + 1, memo));
+
+            memo.put(index, minHeight);
+        }
+        return memo.get(index);
+    }
+
+    public void fillingBooksInShelves_DP_Recusrive_Memoization(int[][] books, int shelfWidth) {
+        //https://leetcode.com/problems/filling-bookcase-shelves/
+        //https://leetcode.com/problems/filling-bookcase-shelves/discuss/2278530/Split-and-CHILL
+        Map<Integer, Integer> memo = new HashMap<>();
+        int minHeight = fillingBooksInShelves_DP_Recusrive_Memoization_Helper(books, shelfWidth, 0, memo);
+        //output
+        System.out.println("Min possible height: " + minHeight);
+    }
+
+    private int perfectSquares_DP_Recursive_Memoization_Helper(int n, Map<Integer, Integer> cache) {
+        //if n == 0, there are 0 perfect squares that sums upto 0
+        if (n == 0) {
+            return n; // n == 0
+        }
+
+        if (cache.containsKey(n)) {
+            return cache.get(n);
+        }
+
+        //this is the branching factor.
+        //let say n == 12, sqrt(n) = 3.4.. roundOff = 3
+        //Now this 3 * 3 == 9 and if we go one more like for 4 ==> 4 * 4 = 16
+        //that means this 16 > n, we can't use 4 as perfect sqaures sums because
+        //it always be greater than n
+        int sqrRootN = (int) Math.sqrt(n);
+        int currPerfectSquaresWaysToN = Integer.MAX_VALUE;
+        for (int branch = 1; branch <= sqrRootN; branch++) {
+            int currPerfectSqr = branch * branch;
+            currPerfectSquaresWaysToN = Math.min(currPerfectSquaresWaysToN,
+                    1 + perfectSquares_DP_Recursive_Memoization_Helper(n - currPerfectSqr, cache));
+        }
+        cache.put(n, currPerfectSquaresWaysToN);
+        return currPerfectSquaresWaysToN;
+    }
+
+    public void perfectSquares_DP_Recursive_Memoization(int n) {
+        //........................T: O(n * sqrt(n)), sqrt(n) is the branching factor for
+        //each n in the decision tree
+        //https://leetcode.com/problems/perfect-squares/submissions/
+        //explanation: https://youtu.be/HLZLwjzIVGo
+        //<n, currPerfectSquaresWays>
+        Map<Integer, Integer> cache = new HashMap<>();
+        int perfectSquaresCount = perfectSquares_DP_Recursive_Memoization_Helper(n, cache);
+        //output
+        System.out.println("Count of perfect squares that will sum up to n: " + perfectSquaresCount);
+    }
+
+    public void perfectSquares_DP_Memoization(int n) {
+        //........................T: O(n * sqrt(n)), sqrt(n) is the branching factor for
+        //each n in the decision tree
+        //https://leetcode.com/problems/perfect-squares/submissions/
+        //explanation: https://youtu.be/HLZLwjzIVGo
+        //<n, currPerfectSquaresWays>
+        Map<Integer, Integer> cache = new HashMap<>();
+        //if n == 0, 0 are the ways to have sum of perfect squares
+        cache.put(0, 0);
+
+        for (int nth = 1; nth <= n; nth++) {
+            for (int i = 1; i <= nth; i++) {
+                int currPerfectSqr = i * i;
+                if (nth - currPerfectSqr < 0) {
+                    break;
+                }
+                int currPerfectSquaresWaysToN = Math.min(
+                        cache.getOrDefault(nth, Integer.MAX_VALUE),
+                        1 + cache.getOrDefault(nth - currPerfectSqr, Integer.MAX_VALUE));
+                cache.put(nth, currPerfectSquaresWaysToN);
+            }
+        }
+        //output
+        System.out.println("Count of perfect squares that will sum up to n: " + cache.get(n));
+    }
+
+    private int outOfBoundaryPaths_DP_Recursive_Memoization_Helper(
+            int m, int n, int maxMove, int row, int col, Map<String, Integer> cache) {
+        //out of boundary path found return 1
+        if (row < 0 || row >= m || col < 0 || col >= n) {
+            return 1;
+        }
+
+        //if no moves are left return 0
+        if (maxMove == 0) {
+            return 0;
+        }
+
+        String cacheCoord = row + "," + col + "," + maxMove;
+
+        if (cache.containsKey(cacheCoord)) {
+            return cache.get(cacheCoord);
+        }
+        int mod = 1000000007;
+        int currPath = 0;
+        currPath += (outOfBoundaryPaths_DP_Recursive_Memoization_Helper(m, n, maxMove - 1, row - 1, col, cache)
+                + outOfBoundaryPaths_DP_Recursive_Memoization_Helper(m, n, maxMove - 1, row + 1, col, cache)) % mod;
+
+        currPath += (outOfBoundaryPaths_DP_Recursive_Memoization_Helper(m, n, maxMove - 1, row, col - 1, cache)
+                + outOfBoundaryPaths_DP_Recursive_Memoization_Helper(m, n, maxMove - 1, row, col + 1, cache)) % mod;
+        cache.put(cacheCoord, currPath % mod);
+        return cache.get(cacheCoord);
+    }
+
+    public void outOfBoundaryPaths_DP_Recursive_Memoization(int m, int n, int maxMove, int startRow, int startCol) {
+        //https://leetcode.com/problems/out-of-boundary-paths/
+        Map<String, Integer> cache = new HashMap<>();
+        int paths = outOfBoundaryPaths_DP_Recursive_Memoization_Helper(m, n, maxMove, startRow, startCol, cache);
+        //output:
+        System.out.println("Out of boundary paths:  " + paths);
     }
 
     public void nMeetingRooms_Greedy(int[] startTime, int[] finishTime) {
@@ -14751,6 +15015,53 @@ public class DSA450Questions {
         //output
         int output = Math.max(len, (maxFreq - 1) * (n + 1) + maxFreqCount);
         System.out.println("Least unit of time cpu will take to finish all tasks: " + output);
+    }
+
+    public void twoCityScheduling_Greedy(int[][] costs) {
+        //https://leetcode.com/problems/two-city-scheduling/
+        //explanation: https://youtu.be/d-B_gk_gJtQ
+
+        class CostDiff {
+
+            int costDiff;
+            int costA;
+            int costB;
+
+            public CostDiff(int costDiff, int costA, int costB) {
+                this.costDiff = costDiff;
+                this.costA = costA;
+                this.costB = costB;
+            }
+
+        }
+
+        List<CostDiff> diffs = new ArrayList<>();
+        //calculating the cost diff with intuition of how musch
+        //extra we have to pay if we send ith person to cityB so
+        //cityB - cityA = diff
+        for (int[] cost : costs) {
+            int costA = cost[0];
+            int costB = cost[1];
+            diffs.add(new CostDiff(costB - costA, costA, costB));
+        }
+
+        //sort the list on basis of costDiff, this will sort diffs in incr order
+        //that means on the left side of diffs list we will have min cost diff for ith
+        //person to send to cityB, Now acc to quest we need to half of the person to cityA and 
+        //other half to cityB, we are greedily choosing min cost at which we can send
+        //half ith person to cityB first and remaining can go to cityA
+        Collections.sort(diffs, (d1, d2) -> d1.costDiff - d2.costDiff);
+        int minCost = 0;
+        for (int i = 0; i < diffs.size(); i++) {
+            if (i < diffs.size() / 2) {
+                minCost += diffs.get(i).costB;
+            } else {
+                minCost += diffs.get(i).costA;
+            }
+        }
+        //output
+        System.out.println("Toatal min cost at which half of people can travel to city A and half to cityB: "
+                + minCost);
     }
 
     public void graphBFSAdjList_Graph(int V, List<List<Integer>> adjList) {
@@ -16415,6 +16726,74 @@ public class DSA450Questions {
                 + minimumUnfairDistributionOfCookiesToKStudent_Result);
     }
 
+    private boolean partitionToKEqualSumSubset_Backtracking_Helper(int[] nums, int k,
+            int index, int currSubsetSum, int sumPerKSubset, Set<Integer> indexUsed) {
+
+        if (k == 0) {
+            return true;
+        }
+
+        if (currSubsetSum == sumPerKSubset) {
+            return partitionToKEqualSumSubset_Backtracking_Helper(nums, k - 1,
+                    0, 0, sumPerKSubset, indexUsed);
+        }
+
+        for (int i = index; i < nums.length; i++) {
+            if (indexUsed.contains(i)
+                    //handle duplicates
+                    || (i - 1 >= 0 && nums[i] == nums[i - 1] && !indexUsed.contains(i - 1))
+                    //handles case where adding curr nums[i] to currSubsetSum
+                    //will not give any solution
+                    || currSubsetSum + nums[i] > sumPerKSubset) {
+                continue;
+            }
+
+            indexUsed.add(i);
+            if (partitionToKEqualSumSubset_Backtracking_Helper(
+                    nums, k, i + 1, currSubsetSum + nums[i], sumPerKSubset, indexUsed)) {
+                return true;
+            }
+            indexUsed.remove(i);
+        }
+        return false;
+    }
+
+    public boolean partitionToKEqualSumSubset_Backtracking(int[] nums, int k) {
+        //.............................T: O(2^(k*N)), N is length of array, we will be
+        //trying all possible k subsets by making decision if a index to be used in subset
+        //for next time or not.
+        //https://leetcode.com/problems/partition-to-k-equal-sum-subsets/
+        //https://leetcode.com/problems/partition-to-k-equal-sum-subsets/discuss/2360226/Java-ororBeats-90-oror-Hardcore-expl'n-!!
+        //explanation: https://youtu.be/mBk4I0X46oI
+        
+        //we cant make k partitions(non-empty subsets) if array element is less than k
+        if(k > nums.length){
+            return false;
+        }
+        
+        int arrSum = 0;
+        for (int val : nums) {
+            arrSum += val;
+        }
+        
+        //k subset partition should have equal sum for each subset
+        //if the total array sun is not divisible by k thenone of the k 
+        //partition will have more sum than the others
+        //ex: nums = [5,5,5,5], k = 4 ==> arrSum = 20 where arrSum % k == 0
+        //that means subset = {{5},{5},{5},{5}} all sub set have equal sum of 5
+        //ex: nums = [5,5,5,6], k = 4 ==> arrSum = 21 where arrSum % k != 0
+        //that means subset = {{5},{5},{5},{6}} all sub set doesn't have equal sum
+        if (arrSum % k != 0) {
+            return false;
+        }
+        //sum of each subset
+        int sumPerKSubset = arrSum / k;
+        Set<Integer> indexUsed = new HashSet<>();
+        //sort nums so that we can handle duplicates while making decisions
+        Arrays.sort(nums);
+        return partitionToKEqualSumSubset_Backtracking_Helper(nums, k, 0, 0, sumPerKSubset, indexUsed);
+    }
+
     public void LRUCacheDesignImpl(List<String> operations, List<List<Integer>> inputs) {
 
         LRUCacheDesign lruObj = null;
@@ -16941,8 +17320,8 @@ public class DSA450Questions {
                 //if curr point[x, y] is not forming a diagonal with query[qX, qY]
                 // or any of the curr x, y is same as qX, qY then they can't form diagnal
                 //with query[qX, qY]
-                boolean diagonal = Math.abs(x - qX) == Math.abs(y - qY);
-                if (!diagonal || x == qY || y == qY) {
+                boolean isDiagonal = Math.abs(x - qX) == Math.abs(y - qY);
+                if (!isDiagonal || x == qY || y == qY) {
                     continue;
                 }
 
@@ -18246,6 +18625,7 @@ public class DSA450Questions {
         //......................................................................
 //        Row: 97
 //        System.out.println("Check two strings are isomorphic or not");
+//        //https://leetcode.com/problems/word-pattern/
 //        //https://www.geeksforgeeks.org/check-if-two-given-strings-are-isomorphic-to-each-other/
 //        String s1 = "aab";
 //        String s2 = "xxy";
@@ -19188,17 +19568,24 @@ public class DSA450Questions {
 //        obj.minOperationsToMakeArrayPallindrome(new int[]{1, 2});
         //......................................................................
 //        Row: 112
-//        System.out.println("maximum sum such that no 2 elements are adjacent / Sticler thief DP problem");
+//        System.out.println("maximum sum such that no 2 elements are adjacent / Stickler thief DP problem");
 //        //https://leetcode.com/problems/house-robber
+//        //https://leetcode.com/problems/house-robber-ii
 //        int[] houses = new int[]{5, 5, 10, 100, 10, 5};
 //        System.out.println("The maximum amount stickler thief can pick from alternate houses: " + obj.sticklerThief_Recursion(houses, houses.length));
-//        obj.sticklerThief_DP_Memoization(houses);
+//        System.out.println("The maximum amount stickler thief can pick from alternate houses (DP): "
+//                + obj.sticklerThief_DP_Memoization(houses));
 //        houses = new int[]{1, 2, 3};
 //        System.out.println("The maximum amount stickler thief can pick from alternate houses: " + obj.sticklerThief_Recursion(houses, houses.length));
-//        obj.sticklerThief_DP_Memoization(houses);
+//        System.out.println("The maximum amount stickler thief can pick from alternate houses (DP): "
+//                + obj.sticklerThief_DP_Memoization(houses));
 //        houses = new int[]{5};
 //        System.out.println("The maximum amount stickler thief can pick from alternate houses: " + obj.sticklerThief_Recursion(houses, houses.length));
-//        obj.sticklerThief_DP_Memoization(houses);
+//        System.out.println("The maximum amount stickler thief can pick from alternate houses (DP): "
+//                + obj.sticklerThief_DP_Memoization(houses));
+//        obj.sticklerThiefTwo_DP_Memoization(new int[]{2,3,2});
+//        obj.sticklerThiefTwo_DP_Memoization(new int[]{1,2,3});
+//        obj.sticklerThiefTwo_DP_Memoization(new int[]{1,2,3,1});
         //......................................................................
 //        Row: 203
 //        System.out.println("Check if given undirected graph is a binary tree or not");
@@ -21696,86 +22083,159 @@ public class DSA450Questions {
 //            {0, 0, 1, 0}, {0, 1, 1, 0}, {0, 1, 0, 0}});
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Jump game(s)");
-        //https://leetcode.com/problems/jump-game/
-        obj.jumpGame(new int[]{2, 3, 1, 1, 4});
-        obj.jumpGame(new int[]{3, 2, 1, 0, 4});
-        obj.jumpGame(new int[]{1});
-        obj.jumpGame(new int[]{0});
-        //https://leetcode.com/problems/jump-game-iii/
-        obj.jumpGameThree(new int[]{4, 2, 3, 0, 3, 1, 2}, 5);
-        obj.jumpGameThree(new int[]{3, 0, 2, 1, 2}, 2);
-        //https://leetcode.com/problems/jump-game-iv/
-        System.out.println("Steps to reach end: "
-                + obj.jumpGameFour(new int[]{100, -23, -23, 404, 100, 23, 23, 23, 3, 404}));
-        System.out.println("Steps to reach end: "
-                + obj.jumpGameFour(new int[]{7}));
-        System.out.println("Steps to reach end: "
-                + obj.jumpGameFour(new int[]{7, 6, 9, 6, 9, 6, 9, 7}));
-        //https://leetcode.com/problems/jump-game-vii/
-        System.out.println("Can we reach end of str: " + obj.jumpGameSeven("011010", 2, 3));
-        System.out.println("Can we reach end of str: " + obj.jumpGameSeven("01101110", 2, 3));
+//        System.out.println("Jump game(s)");
+//        //https://leetcode.com/problems/jump-game/
+//        obj.jumpGame(new int[]{2, 3, 1, 1, 4});
+//        obj.jumpGame(new int[]{3, 2, 1, 0, 4});
+//        obj.jumpGame(new int[]{1});
+//        obj.jumpGame(new int[]{0});
+//        //https://leetcode.com/problems/jump-game-iii/
+//        obj.jumpGameThree(new int[]{4, 2, 3, 0, 3, 1, 2}, 5);
+//        obj.jumpGameThree(new int[]{3, 0, 2, 1, 2}, 2);
+//        //https://leetcode.com/problems/jump-game-iv/
+//        System.out.println("Steps to reach end: "
+//                + obj.jumpGameFour(new int[]{100, -23, -23, 404, 100, 23, 23, 23, 3, 404}));
+//        System.out.println("Steps to reach end: "
+//                + obj.jumpGameFour(new int[]{7}));
+//        System.out.println("Steps to reach end: "
+//                + obj.jumpGameFour(new int[]{7, 6, 9, 6, 9, 6, 9, 7}));
+//        //https://leetcode.com/problems/jump-game-vii/
+//        System.out.println("Can we reach end of str: " + obj.jumpGameSeven("011010", 2, 3));
+//        System.out.println("Can we reach end of str: " + obj.jumpGameSeven("01101110", 2, 3));
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Djikstra Algorithm Graph");
-        obj.djikstraAlgorithm_Graph();
+//        System.out.println("Djikstra Algorithm Graph");
+//        obj.djikstraAlgorithm_Graph();
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Task Schedular");
-        //https://leetcode.com/problems/task-scheduler/
-        obj.taskSchedular_Greedy(new char[]{'A', 'A', 'A', 'B', 'B', 'B'}, 2);
-        obj.taskSchedular_Greedy(new char[]{'A', 'A', 'A', 'B', 'B', 'B'}, 0);
+//        System.out.println("Task Schedular");
+//        //https://leetcode.com/problems/task-scheduler/
+//        obj.taskSchedular_Greedy(new char[]{'A', 'A', 'A', 'B', 'B', 'B'}, 2);
+//        obj.taskSchedular_Greedy(new char[]{'A', 'A', 'A', 'B', 'B', 'B'}, 0);
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Check If A Move Is Legal");
-        //https://leetcode.com/problems/check-if-move-is-legal/
-        obj.checkIfMoveIsLegal(
-                new String[][]{
-                    {".", ".", ".", "B", ".", ".", ".", "."},
-                    {".", ".", ".", "W", ".", ".", ".", "."},
-                    {".", ".", ".", "W", ".", ".", ".", "."},
-                    {".", ".", ".", "W", ".", ".", ".", "."},
-                    {"W", "B", "B", ".", "W", "W", "W", "B"},
-                    {".", ".", ".", "B", ".", ".", ".", "."},
-                    {".", ".", ".", "B", ".", ".", ".", "."},
-                    {".", ".", ".", "W", ".", ".", ".", "."}
-                }, 4, 3, "B"
-        );
+//        System.out.println("Check If A Move Is Legal");
+//        //https://leetcode.com/problems/check-if-move-is-legal/
+//        obj.checkIfMoveIsLegal(
+//                new String[][]{
+//                    {".", ".", ".", "B", ".", ".", ".", "."},
+//                    {".", ".", ".", "W", ".", ".", ".", "."},
+//                    {".", ".", ".", "W", ".", ".", ".", "."},
+//                    {".", ".", ".", "W", ".", ".", ".", "."},
+//                    {"W", "B", "B", ".", "W", "W", "W", "B"},
+//                    {".", ".", ".", "B", ".", ".", ".", "."},
+//                    {".", ".", ".", "B", ".", ".", ".", "."},
+//                    {".", ".", ".", "W", ".", ".", ".", "."}
+//                }, 4, 3, "B"
+//        );
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Island Perimeter");
-        //https://leetcode.com/problems/island-perimeter/
-        obj.islandPerimeter(new int[][]{{0, 1, 0}, {0, 1, 0}});
-        obj.islandPerimeter(new int[][]{{1, 1, 0}});
-        obj.islandPerimeter(new int[][]{
-            {0, 1, 0, 0}, {1, 1, 1, 0}, {0, 1, 0, 0}, {1, 1, 0, 0}});
+//        System.out.println("Island Perimeter");
+//        //https://leetcode.com/problems/island-perimeter/
+//        obj.islandPerimeter(new int[][]{{0, 1, 0}, {0, 1, 0}});
+//        obj.islandPerimeter(new int[][]{{1, 1, 0}});
+//        obj.islandPerimeter(new int[][]{
+//            {0, 1, 0, 0}, {1, 1, 1, 0}, {0, 1, 0, 0}, {1, 1, 0, 0}});
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Decode String");
-        //https://leetcode.com/problems/decode-string/
-        obj.decodedString("3[a]2[bc]");
-        obj.decodedString("3[a2[c]]");
-        obj.decodedString("2[abc]3[cd]ef");
-        obj.decodedString("20[abc]3[cd]ef");
+//        System.out.println("Decode String");
+//        //https://leetcode.com/problems/decode-string/
+//        obj.decodedString("3[a]2[bc]");
+//        obj.decodedString("3[a2[c]]");
+//        obj.decodedString("2[abc]3[cd]ef");
+//        obj.decodedString("20[abc]3[cd]ef");
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Valid Palindrome II");
-        //https://leetcode.com/problems/valid-palindrome-ii/
-        System.out.println("Valid pallindrome two: " + obj.validPallindromeTwo("abc"));
-        System.out.println("Valid pallindrome two: " + obj.validPallindromeTwo("aba"));
-        System.out.println("Valid pallindrome two: " + obj.validPallindromeTwo("abca"));
+//        System.out.println("Valid Palindrome II");
+//        //https://leetcode.com/problems/valid-palindrome-ii/
+//        System.out.println("Valid pallindrome two: " + obj.validPallindromeTwo("abc"));
+//        System.out.println("Valid pallindrome two: " + obj.validPallindromeTwo("aba"));
+//        System.out.println("Valid pallindrome two: " + obj.validPallindromeTwo("abca"));
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Decode Ways DP Problem");
-        //https://leetcode.com/problems/decode-ways/
-        obj.decodeWays_Recursive_Memoization("12");
-        obj.decodeWays_Recursive_Memoization("226");
-        obj.decodeWays_Recursive_Memoization("06");
-        obj.decodeWays_Recursive_Memoization("11106");
-        obj.decodeWays_DP_Memoization("12");
-        obj.decodeWays_DP_Memoization("226");
-        obj.decodeWays_DP_Memoization("06");
-        obj.decodeWays_DP_Memoization("11106");
+//        System.out.println("Decode Ways DP Problem");
+//        //https://leetcode.com/problems/decode-ways/
+//        obj.decodeWays_Recursive_Memoization("12");
+//        obj.decodeWays_Recursive_Memoization("226");
+//        obj.decodeWays_Recursive_Memoization("06");
+//        obj.decodeWays_Recursive_Memoization("11106");
+//        obj.decodeWays_DP_Memoization("12");
+//        obj.decodeWays_DP_Memoization("226");
+//        obj.decodeWays_DP_Memoization("06");
+//        obj.decodeWays_DP_Memoization("11106");
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+//        System.out.println("Two City Scheduling");
+//        //https://leetcode.com/problems/two-city-scheduling/
+//        obj.twoCityScheduling_Greedy(new int[][]{
+//            {10, 20}, {30, 200}, {400, 50}, {30, 20}});
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT MY GOOGLE ONSITE INTERVIEW
+//        System.out.println("Filling Bookcase Shelves");
+//        //https://leetcode.com/problems/filling-bookcase-shelves/
+//        obj.fillingBooksInShelves_DP_Recusrive_Memoization(new int[][]{
+//            {1, 1}, {2, 3}, {2, 3}, {1, 1}, {1, 1}, {1, 1}, {1, 2}}, 4);
+//        obj.fillingBooksInShelves_DP_Recusrive_Memoization(new int[][]{
+//            {1, 3}, {2, 4}, {3, 2}}, 6);
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Perfect Squares");
+        //https://leetcode.com/problems/perfect-squares
+        //possible perfect sqrs that sum upto 12
+        //1. sqr(3) + sqr(1) + sqr(1) + sqr(1) ==> 9 + 1 + 1 + 1 == 12
+        //2. sqr(2) + sqr(2) + sqr(2) ==> 4 + 4 + 4 == 12 also this is MIN hence our result
+        obj.perfectSquares_DP_Recursive_Memoization(12);
+        obj.perfectSquares_DP_Recursive_Memoization(13);
+        obj.perfectSquares_DP_Recursive_Memoization(1);
+        //TLE on leetcode
+        obj.perfectSquares_DP_Memoization(12);
+        obj.perfectSquares_DP_Memoization(13);
+        obj.perfectSquares_DP_Memoization(1);
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Out of Boundary Paths");
+        //https://leetcode.com/problems/out-of-boundary-paths/
+        obj.outOfBoundaryPaths_DP_Recursive_Memoization(2, 2, 2, 0, 0);
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Range Sum Query (1D/ 2D) - Immutable");
+        //https://leetcode.com/problems/range-sum-query-immutable/
+        //https://leetcode.com/problems/range-sum-query-2d-immutable/
+        obj.rangeSumQueries_BruteForce(
+                new int[]{-2, 0, 3, -5, 2, -1},
+                new int[][]{{0, 2}, {2, 5}, {0, 5}});
+        obj.rangeSumQueries(
+                new int[]{-2, 0, 3, -5, 2, -1},
+                new int[][]{{0, 2}, {2, 5}, {0, 5}});
+        obj.rangeSumQuery2D(
+                new int[][]{
+                    {3, 0, 1, 4, 2},
+                    {5, 6, 3, 2, 1},
+                    {1, 2, 0, 1, 5},
+                    {4, 1, 0, 1, 7},
+                    {1, 0, 3, 0, 5}},
+                new int[][]{
+                    {0, 0, 4, 4},
+                    {2, 1, 4, 3},
+                    {1, 1, 2, 2},
+                    {1, 2, 2, 4}});
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Binary Search Tree Iterator");
+        //https://leetcode.com/problems/binary-search-tree-iterator
+        TreeNode<Integer> root1 = new TreeNode<>(2);
+        root1.setLeft(new TreeNode<>(1));
+        root1.setRight(new TreeNode<>(3));
+        obj.binarySearchTreeIterator(root1);
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Partition to K Equal Sum Subsets");
+        //https://leetcode.com/problems/partition-to-k-equal-sum-subsets/
+        System.out.println("Partition to K equal subset sum possible: "
+                + obj.partitionToKEqualSumSubset_Backtracking(new int[]{4, 3, 2, 3, 5, 2, 1}, 4));
+        System.out.println("Partition to K equal subset sum possible: "
+                + obj.partitionToKEqualSumSubset_Backtracking(new int[]{1, 2, 3, 4}, 3));
+
     }
 
 }
