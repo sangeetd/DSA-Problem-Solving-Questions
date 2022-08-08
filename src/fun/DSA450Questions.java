@@ -997,39 +997,39 @@ public class DSA450Questions {
     }
 
     public void maximumOfAllSubArrayOfSizeK(int[] arr, int K) {
-
+        //https://leetcode.com/problems/sliding-window-maximum/
         //https://www.geeksforgeeks.org/sliding-window-maximum-maximum-of-all-subarrays-of-size-k/
         List<Integer> result = new ArrayList<>();
         int n = arr.length;
         int index;
-        Deque<Integer> q = new LinkedList<>();
+        Deque<Integer> queue = new LinkedList<>();
         for (index = 0; index < K; index++) {
             //check curr element >= last added element
-            while (!q.isEmpty() && arr[q.peekLast()] <= arr[index]) {
-                q.removeLast();
+            while (!queue.isEmpty() && arr[queue.peekLast()] <= arr[index]) {
+                queue.removeLast();
             }
-            q.addLast(index);
+            queue.addLast(index);
         }
 
         for (; index < n; index++) {
 
-            result.add(arr[q.peekFirst()]);
+            result.add(arr[queue.peekFirst()]);
 
             //index => endIndex, q.peekFirst() = startIndex
             //endIndex - startIndex >= window(K) then maintain window size
-            while (!q.isEmpty() && index - q.peekFirst() >= K) {
-                q.removeFirst();
+            while (!queue.isEmpty() && index - queue.peekFirst() >= K) {
+                queue.removeFirst();
             }
 
-            while (!q.isEmpty() && arr[q.peekLast()] <= arr[index]) {
-                q.removeLast();
+            while (!queue.isEmpty() && arr[queue.peekLast()] <= arr[index]) {
+                queue.removeLast();
             }
-            q.addLast(index);
+            queue.addLast(index);
         }
-        result.add(arr[q.peekFirst()]);
+        result.add(arr[queue.peekFirst()]);
 
         //output:
-        System.out.println("output: " + result);
+        System.out.println("Max of all subarrays of size K: " + result);
     }
 
     public void averageWaitingTime(int[][] customers) {
@@ -1073,15 +1073,15 @@ public class DSA450Questions {
                         //check wheather there is any duplicates are there or not
                         //if there are duplactes update start and end until we reach the last
                         //duplicated element
-                        while (start < end && arr[start] == arr[start + 1]) {
+                        while (end > start && arr[start] == arr[start + 1]) {
                             start++;
                         }
 
-                        while (start < end && arr[end] == arr[end - 1]) {
+                        while (end > start && arr[end] == arr[end - 1]) {
                             end--;
                         }
 
-                        //update start and end from the last duplicated element
+                        //update start and end to the last duplicated element
                         start++;
                         end--;
 
@@ -1159,22 +1159,21 @@ public class DSA450Questions {
     public void contigousArrayWithEqualZeroAndOne(int[] arr) {
 
         //https://leetcode.com/problems/contiguous-array/
-        Map<Integer, Integer> map = new HashMap<>();
-        map.put(0, -1);
-        int count = 0;
+        Map<Integer, Integer> prefixSumIndexes = new HashMap<>();
+        prefixSumIndexes.put(0, -1);
+        int prefixSum = 0;
         int maxLen = 0;
 
         for (int i = 0; i < arr.length; i++) {
 
-            count += arr[i] == 1 ? 1 : -1;
+            prefixSum += arr[i] == 1 ? 1 : -1;
 
-            if (map.containsKey(count)) {
-                maxLen = Math.max(maxLen, i - map.get(count));
+            if (prefixSumIndexes.containsKey(prefixSum)) {
+                maxLen = Math.max(maxLen, i - prefixSumIndexes.get(prefixSum));
             } else {
-                map.put(count, i);
+                prefixSumIndexes.put(prefixSum, i);
             }
         }
-
         //output:
         System.out.println("Max length: " + maxLen);
     }
@@ -1235,7 +1234,7 @@ public class DSA450Questions {
         System.out.println("Max path sum: " + result);
     }
 
-    public void asteroidCollision(int[] asteroid) {
+    public void asteroidCollision(int[] asteroids) {
 
         //https://leetcode.com/problems/asteroid-collision/
         //explanation: https://youtu.be/6GGTBM7mwfs
@@ -1251,43 +1250,38 @@ public class DSA450Questions {
          if(abs(incoming) == peek) both will be destroyed and stack need to pop out peek value //2 else if cond
         
          */
+        
         Stack<Integer> stack = new Stack<>();
-        for (int i = 0; i < asteroid.length; i++) {
 
-            if (stack.isEmpty() || asteroid[i] > 0) {
-                stack.push(asteroid[i]);
+        for (int stone : asteroids) {
+            if (stack.isEmpty() || stone > 0) {
+                stack.push(stone);
             } else {
-
                 while (true) {
-
-                    int peek = stack.peek();
-                    if (peek < 0) {
-                        //peek is less that 0 means -ve(move to left)
-                        //incoming aseroids[i] is either +ve or -ve
-                        //they will never collide
-                        //ex: stack[-4], incoming = -10 both move to left, left dir(no collision)
-                        //ex: stack[-4], incoming = 10 both move to left, right dir(no collision)
-                        stack.push(asteroid[i]);
+                    int prevStone = stack.peek();
+                    if (prevStone < 0) {
+                        //prevStone = -ve, stone = -ve => left, left
+                        //prevStone = -ve, stone = +ve => left, right
+                        //both cases not collision will happen and we
+                        //can add stone to our stack
+                        stack.push(stone);
                         break;
-                    } else if (peek == -asteroid[i]) {
-                        //stack[4], incoming = -4 both move to right, left fir(collision)
-                        //magnitude of both are same so both will destroy 
-                        //(incoming = -4 will not be pushed and 4 is also poped)
-                        // If both are the same size, both will explode
+                    } else if (prevStone == -stone) {
+                        //prevStone = +ve, stone = -ve => 
+                        //prevStone == abs(stone) => right, left & size same
                         stack.pop();
                         break;
-                    } else if (peek > -asteroid[i]) {
-                        //peek is greater means +ve(move to right dir)
-                        //aseroids[i] is lesser -ve(move to left dir)
-                        //If two asteroids meet, the smaller one will explode
+                    } else if (prevStone > -stone) {
+                        //prevStone = +ve, stone = -ve =>
+                        //prevStone > abs(stone) => right, left, stone get destroyed
                         break;
                     } else {
-                        //case of stack[3,2,1], incoming is -10
-                        // -10 will collide with all the asteroids and blow them up until the stack is 
-                        //empty and when sack is empty put the -10 as the only asteroids
+                        //prevStone = +ve, stone = -ve => right, left
+                        //but abs(stone) > prevStone then all prevStone under this situation will get destroyed
                         stack.pop();
                         if (stack.isEmpty()) {
-                            stack.push(asteroid[i]);
+                            //once all such prevStone get destroyed, add stone
+                            stack.push(stone);
                             break;
                         }
                     }
@@ -1296,6 +1290,7 @@ public class DSA450Questions {
         }
 
         //output:
+        //int[] output = stack.stream().mapToInt(stone -> stone).toArray();
         int[] output = new int[stack.size()];
         int index = stack.size() - 1;
         while (!stack.isEmpty()) {
@@ -1487,7 +1482,8 @@ public class DSA450Questions {
 
     public void findMedianInDataStream(int[] stream) {
 
-        //explanantion: https://leetcode.com/problems/find-median-from-data-stream/solution/ [HEAP BASED]
+        //explanantion: https://leetcode.com/problems/find-median-from-data-stream/solution/
+        //[HEAP BASED]
         PriorityQueue<Integer> minHeap = new PriorityQueue<>((a, b) -> a.compareTo(b));
         PriorityQueue<Integer> maxHeap = new PriorityQueue<>((a, b) -> b.compareTo(a));
 
@@ -1508,22 +1504,22 @@ public class DSA450Questions {
         }
     }
 
-    public void numPairsDivisibleBy60(int[] time) {
+    public void numPairsDivisibleBy60(int[] times) {
 
         //https://leetcode.com/problems/pairs-of-songs-with-total-durations-divisible-by-60/
-        int[] remainder = new int[60];
-        int count = 0;
-        for (int t : time) {
-            if (t % 60 == 0) {
-                count += remainder[0];
-            } else {
-                count += remainder[60 - t % 60];
-            }
-            remainder[t % 60]++;
+        int[] seen = new int[60];
+        int result = 0;
+        
+        for(int time: times){
+            int hashedTime = time % 60;
+            int complement = 60 - hashedTime == 60 || 60 - hashedTime < 0
+                ? 0 : 60 - hashedTime;
+            result += seen[complement];
+            seen[hashedTime]++;
         }
 
         //output:
-        System.out.println("Total pair: " + count);
+        System.out.println("Total pair: " + result);
     }
 
     private int mergeSort(int[] arr, int start, int mid, int end) {
@@ -1984,48 +1980,6 @@ public class DSA450Questions {
         return true;
     }
 
-    private void combinationSum_2_Helper(int[] arr, int N, int target, int currSum,
-            List<Integer> currList, List<List<Integer>> result) {
-
-        if (currSum == target) {
-            //to avoid any duplicate combinations of arr element
-            for (List<Integer> l : result) {
-                //currList combination is already added in the result, we dont need extra
-                if (l.equals(currList)) {
-                    return;
-                }
-            }
-            result.add(currList);
-            return;
-        }
-
-        if (N >= arr.length || currSum > target || arr[N] > target) {
-            return;
-        }
-        //two decision to make
-        //1. we can skip the curr arr element and move to next element
-        combinationSum_2_Helper(arr, N + 1, target, currSum, new ArrayList<>(currList), result);
-
-        //2. we can take the curr arr element and that element needs to added 
-        //in the currList & also to be added in currSum
-        currList.add(arr[N]);
-        combinationSum_2_Helper(arr, N + 1, target, currSum + arr[N], new ArrayList<>(currList), result);
-    }
-
-    public void combinationSum_2(int[] arr, int target) {
-
-        //..............................T: O(2^N)
-        //APPROACH SIMILAR TO SUBSET SUM EQUAL TO TARGET
-        //NOT FULLY OPTIMISED
-        //https://leetcode.com/problems/combination-sum-ii/
-        Arrays.sort(arr);
-        List<List<Integer>> result = new ArrayList<>();
-        combinationSum_2_Helper(arr, 0, target, 0, new ArrayList<>(), result);
-
-        //output
-        System.out.println("All combinations whose sum is equal to target: " + result);
-    }
-
     public int longestConsecutiveSequence(int[] arr) {
 
         int N = arr.length;
@@ -2317,31 +2271,74 @@ public class DSA450Questions {
         System.out.println("All permutations of distinct integer: " + res);
     }
 
-    private void combinationSum_1_Helper(int[] arr, int index, int target,
-            List<Integer> curr, List<List<Integer>> res) {
+    private void combinationSum_1_Helper(int[] arr, int currIndex, int target, int currSum,
+            List<Integer> currCombination, List<List<Integer>> result) {
 
-        if (target == 0) {
-            res.add(new ArrayList<>(curr));
-        } else {
-            for (int j = index; j < arr.length; j++) {
-
-                //take only those arr elements that are smaller or equal to target
-                if (arr[j] <= target) {
-                    curr.add(arr[j]);
-                    combinationSum_1_Helper(arr, j, target - arr[j], curr, res);
-                    curr.remove(curr.size() - 1);
-                }
-            }
+        if (currSum == target) {
+            result.add(currCombination);
+            return;
         }
+
+        if (currIndex >= arr.length || currSum > target) {
+            return;
+        }
+
+        //2 choices
+        //1.) add the curr val and allow the same val to be used again
+        //currSum will also include this val
+        currCombination.add(arr[currIndex]);
+        combinationSum_1_Helper(arr, currIndex, target,
+                currSum + arr[currIndex], new ArrayList<>(currCombination), result);
+
+        //2.) skip the curr val and move to new val then currSum will not include val
+        currCombination.remove(currCombination.size() - 1);
+        combinationSum_1_Helper(arr, currIndex + 1, target, currSum, currCombination, result);
+
     }
 
     public void combinationSum_1(int[] arr, int target) {
 
+        //..............................T: O(2^N)
+        //APPROACH SIMILAR TO SUBSET SUM EQUAL TO TARGET
         //https://leetcode.com/problems/combination-sum
-        /*each array element can be taken more that once(unlimited supply), 
-         sum of each combination of list should be equal to target*/
+        Arrays.sort(arr);
+        List<List<Integer>> result = new ArrayList<>();
+        combinationSum_1_Helper(arr, 0, target, 0, new ArrayList<>(), result);
+
+        //output
+        System.out.println("All combinations whose sum is equal to target: " + result);
+    }
+
+    private void combinationSum_2_Helper(int[] arr, int index, int target,
+            List<Integer> curr, List<List<Integer>> res) {
+
+        if (target == 0) {
+            res.add(new ArrayList<>(curr));
+            return;
+        }
+        for (int i = index; i < arr.length; i++) {
+            //skip all the duplicate ones
+            if (i > index && arr[i] == arr[i - 1]) {
+                continue;
+            }
+
+            if (arr[i] > target) {
+                break;
+            }
+            //take only those arr elements that are smaller or equal to target
+            curr.add(arr[i]);
+            combinationSum_2_Helper(arr, i + 1, target - arr[i], curr, res);
+            curr.remove(curr.size() - 1);
+        }
+    }
+
+    public void combinationSum_2(int[] arr, int target) {
+
+        //https://leetcode.com/problems/combination-sum-ii
         List<List<Integer>> res = new ArrayList<>();
-        combinationSum_1_Helper(arr, 0, target, new ArrayList<>(), res);
+        //resulting comination is req in sorted order
+        Arrays.sort(arr);
+        combinationSum_2_Helper(arr, 0, target, new ArrayList<>(), res);
 
         //output
         System.out.println("All combinations whose sum equal to target: ");
@@ -3549,51 +3546,6 @@ public class DSA450Questions {
         System.out.println();
     }
 
-    private boolean shipWeightsWithinGivenDays_CheckDays(int[] weights, int maxWeight, int days) {
-        int day = 1;
-        int currWeightSum = 0;
-        for (int weight : weights) {
-            currWeightSum += weight;
-            if (currWeightSum > maxWeight) {
-                day++;
-                currWeightSum = weight;
-            }
-        }
-        return day <= days;
-    }
-
-    private int shipWeightsWithinGivenDays_BinarySearch(
-            int[] weights, int days, int startWeight, int endWeight) {
-        int capacity = -1;
-        while (endWeight >= startWeight) {
-            int midWeight = startWeight + (endWeight - startWeight) / 2;
-
-            if (shipWeightsWithinGivenDays_CheckDays(weights, midWeight, days)) {
-                capacity = midWeight;
-                endWeight = midWeight - 1;
-            } else {
-                startWeight = midWeight + 1;
-            }
-        }
-        return capacity;
-    }
-
-    public void shipWeightsWithinGivenDays(int[] weights, int days) {
-        //https://leetcode.com/problems/capacity-to-ship-packages-within-d-days/
-        ////explanation: https://youtu.be/YUF3_eBdzsk | https://youtu.be/bcAwHkL7A3A
-        int totalWeight = 0;
-        int maxShipmentWeight = 0;
-        for (int weight : weights) {
-            totalWeight += weight;
-            maxShipmentWeight = Math.max(maxShipmentWeight, weight);
-        }
-
-        int capacityOfShipNeeded = shipWeightsWithinGivenDays_BinarySearch(
-                weights, days, maxShipmentWeight, totalWeight);
-        //output:
-        System.out.println("Capacity of ship required to ship all weights in given days: " + capacityOfShipNeeded);
-    }
-
     private boolean splitArrayInLargestSum_CanSplit(int[] nums, int largestSum, int m) {
         int subarrays = 1;
         int currSum = 0;
@@ -3653,6 +3605,136 @@ public class DSA450Questions {
         }
         //output
         System.out.println("Minimized the largest sum among m subarrays: " + minimizedSum);
+    }
+
+    private boolean shipWeightsWithinGivenDays_CheckDays(int[] weights, int maxWeight, int days) {
+        int day = 1;
+        int currWeightSum = 0;
+        for (int weight : weights) {
+            currWeightSum += weight;
+            if (currWeightSum > maxWeight) {
+                day++;
+                currWeightSum = weight;
+            }
+        }
+        return day <= days;
+    }
+
+    private int shipWeightsWithinGivenDays_BinarySearch(
+            int[] weights, int days, int startWeight, int endWeight) {
+        int capacity = -1;
+        while (endWeight >= startWeight) {
+            int midWeight = startWeight + (endWeight - startWeight) / 2;
+
+            if (shipWeightsWithinGivenDays_CheckDays(weights, midWeight, days)) {
+                capacity = midWeight;
+                endWeight = midWeight - 1;
+            } else {
+                startWeight = midWeight + 1;
+            }
+        }
+        return capacity;
+    }
+
+    public void shipWeightsWithinGivenDays(int[] weights, int days) {
+        //https://leetcode.com/problems/capacity-to-ship-packages-within-d-days/
+        //explanation: https://youtu.be/YUF3_eBdzsk | https://youtu.be/bcAwHkL7A3A
+        //based on splitArrayInLargestSum()
+        int totalWeight = 0;
+        int maxShipmentWeight = 0;
+        for (int weight : weights) {
+            totalWeight += weight;
+            maxShipmentWeight = Math.max(maxShipmentWeight, weight);
+        }
+
+        int capacityOfShipNeeded = shipWeightsWithinGivenDays_BinarySearch(
+                weights, days, maxShipmentWeight, totalWeight);
+        //output:
+        System.out.println("Capacity of ship required to ship all weights in given days: " + capacityOfShipNeeded);
+    }
+
+    private boolean minimizePageAllocationsToStudents_CanAllocate(
+            int[] pages, int maxPageAllocation, int students) {
+
+        int studentsReq = 1;
+        int currPagesSum = 0;
+        for (int page : pages) {
+            currPagesSum += page;
+            if (currPagesSum > maxPageAllocation) {
+                currPagesSum = page;
+                studentsReq++;
+            }
+        }
+        return studentsReq <= students;
+    }
+
+    public void minimizePageAllocationsToStudents(int[] pages, int students) {
+        //............................T: O(N + N.Log(RANGE)), N = length of pages array
+        //RANGE is [min(pages[i]) to sum(pages[i])]
+        //https://www.interviewbit.com/problems/allocate-books/
+        //explanation: https://youtu.be/gYmWHvRHu-s
+        //based on splitArrayInLargestSum()
+        int minPage = pages[0];
+        int totalPages = 0;
+        for (int page : pages) {
+            minPage = Math.min(minPage, page);
+            totalPages += page;
+        }
+
+        //minimize the page allocations to student will lie in range
+        //[minPage to totalPages]
+        //overall T: O(N * Log(RANGE))
+        //Binary search: T; O(Log(RANGE)) 
+        int startPage = minPage;
+        int endPage = totalPages;
+        int minimizesPageAllocation = totalPages;
+        while (endPage > startPage) {
+            int midPage = startPage + (endPage - startPage) / 2;
+            //T: O(N), at worst the below method will check for N pages in pages[]
+            //whether we can allocate all of the pages to given student or not
+            if (minimizePageAllocationsToStudents_CanAllocate(pages, midPage, students)) {
+                minimizesPageAllocation = midPage;
+                endPage = midPage - 1;
+            } else {
+                startPage = midPage + 1;
+            }
+        }
+        //output
+        System.out.println("Minimized pages allocation to students: " + minimizesPageAllocation);
+    }
+
+    private boolean kokoEatingBananas_CanEat(int[] piles, int maxPile, int hour) {
+        int currHr = 0;
+        for (int pile : piles) {
+            currHr += pile / maxPile;
+            if (pile % maxPile != 0) {
+                currHr++;
+            }
+        }
+        return currHr <= hour;
+    }
+
+    public void kokoEatingBananas(int[] piles, int hour) {
+        //https://leetcode.com/problems/koko-eating-bananas/
+        //https://leetcode.com/problems/koko-eating-bananas/discuss/1691271/similar-to-allocate-pages-of-books
+        int maxPile = Integer.MIN_VALUE;
+        for (int pile : piles) {
+            maxPile = Math.max(maxPile, pile);
+        }
+
+        int start = 1;
+        int end = maxPile;
+
+        while (end >= start) {
+            int mid = start + (end - start) / 2;
+            if (kokoEatingBananas_CanEat(piles, mid, hour)) {
+                end = mid - 1;
+            } else {
+                start = mid + 1;
+            }
+        }
+        //output
+        System.out.println("Minimized speed in koko can eat all the bananas within given hours: " + start);
     }
 
     public void subseqOfLengthKWithLargestSum(int[] nums, int k) {
@@ -5242,12 +5324,22 @@ public class DSA450Questions {
             //we decreament the count of that char from map
             //to know how much of that char (chEnd) we needed and how much we have found
             if (tMap.containsKey(chEnd)) {
+                //we choose 1 char from string s that is also in string t
+                //so we will reduce the freq of this char, freq of this char >= 0
+                //shows how much char is req before we found some extra occurences
+                //of this char in string s because we don't care about the extra chars
+                //only char[freq to 0]
                 tMap.put(chEnd, tMap.get(chEnd) - 1);
+                //eacg time we are reduciing freq we are taking a char so tCount++
+                //below if block won't consider any extra occuerences of this char
                 if (tMap.get(chEnd) >= 0) {
                     tCount++;
                 }
             }
 
+            //below while loop with cond tCount == t.length()
+            //signifies that now we have all char of string t in string s
+            //we can calculate window and at same time try to minimize the window size
             while (tCount == t.length()) {
 
                 if (minLenWindow > (end - start + 1)) {
@@ -5306,7 +5398,8 @@ public class DSA450Questions {
             //balance out by moving this window
             //and removing start from patCharCount
             while ((end - start + 1) == patLen) {
-
+                //if the curr window also contains the same char as
+                //that of pattern string (patCharCount == patLen)
                 if (patCharCount == patLen) {
                     totalOccurences++;
                     occuerencesIndex.add(start);
@@ -5420,7 +5513,6 @@ public class DSA450Questions {
         //https://www.geeksforgeeks.org/print-all-combinations-of-balanced-parentheses/
         List<String> result = new ArrayList<>();
         generateBalancedParenthesis_Helper(n, "", 0, 0, result);
-
         //output:
         System.out.println("All balanced parenthesis: " + result);
     }
@@ -5545,7 +5637,7 @@ public class DSA450Questions {
 
             if (len > end - start) {
                 start = i - (len - 1) / 2;
-                end = i + (len) / 2;
+                end = i + (len / 2);
             }
         }
 
@@ -10542,8 +10634,8 @@ public class DSA450Questions {
         }
     }
 
-    private TreeNode<Integer> constructBinaryTreeFromInorderPreorderArray_Helper(int preIndex, int inStart, int inEnd,
-            int[] inorder, int[] preorder) {
+    private TreeNode<Integer> constructBinaryTreeFromInorderPreorderArray_Helper(
+            int preIndex, int inStart, int inEnd, Map<Integer, Integer> inorderMap, int[] preorder) {
 
         if (preIndex >= preorder.length || inStart > inEnd) {
             return null;
@@ -10551,14 +10643,12 @@ public class DSA450Questions {
 
         TreeNode<Integer> root = new TreeNode<>(preorder[preIndex]);
 
-        int index = inStart;
-        //adjust index until we find root value in inorder[index]
-        while (index <= inEnd && inorder[index] != preorder[preIndex]) {
-            index++;
-        }
+        int index = inorderMap.get(preorder[preIndex]);
 
-        root.setLeft(constructBinaryTreeFromInorderPreorderArray_Helper(preIndex + 1, inStart, index - 1, inorder, preorder));
-        root.setRight(constructBinaryTreeFromInorderPreorderArray_Helper(preIndex + 1 + index - inStart, index + 1, inEnd, inorder, preorder));
+        root.setLeft(constructBinaryTreeFromInorderPreorderArray_Helper(
+                preIndex + 1, inStart, index - 1, inorderMap, preorder));
+        root.setRight(constructBinaryTreeFromInorderPreorderArray_Helper(
+                preIndex + 1 + (index - inStart), index + 1, inEnd, inorderMap, preorder));
 
         return root;
     }
@@ -10571,37 +10661,46 @@ public class DSA450Questions {
         }
 
         int n = inorder.length;
-        TreeNode<Integer> root = constructBinaryTreeFromInorderPreorderArray_Helper(0, 0, n - 1, inorder, preorder);
+
+        Map<Integer, Integer> inorderMap = new HashMap<>();
+        for (int i = 0; i < n; i++) {
+            inorderMap.put(inorder[i], i);
+        }
+
+        TreeNode<Integer> root = constructBinaryTreeFromInorderPreorderArray_Helper(
+                0, 0, n - 1, inorderMap, preorder);
 
         //output
         new BinaryTree<>(root).treeBFS();
         System.out.println();
     }
 
-    private TreeNode<Integer> constructBinaryTreeFromInorderPostorderArray_Helper(int[] inorder, int[] postorder,
-            int postIndex, int inStart, int inEnd,
-            Map<Integer, Integer> inorderRootIndex) {
-        if (inStart > inEnd || postIndex < 0 || postIndex > inorder.length - 1) {
+    private TreeNode<Integer> constructBinaryTreeFromInorderPostorderArray_Helper(
+            int[] postorder, int postIndex, int inStart, int inEnd,
+            Map<Integer, Integer> inorderMap) {
+        if (inStart > inEnd || postIndex < 0 || postIndex > postorder.length) {
             return null;
         }
 
         TreeNode<Integer> root = new TreeNode<>(postorder[postIndex]);
-        int rootIndexInInorderArray = inorderRootIndex.get(root.getData());
+        int index = inorderMap.get(postorder[postIndex]);
 
         root.setLeft(constructBinaryTreeFromInorderPostorderArray_Helper(
-                inorder, postorder,
-                postIndex - (inEnd - rootIndexInInorderArray) - 1, // current root minus what's on the right side on the inorder array minus 1
+                postorder,
+                // current root minus what's on the right side on the inorder array minus 1
+                postIndex - (inEnd - index) - 1,
                 inStart,
-                rootIndexInInorderArray - 1,
-                inorderRootIndex
+                index - 1,
+                inorderMap
         ));
 
         root.setRight(constructBinaryTreeFromInorderPostorderArray_Helper(
-                inorder, postorder,
-                postIndex - 1, // the next right side node will be the next one (backwards) on the postorder list
-                rootIndexInInorderArray + 1,
+                postorder,
+                // the next right side node will be the next one (backwards) on the postorder list
+                postIndex - 1,
+                index + 1,
                 inEnd,
-                inorderRootIndex
+                inorderMap
         ));
 
         return root;
@@ -10615,13 +10714,13 @@ public class DSA450Questions {
         }
 
         int n = inorder.length;
-        Map<Integer, Integer> map = new HashMap<>();
+        Map<Integer, Integer> inorderMap = new HashMap<>();
         for (int i = 0; i < n; i++) {
-            map.put(inorder[i], i);
+            inorderMap.put(inorder[i], i);
         }
 
-        TreeNode<Integer> root = constructBinaryTreeFromInorderPostorderArray_Helper(inorder, postorder,
-                n - 1, 0, n - 1, map);
+        TreeNode<Integer> root = constructBinaryTreeFromInorderPostorderArray_Helper(
+                postorder, n - 1, 0, n - 1, inorderMap);
 
         //output
         new BinaryTree<>(root).treeBFS();
@@ -10637,10 +10736,8 @@ public class DSA450Questions {
         TreeNode<Integer> root = new TreeNode<>(preorder[preStart]);
 
         int index = preStart + 1;
-        for (; index <= preEnd; index++) {
-            if (preorder[index] > preorder[preStart]) {
-                break;
-            }
+        while (index <= preEnd && preorder[index] < preorder[preStart]) {
+            index++;
         }
 
         root.setLeft(constructBinarySearchTreeFromPreorderArray_Helper(preorder, preStart + 1, index - 1));
@@ -10655,11 +10752,12 @@ public class DSA450Questions {
         TreeNode<Integer> root = constructBinarySearchTreeFromPreorderArray_Helper(preorder, 0, n - 1);
 
         //output:
-        new BinaryTree<Integer>(root).treeBFS();
+        new BinaryTree<Integer>(root).treeInorder();
         System.out.println();
     }
 
-    private TreeNode<Integer> constructBinarySearchTreeFromPostorderArray_Helper(int[] postorder, int postStart, int postEnd) {
+    private TreeNode<Integer> constructBinarySearchTreeFromPostorderArray_Helper(
+            int[] postorder, int postStart, int postEnd) {
 
         if (postEnd > postStart) {
             return null;
@@ -10668,7 +10766,7 @@ public class DSA450Questions {
         TreeNode<Integer> root = new TreeNode<>(postorder[postStart]);
 
         int index = postStart - 1;
-        while (index >= postEnd && postorder[index] < postorder[postStart]) {
+        while (index >= postEnd && postorder[index] > postorder[postStart]) {
             index--;
         }
 
@@ -10684,7 +10782,7 @@ public class DSA450Questions {
         TreeNode<Integer> root = constructBinarySearchTreeFromPostorderArray_Helper(postorder, n - 1, 0);
 
         //output:
-        new BinaryTree<Integer>(root).treeBFS();
+        new BinaryTree<Integer>(root).treeInorder();
         System.out.println();
     }
 
@@ -16765,17 +16863,17 @@ public class DSA450Questions {
         //https://leetcode.com/problems/partition-to-k-equal-sum-subsets/
         //https://leetcode.com/problems/partition-to-k-equal-sum-subsets/discuss/2360226/Java-ororBeats-90-oror-Hardcore-expl'n-!!
         //explanation: https://youtu.be/mBk4I0X46oI
-        
+
         //we cant make k partitions(non-empty subsets) if array element is less than k
-        if(k > nums.length){
+        if (k > nums.length) {
             return false;
         }
-        
+
         int arrSum = 0;
         for (int val : nums) {
             arrSum += val;
         }
-        
+
         //k subset partition should have equal sum for each subset
         //if the total array sun is not divisible by k thenone of the k 
         //partition will have more sum than the others
@@ -17731,6 +17829,29 @@ public class DSA450Questions {
 
         System.out.println("3 group of cards possible from given 12 cards: "
                 + cardOf12_Helper(colorNumbers));
+    }
+
+    public void implementIncreamentalStack() {
+        //explanation: https://youtu.be/L8tY9gSfHz4
+        ImplementIncreamentalStack stack = new ImplementIncreamentalStack();
+        stack.push(1);
+        stack.push(2);
+        stack.push(3);
+        stack.push(4);
+        stack.print();
+        System.out.println("POP: " + stack.pop());
+        System.out.println("PEEK: " + stack.peek());
+        stack.print();
+        stack.increament(2, 10);
+        stack.push(5);
+        stack.push(6);
+        stack.push(7);
+        stack.increament(5, 100);
+        stack.print();
+        while (!stack.isEmpty()) {
+            System.out.println("POP: " + stack.pop());
+        }
+        stack.print();
     }
 
     public static void main(String[] args) {
@@ -19847,6 +19968,16 @@ public class DSA450Questions {
 //        obj.constructBinaryTreeFromInorderPostorderArray(new int[]{9, 3, 15, 20, 7}, new int[]{9,15,7,20,3});
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
+//        System.out.println("Construct BST from given preorder/postorder array");
+//        //https://practice.geeksforgeeks.org/problems/preorder-to-postorder4423/1/
+//        //PREORDER ARRAY
+//        obj.constructBinarySearchTreeFromPreorderArray(new int[]{40, 30, 35, 80, 100});
+//        obj.constructBinarySearchTreeFromPreorderArray(new int[]{40, 30, 32, 35, 80, 90, 100, 120});
+//        //POSTORDER ARRAY
+//        obj.constructBinarySearchTreeFromPostorderArray(new int[]{35, 30, 100, 80, 40});
+//        obj.constructBinarySearchTreeFromPostorderArray(new int[]{35, 32, 30, 120, 100, 90, 80, 40});
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
 //        System.out.println("Count all the occurences of anagrams of given pattern in the text SLIDING WINDOW");
 //        //https://www.geeksforgeeks.org/amazon-interview-experience-set-324-sde2/
 //        //https://leetcode.com/problems/permutation-in-string/
@@ -19854,16 +19985,6 @@ public class DSA450Questions {
 //        obj.countAllOccurencesOfPatternInGivenString("foorxxorfxdofr", "for");
 //        obj.countAllOccurencesOfPatternInGivenString("aabaabaa", "aaba");
 //        obj.countAllOccurencesOfPatternInGivenString("aabaabaa", "xyz");
-        //......................................................................
-//        Row: SEPARATE QUESTION IMPORTANT
-//        System.out.println("Construct BST from given preorder/postorder array");
-//        //https://practice.geeksforgeeks.org/problems/preorder-to-postorder4423/1/
-//        //PREORDER ARRAY
-//        obj.constructBinarySearchTreeFromPreorderArray(new int[]{40,30,35,80,100});
-//        obj.constructBinarySearchTreeFromPreorderArray(new int[]{40,30,32,35,80,90,100,120});
-//        //POSTORDER ARRAY
-//        obj.constructBinarySearchTreeFromPostorderArray(new int[]{35, 30, 100, 80, 40});
-//        obj.constructBinarySearchTreeFromPostorderArray(new int[]{35, 32, 30, 120, 100, 90, 80, 40});
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
 //        System.out.println("Convert all the leaves of tree to DLL and remove leaves from tree");
@@ -19887,6 +20008,7 @@ public class DSA450Questions {
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
 //        System.out.println("Maximum of all subarray in size of K");
+//        //https://leetcode.com/problems/sliding-window-maximum/
 //        //https://www.geeksforgeeks.org/sliding-window-maximum-maximum-of-all-subarrays-of-size-k/
 //        //https://practice.geeksforgeeks.org/problems/maximum-of-all-subarrays-of-size-k3101/1/
 //        obj.maximumOfAllSubArrayOfSizeK(new int[]{1, 2, 3, 1, 4, 5, 2, 3, 6}, 3);
@@ -20083,6 +20205,7 @@ public class DSA450Questions {
 //        obj.longestPallindromicSubstring("racecar");
 //        obj.longestPallindromicSubstring("babccaa");
 //        obj.longestPallindromicSubstring("aabbaa");
+//        obj.longestPallindromicSubstring("cbb");
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
 //        System.out.println("Next greater element 2 (consider array to cyclic)");
@@ -20586,13 +20709,6 @@ public class DSA450Questions {
 //                + obj.globalAndLocalInversionCountAreEqual(new int[]{1, 2, 0}));
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-//        System.out.println("Combination sum-2");
-//        //https://leetcode.com/problems/combination-sum-ii/
-//        obj.combinationSum_2(new int[]{10,1,2,7,6,1,5}, 8);
-//        obj.combinationSum_2(new int[]{2,5,2,1,2}, 5);
-//        obj.combinationSum_2(new int[]{1}, 5);
-        //......................................................................
-//        Row: SEPARATE QUESTION IMPORTANT
 //        System.out.println("Pascal triangle");
 //        //https://leetcode.com/problems/pascals-triangle/
 //        obj.printPascalTriangle_SimpleAddition(6);
@@ -21006,6 +21122,13 @@ public class DSA450Questions {
 //        obj.combinationSum_1(new int[]{1}, 2);
 //        obj.combinationSum_1(new int[]{2}, 1); //No Combinations Possible
 //        obj.combinationSum_1(new int[]{2, 3, 5}, 8);
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+//        System.out.println("Combination sum-2");
+//        //https://leetcode.com/problems/combination-sum-ii/
+//        obj.combinationSum_2(new int[]{10, 1, 2, 7, 6, 1, 5}, 8);
+//        obj.combinationSum_2(new int[]{2, 5, 2, 1, 2}, 5);
+//        obj.combinationSum_2(new int[]{1}, 5);
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
 //        System.out.println("Shortest unsorted contigous subarray");
@@ -22039,6 +22162,12 @@ public class DSA450Questions {
             {0, 0}, {2, 2}, {3, 10}, {5, 2}, {7, 0}});
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
+//        System.out.println("Split Array Largest Sum");
+//        //https://leetcode.com/problems/split-array-largest-sum/
+//        obj.splitArrayInLargestSum(new int[]{7, 2, 5, 10, 8}, 2);
+//        obj.splitArrayInLargestSum(new int[]{1, 2, 3, 4, 5}, 2);
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
 //        System.out.println("Capacity To Ship Packages Within D Days");
 //        //https://leetcode.com/problems/capacity-to-ship-packages-within-d-days/
 //        //https://leetcode.com/problems/minimized-maximum-of-products-distributed-to-any-store
@@ -22047,10 +22176,18 @@ public class DSA450Questions {
 //        obj.shipWeightsWithinGivenDays(new int[]{3, 2, 2, 4, 1, 4}, 3);
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-//        System.out.println("Split Array Largest Sum");
-//        //https://leetcode.com/problems/split-array-largest-sum/
-//        obj.splitArrayInLargestSum(new int[]{7, 2, 5, 10, 8}, 2);
-//        obj.splitArrayInLargestSum(new int[]{1, 2, 3, 4, 5}, 2);
+//        System.out.println("Minimize Page Allocations To Students");
+//        //https://www.interviewbit.com/problems/allocate-books/
+//        obj.minimizePageAllocationsToStudents(new int[]{12, 34, 67, 90}, 2);
+//        obj.minimizePageAllocationsToStudents(new int[]{12, 34, 67, 90}, 1);
+//        obj.minimizePageAllocationsToStudents(new int[]{12, 34, 67, 90}, 4);
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+//        System.out.println("Koko Eating Bananas");
+//        //https://leetcode.com/problems/koko-eating-bananas/
+//        obj.kokoEatingBananas(new int[]{3, 6, 7, 11}, 8);
+//        obj.kokoEatingBananas(new int[]{30, 11, 23, 4, 20}, 5);
+//        obj.kokoEatingBananas(new int[]{30, 11, 23, 4, 20}, 6);
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
 //        System.out.println("Find Subsequence of Length K With the Largest Sum");
@@ -22235,6 +22372,10 @@ public class DSA450Questions {
                 + obj.partitionToKEqualSumSubset_Backtracking(new int[]{4, 3, 2, 3, 5, 2, 1}, 4));
         System.out.println("Partition to K equal subset sum possible: "
                 + obj.partitionToKEqualSumSubset_Backtracking(new int[]{1, 2, 3, 4}, 3));
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Implement Increamental Stack");
+        obj.implementIncreamentalStack();
 
     }
 
