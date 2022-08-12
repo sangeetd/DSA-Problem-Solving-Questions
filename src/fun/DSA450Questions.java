@@ -8565,7 +8565,7 @@ public class DSA450Questions {
 
         //First 2 approaches are in SomePracticeQuestion reorderList_1/reorderList_2
         //actual
-        new LinkedListUtil<Integer>(head).print();
+        new LinkedListUtil<>(head).print();
 
         //explanantion: https://youtu.be/xRYPjDMSUFw
         //ex: 1-> 2-> 3-> 4-> 5-> NULL
