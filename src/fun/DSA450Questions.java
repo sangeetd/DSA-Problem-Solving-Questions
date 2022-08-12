@@ -1250,7 +1250,6 @@ public class DSA450Questions {
          if(abs(incoming) == peek) both will be destroyed and stack need to pop out peek value //2 else if cond
         
          */
-        
         Stack<Integer> stack = new Stack<>();
 
         for (int stone : asteroids) {
@@ -1509,11 +1508,11 @@ public class DSA450Questions {
         //https://leetcode.com/problems/pairs-of-songs-with-total-durations-divisible-by-60/
         int[] seen = new int[60];
         int result = 0;
-        
-        for(int time: times){
+
+        for (int time : times) {
             int hashedTime = time % 60;
             int complement = 60 - hashedTime == 60 || 60 - hashedTime < 0
-                ? 0 : 60 - hashedTime;
+                    ? 0 : 60 - hashedTime;
             result += seen[complement];
             seen[hashedTime]++;
         }
@@ -3167,6 +3166,62 @@ public class DSA450Questions {
             System.out.println("Indexes(1-based index) of two element that sums equal to target: "
                     + result[0] + " " + result[1]);
         }
+    }
+
+    private void fourSum_twoSumSortedApproach(
+            int[] nums, long target, int index, List<Integer> currList, List<List<Integer>> result) {
+
+        int n = nums.length;
+        int start = index;
+        int end = n - 1;
+        while (end > start) {
+            long currSum = nums[start] + nums[end];
+            if (currSum == target) {
+                List<Integer> kSumList = new ArrayList<>(currList);
+                kSumList.add(nums[start]);
+                kSumList.add(nums[end]);
+                result.add(kSumList);
+                start++;
+                while (start < end && nums[start] == nums[start - 1]) {
+                    start++;
+                }
+            } else if (currSum > target) {
+                end--;
+            } else {
+                start++;
+            }
+        }
+    }
+
+    private void fourSum_CombinationSum2Approach(
+            int[] nums, int target, int index, int kSum, List<Integer> currList, List<List<Integer>> result) {
+        if (kSum == 2) {
+            fourSum_twoSumSortedApproach(nums, target, index, currList, result);
+            return;
+        }
+
+        for (int i = index; i < nums.length; i++) {
+            if (i > index && nums[i] == nums[i - 1]) {
+                continue;
+            }
+            currList.add(nums[i]);
+            fourSum_CombinationSum2Approach(
+                    nums, target - nums[i], i + 1, kSum - 1, new ArrayList<>(currList), result);
+            currList.remove(currList.size() - 1);
+        }
+    }
+
+    public void fourSum(int[] nums, int target) {
+        //https://leetcode.com/problems/4sum/
+        //explanation: https://youtu.be/EYeR-_1NRlQ
+        //This approach is generic approach for K-sum (4Sum, 5sum...)
+        //based on combination_2 & twoSum-Sorted
+        List<List<Integer>> result = new ArrayList<>();
+        Arrays.sort(nums);
+        int kSum = 4;
+        fourSum_CombinationSum2Approach(nums, target, 0, kSum, new ArrayList<>(), result);
+        //output
+        System.out.println("Four sum/ Generic KSum: " + result);
     }
 
     public void maximumLengthOfSubarrayWithPositiveProduct(int[] nums) {
@@ -8519,58 +8574,60 @@ public class DSA450Questions {
 
         //explanantion: https://youtu.be/xRYPjDMSUFw
         //ex: 1-> 2-> 3-> 4-> 5-> NULL
-        //slowPrev = 2->.., slow = 3->..
+        //slow = 3->..
         //break it into 2 list (2 half)
         //l1 = 1-> 2-> NULL
         //l2 = 3-> 4-> 5-> NULL
         //reverse(l2) = 5-> 4-> 3-> NULL
         //reorderMerger(l1, l2) = 1-> 5-> 2-> 4-> 3-> NULL
-        Node<Integer> slowPrev = null;
+        if(head == null || head.getNext() == null){
+            return;
+        }
+        
+        //find mid of the linked list
         Node<Integer> slow = head;
-        Node<Integer> fast = head;
-        while (fast != null && fast.getNext() != null) {
-            slowPrev = slow;
+        Node<Integer> fast = head.getNext();
+        while(fast != null && fast.getNext() != null){
             slow = slow.getNext();
             fast = fast.getNext().getNext();
         }
-
-        //list 1 head-> slowPrev-> NULL
-        Node<Integer> list1 = head;
-        slowPrev.setNext(null);
-
-        //reverse slow ptr
-        Node<Integer> curr = slow;
-        Node<Integer> next = null;
+        
+        Node<Integer> mid = slow;
+        
+        Node<Integer> tempSecond = mid.getNext();
+        mid.setNext(null);
+        
+        //reversing the second half of the list
+        Node<Integer> curr = tempSecond;
         Node<Integer> prev = null;
-
-        while (curr != null) {
+        Node<Integer> next = null;
+        
+        while(curr != null){
             next = curr.getNext();
             curr.setNext(prev);
             prev = curr;
             curr = next;
         }
-
-        //list 2 would be slow-reversed 2nd half (prev)
-        Node<Integer> list2 = prev;
-
-        //reorder merge(list1, list2)
-        while (list1 != null) {
-
-            Node<Integer> list1_Next = list1.getNext();
-            Node<Integer> list2_Next = list2.getNext();
-
-            list1.setNext(list2);
-
-            if (list1_Next == null) {
+        
+        Node<Integer> second = prev;
+        Node<Integer> first = head;
+        
+        while(second != null){
+            
+            Node<Integer> firstNext = first.getNext();
+            Node<Integer> secondNext = second.getNext();
+            
+            first.setNext(second);
+            
+            if(firstNext == null){
                 break;
             }
-
-            list2.setNext(list1_Next);
-
-            list1 = list1_Next;
-            list2 = list2_Next;
+            
+            second.setNext(firstNext);
+            
+            first = firstNext;
+            second = secondNext;
         }
-
         //output
         new LinkedListUtil<Integer>(head).print();
     }
@@ -12613,30 +12670,28 @@ public class DSA450Questions {
             System.out.println("Number formed: 0");
             return;
         }
-
-        int index = 0;
+        
         StringBuilder sb = new StringBuilder();
-        Stack<Character> stack = new Stack<>();
+        Stack<Integer> stack = new Stack<>();
 
-        while (index < num.length()) {
+        for (char ch : num.toCharArray()) {
+            int digit = ch - '0';
             //Greedily take the smaller digit than stack's peek digit
             //ex: "1432219"
             //stack [1]
             //stack [1, 4] as not 1 > 4
             //stack [1, 3] as 4 > 3 
             //becasue if number has to be formed in that case 14 > 13 smaller num req 13 and so on.
-            while (K != 0 && !stack.isEmpty() && stack.peek() > num.charAt(index)) {
+            while (!stack.isEmpty() && stack.peek() > digit && K != 0) {
                 stack.pop();
                 K--;
             }
-
-            stack.push(num.charAt(index));
-            index++;
+            stack.push(digit);
         }
 
         //case when all the digits in the stack are same
         //ex: 1111
-        while (K != 0) {
+        while (!stack.isEmpty() && K != 0) {
             stack.pop();
             K--;
         }
@@ -12659,33 +12714,28 @@ public class DSA450Questions {
         System.out.println("Number formed: " + sb.toString());
     }
 
-    public void findTheMostCompetetiveSubsequenceOfSizeKFromArray(int[] arr, int K) {
+    public void findTheMostCompetetiveSubsequenceOfSizeKFromArray(int[] nums, int K) {
 
         //problem: https://leetcode.com/problems/find-the-most-competitive-subsequence/
         //explanation: https://leetcode.com/problems/find-the-most-competitive-subsequence/discuss/1113429/Java-Brute-Force-Stack
-        int[] result = new int[K];
+        int n = nums.length;
         Stack<Integer> stack = new Stack<>();
-
-        for (int i = 0; i < arr.length; i++) {
-
-            int curr = arr[i];
-
-            if (stack.size() != K || stack.peek() > curr) {
-
-                int leftNums = arr.length - i;
-                while (K - stack.size() < leftNums && !stack.isEmpty() && stack.peek() > curr) {
-                    stack.pop();
-                }
-                stack.push(curr);
+        
+        for(int i = 0; i < n; i++){
+            int val = nums[i];
+            
+            while(stack.size() > 0 && stack.size() + n - (i + 1) >= K
+            && stack.peek() > val){
+                stack.pop();
             }
+            stack.push(val);
         }
-
-        int index = result.length - 1;
-        while (!stack.isEmpty()) {
-            result[index--] = stack.pop();
+        
+        while(!stack.isEmpty() && stack.size() > K){
+            stack.pop();
         }
-
         //output
+        int[] result = stack.stream().mapToInt(val -> val).toArray();
         for (int x : result) {
             System.out.print(x + " ");
         }
@@ -16890,6 +16940,251 @@ public class DSA450Questions {
         //sort nums so that we can handle duplicates while making decisions
         Arrays.sort(nums);
         return partitionToKEqualSumSubset_Backtracking_Helper(nums, k, 0, 0, sumPerKSubset, indexUsed);
+    }
+
+    private void nQueens_Backtracking_Helper_HashSetCheck(
+            char[][] board, int col, int n,
+            List<List<String>> queenPlacements, Set<String> previousPlacedQueens) {
+
+        //if we have placed our queens successfully
+        //starting from col == 0 to col == n - 1
+        //then when col == n is called, we can say the curr placement of queens
+        //are valid palcements
+        if (col == n) {
+            //as per output format, converting each row to string format
+            List<String> currPlacement = new ArrayList<>();
+            for (char[] row : board) {
+                currPlacement.add(String.valueOf(row));
+            }
+            queenPlacements.add(currPlacement);
+            return;
+        }
+
+        //for a given col we will try to place our queen in each row
+        //of that col, if it is safe to place there we will move to next col
+        //to try to place our next queen safely
+        for (int row = 0; row < n; row++) {
+            //first we will check if it is safe to place our curr queen
+            //at a given row and col
+            //safety rule:
+            //1. no queen should already be there in upper-left diagonal
+            //2. no queen should already be there in curr row straight-left col
+            //3. no queen should already be there in bottom-left diagonal
+            //if a queen is already placed on any of the below locations we don't
+            //want to place our curr queen in alignment with previous queen
+            if (previousPlacedQueens.contains("UPPER-LEFT-DIAGONAL" + (n - 1 + col - row))
+                    || previousPlacedQueens.contains("STRAIGHT-LEFT" + row)
+                    || previousPlacedQueens.contains("BOTTOM-LEFT-DIAGONAL" + (row + col))) {
+                continue;
+            }
+            //we will try place our Queen in each row
+            //in a given col
+
+            previousPlacedQueens.add("UPPER-LEFT-DIAGONAL" + (n - 1 + col - row));
+            previousPlacedQueens.add("STRAIGHT-LEFT" + row);
+            previousPlacedQueens.add("BOTTOM-LEFT-DIAGONAL" + (row + col));
+
+            board[row][col] = 'Q';
+
+            nQueens_Backtracking_Helper_HashSetCheck(
+                    board, col + 1, n, queenPlacements, previousPlacedQueens);
+
+            board[row][col] = '.';
+
+            previousPlacedQueens.remove("UPPER-LEFT-DIAGONAL" + (n - 1 + col - row));
+            previousPlacedQueens.remove("STRAIGHT-LEFT" + row);
+            previousPlacedQueens.remove("BOTTOM-LEFT-DIAGONAL" + (row + col));
+        }
+    }
+
+    private boolean nQueens_Backtracking_IsSafeToPlaceQueen(
+            char[][] board, int row, int col, int n) {
+        /*
+         //since we are moving col wise by placing our queen in curr col
+         //and we are moving like [0 <= col < n] therefore from our col there will
+         //be no queens placed in right, only before this curr col.
+         //so keeping this in mind we will only check all the prev dires from the curr col
+         //to check if there were any queen placed in previous itrations or not
+         upper-left diagonal
+         straight-left col
+         bootom-left diagonal
+         .\
+         ..\
+         ...\
+         ....\
+        
+         ----- [COL]
+        
+         ..../
+         .../
+         ../
+         ./
+        
+         */
+        int currRow = row;
+        int currCol = col;
+
+        //upper-left diagonal
+        while (currRow >= 0 && currCol >= 0) {
+            if (board[currRow][currCol] == 'Q') {
+                return false;
+            }
+            currRow--;
+            currCol--;
+        }
+
+        currRow = row;
+        currCol = col;
+        //same row straight-left col
+        while (currCol >= 0) {
+            if (board[currRow][currCol] == 'Q') {
+                return false;
+            }
+            currCol--;
+        }
+
+        currRow = row;
+        currCol = col;
+        //same row straight-left col
+        while (currRow < n && currCol >= 0) {
+            if (board[currRow][currCol] == 'Q') {
+                return false;
+            }
+            currRow++;
+            currCol--;
+        }
+        return true;
+    }
+
+    private void nQueens_Backtracking_Helper(
+            char[][] board, int col, int n, List<List<String>> queenPlacements) {
+
+        //if we have placed our queens successfully
+        //starting from col == 0 to col == n - 1
+        //then when col == n is called, we can say the curr placement of queens
+        //are valid palcements
+        if (col == n) {
+            //as per output format, converting each row to string format
+            List<String> currPlacement = new ArrayList<>();
+            for (char[] row : board) {
+                currPlacement.add(String.valueOf(row));
+            }
+            queenPlacements.add(currPlacement);
+            return;
+        }
+
+        //for a given col we will try to place our queen in each row
+        //of that col, if it is safe to place there we will move to next col
+        //to try to place our next queen safely
+        for (int row = 0; row < n; row++) {
+            //first we will check if it is safe to place our curr queen
+            //at a given row and col
+            //safety rule:
+            //1. no queen should already be there in upper-left diagonal
+            //2. no queen should already be there in curr row straight-left col
+            //3. no queen should already be there in bottom-left diagonal
+            if (nQueens_Backtracking_IsSafeToPlaceQueen(board, row, col, n)) {
+                //we will try place our Queen in each row
+                //in a given col
+                board[row][col] = 'Q';
+                nQueens_Backtracking_Helper(board, col + 1, n, queenPlacements);
+                board[row][col] = '.';
+            }
+        }
+    }
+
+    public void nQueens_Backtracking(int n) {
+        //https://leetcode.com/problems/n-queens/
+        //explanation: https://youtu.be/i05Ju7AftcM
+        List<List<String>> queenPlacements = new ArrayList<>();
+        char[][] board = new char[n][n];
+        for (int r = 0; r < n; r++) {
+            for (int c = 0; c < n; c++) {
+                board[r][c] = '.';
+            }
+        }
+        nQueens_Backtracking_Helper(board, 0, n, queenPlacements);
+
+        //on leetcode this set based checking was slow,
+        //keep this approach if in case it was asked
+//        Set<String> previousPlacedQueens = new HashSet<>();
+//        nQueens_Backtracking_Helper_HashSetCheck(board, 0, n, queenPlacements, previousPlacedQueens);
+        //output:
+        System.out.println("All possible placement of N-Queens: " + queenPlacements);
+    }
+
+    private boolean sudokuSolver_Backtracking_IsValidToPutNum(
+            char[][] board, int row, int col, char num) {
+        for (int i = 0; i < board.length; i++) {
+            //if in row wise dir already have same num as we are tyring to put
+            if (board[i][col] == num) {
+                return false;
+            }
+            //if in col wise dir already have same num as we are tyring to put
+            if (board[row][i] == num) {
+                return false;
+            }
+            //if the curr 3*3 submatrix already have same num as we are tyring to put
+            if (board[3 * (row / 3) + i / 3][3 * (col / 3) + i % 3] == num) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean sudokuSolver_Backtracking_Helper(char[][] board) {
+
+        for (int r = 0; r < board.length; r++) {
+            for (int c = 0; c < board[r].length; c++) {
+                //if the curr spot is empty
+                if (board[r][c] == '.') {
+                    //with this loop we are trying to put in all the possible num
+                    //in the given row and col
+                    for (char num = '1'; num <= '9'; num++) {
+                        //for curr num we will check if it is valid to place this num
+                        //in curr row and col, if it is safe we will put that num into
+                        //the curr empty spot and move to new location by recursion
+                        if (sudokuSolver_Backtracking_IsValidToPutNum(board, r, c, num)) {
+                            board[r][c] = num;
+                            //if by recursion we find the sudoku is solved we will return true
+                            //if it can't be solved keep the original empty spot in the curr row and col
+                            if (sudokuSolver_Backtracking_Helper(board)) {
+                                return true;
+                            } else {
+                                board[r][c] = '.';
+                            }
+                        }
+                    }
+                    //if above loop of [1 to 9] doesn't satisfy the sudoku board
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    public void sudokuSolver_Backtracking(char[][] board) {
+        //https://leetcode.com/problems/sudoku-solver
+        //explanation: https://youtu.be/FWAIf_EVUKE
+        //actual:
+        System.out.println("Empty sudoku board");
+        for (int r = 0; r < board.length; r++) {
+            for (int c = 0; c < board[r].length; c++) {
+                System.out.print(board[r][c] + "\t");
+            }
+            System.out.println();
+        }
+
+        sudokuSolver_Backtracking_Helper(board);
+
+        //output
+        System.out.println("Solved sudoku");
+        for (int r = 0; r < board.length; r++) {
+            for (int c = 0; c < board[r].length; c++) {
+                System.out.print(board[r][c] + "\t");
+            }
+            System.out.println();
+        }
     }
 
     public void LRUCacheDesignImpl(List<String> operations, List<List<Integer>> inputs) {
@@ -21846,13 +22141,16 @@ public class DSA450Questions {
 //        });
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-//        System.out.println("Two Sum/ Two Sum II - Input Array Is Sorted");
+//        System.out.println("Two Sum/ Two Sum II - Input Array Is Sorted/ Four Sum");
 //        //https://leetcode.com/problems/two-sum/
 //        //https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/
 //        obj.twoSum_UnsortedArray(new int[]{2, 7, 11, 15}, 9);
 //        obj.twoSum_UnsortedArray(new int[]{3, 2, 4}, 6);
 //        obj.twoSum2_SortedArray(new int[]{2, 7, 11, 15}, 9);
 //        obj.twoSum2_SortedArray(new int[]{-1, 0}, -1);
+//        //https://leetcode.com/problems/4sum/
+//        obj.fourSum(new int[]{1, 0, -1, 0, -2, 2}, 0);
+//        obj.fourSum(new int[]{2, 2, 2, 2, 2}, 8);
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
 //        System.out.println("Smallest String With A Given Numeric Value");
@@ -22376,7 +22674,27 @@ public class DSA450Questions {
 //        Row: SEPARATE QUESTION IMPORTANT
         System.out.println("Implement Increamental Stack");
         obj.implementIncreamentalStack();
-
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("N-Queens");
+        //https://leetcode.com/problems/n-queens/
+        obj.nQueens_Backtracking(1);
+        obj.nQueens_Backtracking(4);
+        obj.nQueens_Backtracking(9);
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Sudoku Solver");
+        //https://leetcode.com/problems/sudoku-solver
+        obj.sudokuSolver_Backtracking(new char[][]{
+            {'5', '3', '.', '.', '7', '.', '.', '.', '.'},
+            {'6', '.', '.', '1', '9', '5', '.', '.', '.'},
+            {'.', '9', '8', '.', '.', '.', '.', '6', '.'},
+            {'8', '.', '.', '.', '6', '.', '.', '.', '3'},
+            {'4', '.', '.', '8', '.', '3', '.', '.', '1'},
+            {'7', '.', '.', '.', '2', '.', '.', '.', '6'},
+            {'.', '6', '.', '.', '.', '.', '2', '8', '.'},
+            {'.', '.', '.', '4', '1', '9', '.', '.', '5'},
+            {'.', '.', '.', '.', '8', '.', '.', '7', '9'}});
     }
 
 }
