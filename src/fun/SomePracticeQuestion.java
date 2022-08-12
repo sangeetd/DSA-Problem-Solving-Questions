@@ -5,7 +5,6 @@
  */
 package fun;
 
-import com.sun.xml.internal.bind.v2.runtime.Coordinator;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,7 +13,6 @@ import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -26,10 +24,7 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.Stack;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import javafx.util.Pair;
 
 /**
  *
