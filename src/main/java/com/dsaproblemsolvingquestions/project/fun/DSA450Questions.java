@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
- *
  * @author sangeetdas
  */
 public class DSA450Questions {
@@ -455,8 +454,8 @@ public class DSA450Questions {
         //output:
         System.out.println("Max sum subarray with start & end: "
                 + (maxSum == 0
-                        ? maxElement + " Start: " + maxElementIndex + " end: " + maxElementIndex
-                        : maxSum + " Start: " + start + " end: " + end)
+                ? maxElement + " Start: " + maxElementIndex + " end: " + maxElementIndex
+                : maxSum + " Start: " + start + " end: " + end)
         );
     }
 
@@ -1430,6 +1429,61 @@ public class DSA450Questions {
         return false;
     }
 
+    public boolean frogJump(int[] stones) {
+        //https://leetcode.com/problems/frog-jump/
+        class Jump {
+
+            int currStone;
+            int jump;
+
+            public Jump(int currStone, int jump) {
+                this.currStone = currStone;
+                this.jump = jump;
+            }
+
+        }
+
+        int n = stones.length;
+        int lastStone = stones[n - 1];
+        Queue<Jump> queue = new LinkedList<>();
+        Set<String> visited = new HashSet<>();
+        Set<Integer> stonesSet = new HashSet<>();
+        for (int stone : stones) {
+            stonesSet.add(stone);
+        }
+
+        int currStone = 0;
+        int jump = 0;
+        queue.add(new Jump(currStone, jump));
+
+        while (!queue.isEmpty()) {
+            Jump curr = queue.poll();
+            currStone = curr.currStone;
+            jump = curr.jump;
+
+            //if we have reached the last stone
+            if (currStone == lastStone) {
+                return true;
+            }
+
+            //if any currStone doesn't exist in the stone list,
+            //we can't move there, so continue
+            if (!stonesSet.contains(currStone)) {
+                continue;
+            }
+            //from curr jump we can furtehr move to k, k - 1, k + 1 move
+            for (int moveK = -1; moveK <= 1; moveK++) {
+                //if any currStone and jump previously visited, continue
+                if (visited.contains(currStone + "," + (jump + moveK))) {
+                    continue;
+                }
+                queue.add(new Jump(currStone + jump + moveK, jump + moveK));
+                visited.add(currStone + "," + (jump + moveK));
+            }
+        }
+        return false;
+    }
+
     public void nextGreaterElement2_CyclicArray(int[] arr) {
 
         //explanation: https://leetcode.com/problems/next-greater-element-ii/solution/
@@ -2154,9 +2208,9 @@ public class DSA450Questions {
         int pair = 0;
         Map<Integer, Long> map = IntStream.of(arr).boxed()
                 .collect(Collectors.groupingBy(
-                                Function.identity(),
-                                Collectors.counting()
-                        ));
+                        Function.identity(),
+                        Collectors.counting()
+                ));
 
         for (int key : map.keySet()) {
 
@@ -2184,9 +2238,9 @@ public class DSA450Questions {
         //get the frequency count of all the array element
         Map<Integer, Long> map = IntStream.of(arr).boxed()
                 .collect(Collectors.groupingBy(
-                                Function.identity(),
-                                Collectors.counting()
-                        ));
+                        Function.identity(),
+                        Collectors.counting()
+                ));
 
         //arrange all the array element at top having less frequency
         PriorityQueue<Integer> minFreq = new PriorityQueue<>(
@@ -2218,8 +2272,8 @@ public class DSA450Questions {
     }
 
     private void printAllPermutationOfDistinctIntegerArray_Helper(int[] arr,
-            int index,
-            List<List<Integer>> res) {
+                                                                  int index,
+                                                                  List<List<Integer>> res) {
 
         if (index == arr.length) {
             res.add(Arrays.stream(arr).boxed().collect(Collectors.toList()));
@@ -2252,7 +2306,7 @@ public class DSA450Questions {
     }
 
     private void combinationSum_1_Helper(int[] arr, int currIndex, int target, int currSum,
-            List<Integer> currCombination, List<List<Integer>> result) {
+                                         List<Integer> currCombination, List<List<Integer>> result) {
 
         if (currSum == target) {
             result.add(currCombination);
@@ -2290,7 +2344,7 @@ public class DSA450Questions {
     }
 
     private void combinationSum_2_Helper(int[] arr, int index, int target,
-            List<Integer> curr, List<List<Integer>> res) {
+                                         List<Integer> curr, List<List<Integer>> res) {
 
         if (target == 0) {
             res.add(new ArrayList<>(curr));
@@ -4423,14 +4477,14 @@ public class DSA450Questions {
         board[row][col] = color;
         //need to check in all 8 dirs
         int[][] dirs = {
-            {-1, 0},
-            {1, 0},
-            {0, -1},
-            {0, 1},
-            {-1, -1},
-            {-1, 1},
-            {1, -1},
-            {1, 1}
+                {-1, 0},
+                {1, 0},
+                {0, -1},
+                {0, 1},
+                {-1, -1},
+                {-1, 1},
+                {1, -1},
+                {1, 1}
         };
 
         for (int[] dir : dirs) {
@@ -4788,8 +4842,8 @@ public class DSA450Questions {
     }
 
     private void printSentencesFromCollectionOfWords_Propagte_Recursion(String[][] words,
-            int m, int n,
-            String[] output) {
+                                                                        int m, int n,
+                                                                        String[] output) {
         // Add current word to output array
         output[m] = words[m][n];
 
@@ -4856,9 +4910,9 @@ public class DSA450Questions {
         int N = S.length();
         Map<Character, Long> map = S.chars().mapToObj(c -> (char) c)
                 .collect(Collectors.groupingBy(
-                                Function.identity(),
-                                Collectors.counting()
-                        ));
+                        Function.identity(),
+                        Collectors.counting()
+                ));
 
         PriorityQueue<Character> heap = new PriorityQueue<>(
                 //if freq are same for two char
@@ -5143,7 +5197,7 @@ public class DSA450Questions {
     private int countOccurenceOfGivenStringInCharArray_Count = 0;
 
     private void countOccurenceOfGivenStringInCharArray_Helper(char[][] charArr, int x, int y,
-            int startPoint, String str, StringBuilder sb) {
+                                                               int startPoint, String str, StringBuilder sb) {
 
         if (sb.toString().equals(str)) {
             //once set of string is found reset stringbuilder
@@ -5195,7 +5249,7 @@ public class DSA450Questions {
     }
 
     private void printAllSubSequencesOfAString_Helper(String str, int start, int N,
-            String current, Set<String> subseq) {
+                                                      String current, Set<String> subseq) {
 
         if (start == N) {
             subseq.add(current);
@@ -5775,7 +5829,7 @@ public class DSA450Questions {
     }
 
     private List<String> stepsToOpenTheLock_AllCombinations(String originalLockStr,
-            Set<String> deadEnd, Set<String> visitedCombination) {
+                                                            Set<String> deadEnd, Set<String> visitedCombination) {
 
         List<String> allCombinations = new ArrayList<>();
 
@@ -6032,8 +6086,8 @@ public class DSA450Questions {
     }
 
     private void interleavingOfTwoStrings_Helper(String a, String b,
-            int m, int n,
-            StringBuilder sb, List<String> res) {
+                                                 int m, int n,
+                                                 StringBuilder sb, List<String> res) {
 
         if (sb.length() == a.length() + b.length()) {
             res.add(sb.toString());
@@ -6222,8 +6276,8 @@ public class DSA450Questions {
     }
 
     private void allPhoneDigitLetterCombinations_Helper(String digits,
-            int digitIndex, String curr,
-            Map<Integer, String> map, List<String> combinations) {
+                                                        int digitIndex, String curr,
+                                                        Map<Integer, String> map, List<String> combinations) {
 
         if (digitIndex == digits.length()) {
             combinations.add(curr);
@@ -6394,15 +6448,15 @@ public class DSA450Questions {
         //https://leetcode.com/problems/minimum-number-of-steps-to-make-two-strings-anagram/
         Map<Character, Long> sMap = s.chars().mapToObj(c -> (char) c)
                 .collect(Collectors.groupingBy(
-                                Function.identity(),
-                                Collectors.counting()
-                        ));
+                        Function.identity(),
+                        Collectors.counting()
+                ));
 
         Map<Character, Long> tMap = t.chars().mapToObj(c -> (char) c)
                 .collect(Collectors.groupingBy(
-                                Function.identity(),
-                                Collectors.counting()
-                        ));
+                        Function.identity(),
+                        Collectors.counting()
+                ));
 
         //if freq of a char in t is less than the freq of same char in s
         //freq(t.char, defaultIfSameCharNotPresent = 0) < freq(s.char)
@@ -6425,9 +6479,9 @@ public class DSA450Questions {
         //OPTIMISED from above link
         Map<Character, Long> sMap = s.chars().mapToObj(c -> (char) c)
                 .collect(Collectors.groupingBy(
-                                Function.identity(),
-                                Collectors.counting()
-                        ));
+                        Function.identity(),
+                        Collectors.counting()
+                ));
         //reduce the freq of char of string t from freq Map(sMap) of string s
         //this reduce will balance all the common char of both strings(anagrams)
         //all the char left in map should be removed, where String T & S are anagrams
@@ -6696,9 +6750,9 @@ public class DSA450Questions {
         //https://leetcode.com/problems/first-unique-character-in-a-string/
         Map<Character, Long> freq = str.chars().mapToObj(c -> (char) c)
                 .collect(Collectors.groupingBy(
-                                Function.identity(),
-                                Collectors.counting()
-                        ));
+                        Function.identity(),
+                        Collectors.counting()
+                ));
         for (int i = 0; i < str.length(); i++) {
             if (freq.get(str.charAt(i)) == 1) {
                 return i;
@@ -6708,10 +6762,10 @@ public class DSA450Questions {
     }
 
     private boolean substringWithConcatenationsOfGivenWords_Check(int index, String str,
-            int lengthPerWord,
-            int subStringLength,
-            int wordsLength,
-            Map<String, Integer> wordsCounter) {
+                                                                  int lengthPerWord,
+                                                                  int subStringLength,
+                                                                  int wordsLength,
+                                                                  Map<String, Integer> wordsCounter) {
 
         Map<String, Integer> remaining = new HashMap<>(wordsCounter);
         int wordsUsed = 0;
@@ -7513,6 +7567,125 @@ public class DSA450Questions {
             return isStringPallindrome(skipStart) || isStringPallindrome(skipEnd);
         }
         return true;
+    }
+
+    public void textJustification(String[] words, int maxWidth) {
+        //https://leetcode.com/problems/text-justification/
+        //https://www.interviewbit.com/problems/justified-text/hints/
+        int n = words.length;
+        int SPACE_CONSTANT = 1;
+        List<String> result = new ArrayList<>();
+        int index = 0;
+
+        while (index < n) {
+            int lineLength = -1;
+            int wordIndex = index;
+
+            while (wordIndex < n
+                    && words[wordIndex].length() + SPACE_CONSTANT + lineLength <= maxWidth) {
+                lineLength += words[wordIndex].length() + SPACE_CONSTANT;
+                wordIndex++;
+            }
+
+            StringBuilder sb = new StringBuilder(words[index]);
+            int spaces = 1;
+            int extras = 0;
+
+            if (wordIndex != index + 1 && wordIndex != n) {
+                spaces = (maxWidth - lineLength) / (wordIndex - index - 1) + SPACE_CONSTANT;
+                extras = (maxWidth - lineLength) % (wordIndex - index - 1);
+            }
+
+            for (int j = index + 1; j < wordIndex; j++) {
+                //add min spaces req between two words
+                for (int space = 0; space < spaces; space++) {
+                    sb.append(" ");
+                }
+                //if any extra spaces are also req, that should also be added
+                if (extras-- > 0) {
+                    sb.append(" ");
+                }
+                //after adding all the spaces, we can add the curr jth word
+                sb.append(words[j]);
+            }
+
+            int remaining = maxWidth - sb.length();
+            while (remaining-- > 0) {
+                sb.append(" ");
+            }
+            result.add(sb.toString());
+            index = wordIndex;
+        }
+        //output
+        System.out.println("Text justification: " + result);
+    }
+
+    public void positionsOfLargeGroups(String str) {
+        //https://leetcode.com/problems/positions-of-large-groups/
+        //SLIDING WINDOW approach
+        List<List<Integer>> positions = new ArrayList<>();
+        int n = str.length();
+        Map<Character, Integer> freq = new HashMap<>();
+        int start = 0;
+        int end = 0;
+        while (end < n) {
+
+            char chEnd = str.charAt(end);
+            freq.put(chEnd, freq.getOrDefault(chEnd, 0) + 1);
+
+            //size == 2 means we now have discontinuity from a potential large group,
+            //in that discontinuity we can add previous group if it was >= 3
+            //we are not calculating window length as (end - start + 1) because
+            //end is already ahead of large group where we found a discontinuity,
+            //so length to be considered here till end - 1
+            if (freq.size() == 2) {
+                if (end - start >= 3) {
+                    positions.add(Arrays.asList(start, end - 1));
+                }
+            }
+
+            //large group will be of same chars whose freq is >= 3
+            //if we have more than 1 char in our freq map, we need to adjust our window
+            //to find next coming large groups because if previous was a large groups, it
+            //would have been calculated in above if block
+            while (freq.size() > 1) {
+                char chStart = str.charAt(start);
+                freq.put(chStart, freq.getOrDefault(chStart, 0) - 1);
+                if (freq.get(chStart) <= 0) {
+                    freq.remove(chStart);
+                }
+                start++;
+            }
+            end++;
+        }
+        //this if block is handle cases of str = "aaa", "abcaaaa"
+        //here after end > n, we are not able to check the very last large groups of str
+        //so need this cond here also
+        if (end - start >= 3) {
+            positions.add(Arrays.asList(start, end - 1));
+        }
+        //output
+        System.out.println("Positions of all the large groups of strings: " + positions);
+    }
+
+    public void positionsOfLargeGroups_Optimized(String str) {
+        //https://leetcode.com/problems/positions-of-large-groups/
+        //TWO POINTER approach
+        List<List<Integer>> positions = new ArrayList<>();
+        int n = str.length();
+        int start = 0;
+        int end = 0;
+        while (end < n) {
+            if (end == n - 1 || str.charAt(end) != str.charAt(end + 1)) {
+                if (end - start + 1 >= 3) {
+                    positions.add(Arrays.asList(start, end));
+                }
+                start = end + 1;
+            }
+            end++;
+        }
+        //output
+        System.out.println("Positions of all the large groups of strings: " + positions);
     }
 
     public Node<Integer> reverseLinkedList_Iterative(Node<Integer> node) {
@@ -8561,51 +8734,51 @@ public class DSA450Questions {
         //l2 = 3-> 4-> 5-> NULL
         //reverse(l2) = 5-> 4-> 3-> NULL
         //reorderMerger(l1, l2) = 1-> 5-> 2-> 4-> 3-> NULL
-        if(head == null || head.getNext() == null){
+        if (head == null || head.getNext() == null) {
             return;
         }
-        
+
         //find mid of the linked list
         Node<Integer> slow = head;
         Node<Integer> fast = head.getNext();
-        while(fast != null && fast.getNext() != null){
+        while (fast != null && fast.getNext() != null) {
             slow = slow.getNext();
             fast = fast.getNext().getNext();
         }
-        
+
         Node<Integer> mid = slow;
-        
+
         Node<Integer> tempSecond = mid.getNext();
         mid.setNext(null);
-        
+
         //reversing the second half of the list
         Node<Integer> curr = tempSecond;
         Node<Integer> prev = null;
         Node<Integer> next = null;
-        
-        while(curr != null){
+
+        while (curr != null) {
             next = curr.getNext();
             curr.setNext(prev);
             prev = curr;
             curr = next;
         }
-        
+
         Node<Integer> second = prev;
         Node<Integer> first = head;
-        
-        while(second != null){
-            
+
+        while (second != null) {
+
             Node<Integer> firstNext = first.getNext();
             Node<Integer> secondNext = second.getNext();
-            
+
             first.setNext(second);
-            
-            if(firstNext == null){
+
+            if (firstNext == null) {
                 break;
             }
-            
+
             second.setNext(firstNext);
-            
+
             first = firstNext;
             second = secondNext;
         }
@@ -9099,7 +9272,7 @@ public class DSA450Questions {
     }
 
     public void levelOrderTraversal_Recursive_Helper(TreeNode<Integer> root, int level,
-            Map<Integer, List<Integer>> levelOrder) {
+                                                     Map<Integer, List<Integer>> levelOrder) {
 
         if (root == null) {
             return;
@@ -9371,7 +9544,7 @@ public class DSA450Questions {
     public int leftViewOfTreeWithoutExtraSpace_MaxLevel;
 
     private void leftViewOfTreeWithoutExtraSpace_Helper(TreeNode<Integer> root,
-            int level, List<Integer> result) {
+                                                        int level, List<Integer> result) {
         if (root == null) {
             return;
         }
@@ -9431,7 +9604,7 @@ public class DSA450Questions {
     public int rightViewOfTreeWithoutExtraSpace_MaxLevel;
 
     private void rightViewOfTreeWithoutExtraSpace_Helper(TreeNode<Integer> root,
-            int level, List<Integer> result) {
+                                                         int level, List<Integer> result) {
 
         if (root == null) {
             return;
@@ -9979,7 +10152,8 @@ public class DSA450Questions {
         System.out.println("Lowest common ancestor of " + N1 + " " + N2 + ": " + lowestCommonAncestorOfTree_Helper(root, N1, N2));
     }
 
-    class CheckTreeIsSumTree { /*Helper class for checkTreeIsSumTree_Helper method*/ int data = 0;
+    class CheckTreeIsSumTree { /*Helper class for checkTreeIsSumTree_Helper method*/
+        int data = 0;
     }
 
     public boolean checkTreeIsSumTree_Helper(TreeNode<Integer> root, CheckTreeIsSumTree obj) {
@@ -10023,7 +10197,7 @@ public class DSA450Questions {
     }
 
     private void longestPathNodeSum_Helper(TreeNode<Integer> root,
-            TreeLongestPathNodeSum obj, int level) {
+                                           TreeLongestPathNodeSum obj, int level) {
 
         if (root == null) {
             return;
@@ -10483,7 +10657,7 @@ public class DSA450Questions {
     }
 
     private String findDuplicateSubtreeInAGivenTree_Inorder(TreeNode<Integer> root,
-            Map<String, Integer> map, List<TreeNode<Integer>> subtrees) {
+                                                            Map<String, Integer> map, List<TreeNode<Integer>> subtrees) {
 
         if (root == null) {
             return "";
@@ -10519,7 +10693,7 @@ public class DSA450Questions {
     }
 
     private void allNodesAtKDistanceFromRoot(TreeNode<Integer> root, int level,
-            int K, List<Integer> result) {
+                                             int K, List<Integer> result) {
 
         if (root == null) {
             return;
@@ -10534,7 +10708,7 @@ public class DSA450Questions {
     }
 
     private int printAllTheNodesAtKDistanceFromTargetNode_DFS(TreeNode<Integer> root, int target,
-            int K, List<Integer> result) {
+                                                              int K, List<Integer> result) {
 
         if (root == null) {
             return -1;
@@ -10580,7 +10754,7 @@ public class DSA450Questions {
     }
 
     private boolean deleteTreeNodesAndReturnForest_Helper(TreeNode<Integer> root,
-            Set<Integer> deleteSet, List<TreeNode<Integer>> result) {
+                                                          Set<Integer> deleteSet, List<TreeNode<Integer>> result) {
 
         if (root == null) {
             return false;
@@ -10614,7 +10788,7 @@ public class DSA450Questions {
     }
 
     private TreeNode<Integer> deleteTreeNodesAndReturnForest_Helper2(TreeNode<Integer> root,
-            Set<Integer> deleteSet, List<TreeNode<Integer>> result) {
+                                                                     Set<Integer> deleteSet, List<TreeNode<Integer>> result) {
 
         //Easier explanation
         if (root == null) {
@@ -10985,7 +11159,7 @@ public class DSA450Questions {
     }
 
     private void smallestStringInTreeFromLeafToRoot_Helper(TreeNode<Integer> root, StringBuilder sb,
-            PriorityQueue<String> strs) {
+                                                           PriorityQueue<String> strs) {
 
         if (root == null) {
             return;
@@ -11240,7 +11414,7 @@ public class DSA450Questions {
     }
 
     private void maximumWidthOfBinaryTree_Helper(TreeNode<Integer> root, int level,
-            int position, Map<Integer, Integer> map) {
+                                                 int position, Map<Integer, Integer> map) {
         if (root == null) {
             return;
         }
@@ -11695,7 +11869,7 @@ public class DSA450Questions {
     }
 
     private TreeNode<Integer> deleteTreeNodeFromBinarySearchTreeNotInRange_Helper(TreeNode<Integer> root,
-            int low, int high) {
+                                                                                  int low, int high) {
 
         if (root == null) {
             return null;
@@ -11715,7 +11889,7 @@ public class DSA450Questions {
     }
 
     public void deleteTreeNodeFromBinarySearchTreeNotInRange(TreeNode<Integer> root,
-            int low, int high) {
+                                                             int low, int high) {
         TreeNode<Integer> node = deleteTreeNodeFromBinarySearchTreeNotInRange_Helper(root, low, high);
         //output
         new BinaryTree<Integer>(root).treeBFS();
@@ -11826,7 +12000,7 @@ public class DSA450Questions {
     }
 
     private void connectTreeNodesAtSameLevel_Recursive_Helper(TreeNode<Integer> root,
-            int level, Map<Integer, TreeNode<Integer>> map) {
+                                                              int level, Map<Integer, TreeNode<Integer>> map) {
 
         if (root == null) {
             return;
@@ -11979,7 +12153,7 @@ public class DSA450Questions {
     }
 
     private void pseudoPallindromicPathInBinaryTree_Helper(TreeNode<Integer> root,
-            Map<Integer, Integer> map) {
+                                                           Map<Integer, Integer> map) {
 
         if (root == null) {
             return;
@@ -12032,7 +12206,7 @@ public class DSA450Questions {
     int countNumberOfTurnsBetweenRootToGivenKey_CountTurns = 0;
 
     public boolean countNumberOfTurnsBetweenRootToGivenKey(TreeNode<Integer> root,
-            int key, boolean goingLeft) {
+                                                           int key, boolean goingLeft) {
 
         if (root == null) {
             return false;
@@ -12135,7 +12309,7 @@ public class DSA450Questions {
     }
 
     private void longestZigZagPathInTree_Helper(TreeNode<Integer> root,
-            Map<TreeNode<Integer>, LongestZigZagPathInTreePair> map) {
+                                                Map<TreeNode<Integer>, LongestZigZagPathInTreePair> map) {
 
         if (root == null) {
             return;
@@ -12274,10 +12448,10 @@ public class DSA450Questions {
     }
 
     public void timeNeededToInformAllEmployee_NAryTreeDFS(int managerNode,
-            Map<Integer, List<Integer>> managerToEmployees,
-            int[] informTime,
-            PriorityQueue<Integer> minHeap,
-            int currTime) {
+                                                          Map<Integer, List<Integer>> managerToEmployees,
+                                                          int[] informTime,
+                                                          PriorityQueue<Integer> minHeap,
+                                                          int currTime) {
 
         if (!managerToEmployees.containsKey(managerNode)) {
             minHeap.add(currTime);
@@ -12297,7 +12471,7 @@ public class DSA450Questions {
     }
 
     public void timeNeededToInformAllEmployee_NAryTree(int employees, int headManagerID,
-            int[] manager, int[] informTime) {
+                                                       int[] manager, int[] informTime) {
         //Working but little time taking
         //https://leetcode.com/problems/time-needed-to-inform-all-employees/
         //minHeap to store max time taken from headManager to last subordinate 
@@ -12325,7 +12499,7 @@ public class DSA450Questions {
     }
 
     public void timeNeededToInformAllEmployee_DFS(int employees, int headManagerID,
-            int[] manager, int[] informTime) {
+                                                  int[] manager, int[] informTime) {
         //Little more optimized than above solution
         //https://leetcode.com/problems/time-needed-to-inform-all-employees/
         //https://www.geeksforgeeks.org/google-interview-experience-sde-1-off-campus-2022/
@@ -12343,6 +12517,7 @@ public class DSA450Questions {
 
         hasCamera, needCamera, covered
     }
+
     int binaryTreeCameras_ReqCamera;
 
     private BinaryTreeCameraState binaryTreeCameras_Helper(TreeNode<Integer> root) {
@@ -12412,6 +12587,38 @@ public class DSA450Questions {
         while (iterator.hasNext()) {
             System.out.println(iterator.next());
         }
+    }
+
+    public boolean linkedListInBinaryTree_MatchCheck(Node<Integer> head, TreeNode<Integer> root) {
+        if (head == null) {
+            return true;
+        }
+
+        if (root == null || root.getData() != head.getData()) {
+            return false;
+        }
+        return linkedListInBinaryTree_MatchCheck(head.getNext(), root.getLeft())
+                || linkedListInBinaryTree_MatchCheck(head.getNext(), root.getRight());
+    }
+
+    public boolean linkedListInBinaryTree_DFS(Node<Integer> head, TreeNode<Integer> root) {
+        if (root == null) {
+            return false;
+        }
+
+        if (linkedListInBinaryTree_MatchCheck(head, root)) {
+            return true;
+        }
+
+        return linkedListInBinaryTree_DFS(head, root.getLeft())
+                || linkedListInBinaryTree_DFS(head, root.getRight());
+    }
+
+    public void linkedListInBinaryTree(Node<Integer> head, TreeNode<Integer> root) {
+        //https://leetcode.com/problems/linked-list-in-binary-tree/
+        boolean output = linkedListInBinaryTree_DFS(head, root);
+        //output
+        System.out.println("Is linked list present in binary tree: " + output);
     }
 
     // STACK
@@ -12651,7 +12858,7 @@ public class DSA450Questions {
             System.out.println("Number formed: 0");
             return;
         }
-        
+
         StringBuilder sb = new StringBuilder();
         Stack<Integer> stack = new Stack<>();
 
@@ -12701,18 +12908,18 @@ public class DSA450Questions {
         //explanation: https://leetcode.com/problems/find-the-most-competitive-subsequence/discuss/1113429/Java-Brute-Force-Stack
         int n = nums.length;
         Stack<Integer> stack = new Stack<>();
-        
-        for(int i = 0; i < n; i++){
+
+        for (int i = 0; i < n; i++) {
             int val = nums[i];
-            
-            while(stack.size() > 0 && stack.size() + n - (i + 1) >= K
-            && stack.peek() > val){
+
+            while (stack.size() > 0 && stack.size() + n - (i + 1) >= K
+                    && stack.peek() > val) {
                 stack.pop();
             }
             stack.push(val);
         }
-        
-        while(!stack.isEmpty() && stack.size() > K){
+
+        while (!stack.isEmpty() && stack.size() > K) {
             stack.pop();
         }
         //output
@@ -12760,9 +12967,9 @@ public class DSA450Questions {
     }
 
     private void rotAllAdjacent(int[][] basket,
-            int x, int y,
-            boolean[][] visited,
-            int row, int col) {
+                                int x, int y,
+                                boolean[][] visited,
+                                int row, int col) {
 
         //all aadjacent coordinate
         //check new coordinates are in bounds
@@ -12861,10 +13068,10 @@ public class DSA450Questions {
 
         int minTime = 0;
         int[][] dirs = {
-            {-1, 0},
-            {1, 0},
-            {0, -1},
-            {0, 1}
+                {-1, 0},
+                {1, 0},
+                {0, -1},
+                {0, 1}
         };
         Set<String> infected = new HashSet<>();
         while (fresh.size() > 0) {
@@ -13574,7 +13781,7 @@ public class DSA450Questions {
     }
 
     private int countElementsFromSecondArrayLessOrEqualToElementInFirstArray_FindLastOccurenceOfX(int[] arr,
-            int x, int start, int end) {
+                                                                                                  int x, int start, int end) {
 
         //MODIFIED BINARY SERACH FOR THIS QUESTION
         //SIMILAR TO findLastOccurenecOfKInSortedArray()
@@ -15274,7 +15481,7 @@ public class DSA450Questions {
     }
 
     private void graphDFSAdjList_Recursive_Helper(List<List<Integer>> adjList, int vertex,
-            boolean[] visited, List<Integer> result) {
+                                                  boolean[] visited, List<Integer> result) {
 
         visited[vertex] = true;
         result.add(vertex);
@@ -15295,7 +15502,7 @@ public class DSA450Questions {
     }
 
     private void findPathRatInMaze_Helper(int[][] m, int n, int x, int y,
-            StringBuilder sb, ArrayList<String> output) {
+                                          StringBuilder sb, ArrayList<String> output) {
 
         if (x < 0 || x >= n || y < 0 || y >= n || m[x][y] == 0) {
             return;
@@ -15340,7 +15547,7 @@ public class DSA450Questions {
     }
 
     private void numberOfIslands_Helper(int[][] grid, int x, int y,
-            int[][] dir, boolean[][] visited) {
+                                        int[][] dir, boolean[][] visited) {
 
         if (x < 0 || x >= grid.length || y < 0 || y >= grid[x].length
                 || grid[x][y] == 0
@@ -15360,14 +15567,14 @@ public class DSA450Questions {
     public void numberOfIslands_Graph(int[][] grid) {
         //https://leetcode.com/problems/number-of-islands
         int[][] dir = {
-            {-1, -1},
-            {-1, 0},
-            {-1, 1},
-            {0, -1},
-            {0, 1},
-            {1, -1},
-            {1, 0},
-            {1, 1}
+                {-1, -1},
+                {-1, 0},
+                {-1, 1},
+                {0, -1},
+                {0, 1},
+                {1, -1},
+                {1, 0},
+                {1, 1}
         };
         boolean[][] visited = new boolean[grid.length][grid[0].length];
         int islandCount = 0;
@@ -15445,7 +15652,7 @@ public class DSA450Questions {
     }
 
     public boolean detectCycleInDirectedGraphDFS_Helper(List<List<Integer>> adjList, int vertex,
-            boolean[] visited, boolean[] recurStack) {
+                                                        boolean[] visited, boolean[] recurStack) {
 
         if (recurStack[vertex]) {
             return true;
@@ -15575,7 +15782,7 @@ public class DSA450Questions {
     }
 
     public void floodFill_Helper(int[][] image, int srcR, int srcC,
-            int srcColor, int newColor, boolean[][] visited) {
+                                 int srcColor, int newColor, boolean[][] visited) {
 
         //bounds check
         if (srcR < 0 || srcR >= image.length || srcC < 0 || srcC >= image[srcR].length
@@ -15662,7 +15869,7 @@ public class DSA450Questions {
     }
 
     private void allPathFromSourceToTargetInDirectedAcyclicGraph_Helper(Map<Integer, List<Integer>> adj, int vertex,
-            int target, boolean[] vis, List<Integer> curr, List<List<Integer>> result) {
+                                                                        int target, boolean[] vis, List<Integer> curr, List<List<Integer>> result) {
 
         vis[vertex] = true;
         curr.add(vertex);
@@ -15817,8 +16024,8 @@ public class DSA450Questions {
     }
 
     private void vertexWithWeightAllSourceToDestinationPath_Helper(List<List<VertexWithWeight>> adj,
-            int mainSource, int source, int target,
-            int currWeight, boolean[] vis, Map<String, Integer> result) {
+                                                                   int mainSource, int source, int target,
+                                                                   int currWeight, boolean[] vis, Map<String, Integer> result) {
 
         if (source == target) {
             if (!result.containsKey(target + "-" + mainSource)) {
@@ -15925,7 +16132,7 @@ public class DSA450Questions {
     }
 
     private boolean courseSchedule2_IsDirectedGraphCycle(Map<Integer, List<Integer>> graph,
-            int vertex, boolean[] visited, boolean[] recurStack) {
+                                                         int vertex, boolean[] visited, boolean[] recurStack) {
         //same as detect cycle in directed graph but with map based graph input
         if (recurStack[vertex]) {
             return true;
@@ -16322,10 +16529,10 @@ public class DSA450Questions {
         );
 
         int[][] dirs = {
-            {1, 0},
-            {-1, 0},
-            {0, 1},
-            {0, -1}
+                {1, 0},
+                {-1, 0},
+                {0, 1},
+                {0, -1}
         };
 
         int currX = 0;
@@ -16438,7 +16645,7 @@ public class DSA450Questions {
     }
 
     private void pacificAtlanticWaterFlow_HelperBFS(int[][] heights, Queue<Coord> queue,
-            boolean[][] visited, int[][] dirs, int ROW, int COL) {
+                                                    boolean[][] visited, int[][] dirs, int ROW, int COL) {
 
         while (!queue.isEmpty()) {
 
@@ -16475,10 +16682,10 @@ public class DSA450Questions {
         int rightEdge = COL - 1;
 
         int[][] dirs = {
-            {-1, 0},
-            {1, 0},
-            {0, -1},
-            {0, 1}
+                {-1, 0},
+                {1, 0},
+                {0, -1},
+                {0, 1}
         };
 
         Queue<Coord> queueAtlantic = new LinkedList<>();
@@ -16856,7 +17063,7 @@ public class DSA450Questions {
     }
 
     private boolean partitionToKEqualSumSubset_Backtracking_Helper(int[] nums, int k,
-            int index, int currSubsetSum, int sumPerKSubset, Set<Integer> indexUsed) {
+                                                                   int index, int currSubsetSum, int sumPerKSubset, Set<Integer> indexUsed) {
 
         if (k == 0) {
             return true;
@@ -17320,17 +17527,17 @@ public class DSA450Questions {
         // Strings at index 0 is not used, it is to make array 
         // indexing simple 
         String one[] = {"", "one ", "two ", "three ", "four ",
-            "five ", "six ", "seven ", "eight ",
-            "nine ", "ten ", "eleven ", "twelve ",
-            "thirteen ", "fourteen ", "fifteen ",
-            "sixteen ", "seventeen ", "eighteen ",
-            "nineteen "};
+                "five ", "six ", "seven ", "eight ",
+                "nine ", "ten ", "eleven ", "twelve ",
+                "thirteen ", "fourteen ", "fifteen ",
+                "sixteen ", "seventeen ", "eighteen ",
+                "nineteen "};
 
         // Strings at index 0 and 1 are not used, they is to 
         // make array indexing simple 
         String ten[] = {"", "", "twenty ", "thirty ", "forty ",
-            "fifty ", "sixty ", "seventy ", "eighty ",
-            "ninety "};
+                "fifty ", "sixty ", "seventy ", "eighty ",
+                "ninety "};
 
         String str = "";
         // if n is more than 19, divide it 
@@ -17435,10 +17642,10 @@ public class DSA450Questions {
         //if i knows j then its 1 else 0
         //for N * N people matrix
         int[][] whoKnowsWhom = {
-            {0, 0, 1, 0},
-            {0, 0, 1, 0},
-            {0, 0, 0, 0},
-            {0, 0, 1, 0}}; //SHOULD BE GLOBAL
+                {0, 0, 1, 0},
+                {0, 0, 1, 0},
+                {0, 0, 0, 0},
+                {0, 0, 1, 0}}; //SHOULD BE GLOBAL
         return whoKnowsWhom[a][b] == 1;
     }
 
@@ -17476,7 +17683,7 @@ public class DSA450Questions {
     }
 
     private int maximumDistanceCoveredInRobotWalkingSimulation_UpdateY(int currX, int currY,
-            int currDir, int dist, Set<String> obstacles) {
+                                                                       int currDir, int dist, Set<String> obstacles) {
 
         //for y dir can either be 0 = N OR 2 = S
         if (currDir == 0) { //y + dist
@@ -17504,7 +17711,7 @@ public class DSA450Questions {
     }
 
     private int maximumDistanceCoveredInRobotWalkingSimulation_UpdateX(int currX, int currY,
-            int currDir, int dist, Set<String> obstacles) {
+                                                                       int currDir, int dist, Set<String> obstacles) {
 
         //for x dir can either be 1 = E OR 3 = W
         if (currDir == 1) { //x + dist
@@ -17750,8 +17957,8 @@ public class DSA450Questions {
                         //choose server with lowest weight, if weights are same
                         //choose server with lowest index value
                         ? (s1.weight == s2.weight
-                                ? s1.index - s2.index
-                                : s1.weight - s2.weight)
+                        ? s1.index - s2.index
+                        : s1.weight - s2.weight)
                         //if booked time was not same choose the lowest bookedtime
                         //(i.e whoose task will finish early)
                         : s1.bookedTime - s2.bookedTime
@@ -22175,7 +22382,7 @@ public class DSA450Questions {
         System.out.println("Minimum Interval to Include Each Query");
         //https://leetcode.com/problems/minimum-interval-to-include-each-query/
         obj.minimumIntervalToIncludeEachQuery(new int[][]{
-            {1, 4}, {2, 4}, {3, 6}, {4, 4}}, new int[]{2, 3, 4, 5});
+                {1, 4}, {2, 4}, {3, 6}, {4, 4}}, new int[]{2, 3, 4, 5});
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
 //        System.out.println("Find Three Consecutive Integers That Sum to a Given Number");
@@ -22370,11 +22577,11 @@ public class DSA450Questions {
         System.out.println("Pacific Atlantic Water Flow");
         //https://leetcode.com/problems/pacific-atlantic-water-flow/
         obj.pacificAtlanticWaterFlow(new int[][]{
-            {1, 2, 2, 3, 5},
-            {3, 2, 3, 4, 4},
-            {2, 4, 5, 3, 1},
-            {6, 7, 1, 4, 5},
-            {5, 1, 1, 2, 4}});
+                {1, 2, 2, 3, 5},
+                {3, 2, 3, 4, 4},
+                {2, 4, 5, 3, 1},
+                {6, 7, 1, 4, 5},
+                {5, 1, 1, 2, 4}});
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
 //        System.out.println("Mth Element After K Array Rotation");
@@ -22438,7 +22645,7 @@ public class DSA450Questions {
         System.out.println("Min Cost to Connect All Points/ Prim's Algo Based");
         //https://leetcode.com/problems/min-cost-to-connect-all-points/
         obj.minCostToConnectAllPoints_Graph(new int[][]{
-            {0, 0}, {2, 2}, {3, 10}, {5, 2}, {7, 0}});
+                {0, 0}, {2, 2}, {3, 10}, {5, 2}, {7, 0}});
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
 //        System.out.println("Split Array Largest Sum");
@@ -22499,25 +22706,28 @@ public class DSA450Questions {
 //            {0, 0, 1, 0}, {0, 1, 1, 0}, {0, 1, 0, 0}});
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-//        System.out.println("Jump game(s)");
-//        //https://leetcode.com/problems/jump-game/
-//        obj.jumpGame(new int[]{2, 3, 1, 1, 4});
-//        obj.jumpGame(new int[]{3, 2, 1, 0, 4});
-//        obj.jumpGame(new int[]{1});
-//        obj.jumpGame(new int[]{0});
-//        //https://leetcode.com/problems/jump-game-iii/
-//        obj.jumpGameThree(new int[]{4, 2, 3, 0, 3, 1, 2}, 5);
-//        obj.jumpGameThree(new int[]{3, 0, 2, 1, 2}, 2);
-//        //https://leetcode.com/problems/jump-game-iv/
-//        System.out.println("Steps to reach end: "
-//                + obj.jumpGameFour(new int[]{100, -23, -23, 404, 100, 23, 23, 23, 3, 404}));
-//        System.out.println("Steps to reach end: "
-//                + obj.jumpGameFour(new int[]{7}));
-//        System.out.println("Steps to reach end: "
-//                + obj.jumpGameFour(new int[]{7, 6, 9, 6, 9, 6, 9, 7}));
-//        //https://leetcode.com/problems/jump-game-vii/
-//        System.out.println("Can we reach end of str: " + obj.jumpGameSeven("011010", 2, 3));
-//        System.out.println("Can we reach end of str: " + obj.jumpGameSeven("01101110", 2, 3));
+        System.out.println("Jump game(s)");
+        //https://leetcode.com/problems/jump-game/
+        obj.jumpGame(new int[]{2, 3, 1, 1, 4});
+        obj.jumpGame(new int[]{3, 2, 1, 0, 4});
+        obj.jumpGame(new int[]{1});
+        obj.jumpGame(new int[]{0});
+        //https://leetcode.com/problems/jump-game-iii/
+        obj.jumpGameThree(new int[]{4, 2, 3, 0, 3, 1, 2}, 5);
+        obj.jumpGameThree(new int[]{3, 0, 2, 1, 2}, 2);
+        //https://leetcode.com/problems/jump-game-iv/
+        System.out.println("Steps to reach end: "
+                + obj.jumpGameFour(new int[]{100, -23, -23, 404, 100, 23, 23, 23, 3, 404}));
+        System.out.println("Steps to reach end: "
+                + obj.jumpGameFour(new int[]{7}));
+        System.out.println("Steps to reach end: "
+                + obj.jumpGameFour(new int[]{7, 6, 9, 6, 9, 6, 9, 7}));
+        //https://leetcode.com/problems/jump-game-vii/
+        System.out.println("Can we reach end of str: " + obj.jumpGameSeven("011010", 2, 3));
+        System.out.println("Can we reach end of str: " + obj.jumpGameSeven("01101110", 2, 3));
+        //https://leetcode.com/problems/frog-jump/
+        System.out.println("Frog can reach the end of river: " + obj.frogJump(new int[]{0, 1, 3, 5, 6, 8, 12, 17}));
+        System.out.println("Frog can reach the end of river: " + obj.frogJump(new int[]{0, 1, 2, 3, 4, 8, 9, 11}));
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
 //        System.out.println("Djikstra Algorithm Graph");
@@ -22625,24 +22835,24 @@ public class DSA450Questions {
                 new int[][]{{0, 2}, {2, 5}, {0, 5}});
         obj.rangeSumQuery2D(
                 new int[][]{
-                    {3, 0, 1, 4, 2},
-                    {5, 6, 3, 2, 1},
-                    {1, 2, 0, 1, 5},
-                    {4, 1, 0, 1, 7},
-                    {1, 0, 3, 0, 5}},
+                        {3, 0, 1, 4, 2},
+                        {5, 6, 3, 2, 1},
+                        {1, 2, 0, 1, 5},
+                        {4, 1, 0, 1, 7},
+                        {1, 0, 3, 0, 5}},
                 new int[][]{
-                    {0, 0, 4, 4},
-                    {2, 1, 4, 3},
-                    {1, 1, 2, 2},
-                    {1, 2, 2, 4}});
+                        {0, 0, 4, 4},
+                        {2, 1, 4, 3},
+                        {1, 1, 2, 2},
+                        {1, 2, 2, 4}});
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Binary Search Tree Iterator");
-        //https://leetcode.com/problems/binary-search-tree-iterator
-        TreeNode<Integer> root1 = new TreeNode<>(2);
-        root1.setLeft(new TreeNode<>(1));
-        root1.setRight(new TreeNode<>(3));
-        obj.binarySearchTreeIterator(root1);
+//        System.out.println("Binary Search Tree Iterator");
+//        //https://leetcode.com/problems/binary-search-tree-iterator
+//        TreeNode<Integer> root1 = new TreeNode<>(2);
+//        root1.setLeft(new TreeNode<>(1));
+//        root1.setRight(new TreeNode<>(3));
+//        obj.binarySearchTreeIterator(root1);
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
         System.out.println("Partition to K Equal Sum Subsets");
@@ -22667,15 +22877,51 @@ public class DSA450Questions {
         System.out.println("Sudoku Solver");
         //https://leetcode.com/problems/sudoku-solver
         obj.sudokuSolver_Backtracking(new char[][]{
-            {'5', '3', '.', '.', '7', '.', '.', '.', '.'},
-            {'6', '.', '.', '1', '9', '5', '.', '.', '.'},
-            {'.', '9', '8', '.', '.', '.', '.', '6', '.'},
-            {'8', '.', '.', '.', '6', '.', '.', '.', '3'},
-            {'4', '.', '.', '8', '.', '3', '.', '.', '1'},
-            {'7', '.', '.', '.', '2', '.', '.', '.', '6'},
-            {'.', '6', '.', '.', '.', '.', '2', '8', '.'},
-            {'.', '.', '.', '4', '1', '9', '.', '.', '5'},
-            {'.', '.', '.', '.', '8', '.', '.', '7', '9'}});
+                {'5', '3', '.', '.', '7', '.', '.', '.', '.'},
+                {'6', '.', '.', '1', '9', '5', '.', '.', '.'},
+                {'.', '9', '8', '.', '.', '.', '.', '6', '.'},
+                {'8', '.', '.', '.', '6', '.', '.', '.', '3'},
+                {'4', '.', '.', '8', '.', '3', '.', '.', '1'},
+                {'7', '.', '.', '.', '2', '.', '.', '.', '6'},
+                {'.', '6', '.', '.', '.', '.', '2', '8', '.'},
+                {'.', '.', '.', '4', '1', '9', '.', '.', '5'},
+                {'.', '.', '.', '.', '8', '.', '.', '7', '9'}});
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Linked List in Binary Tree");
+        //https://leetcode.com/problems/linked-list-in-binary-tree/
+        TreeNode<Integer> root1 = new TreeNode<>(1);
+        root1.setLeft(new TreeNode<>(4));
+        root1.getLeft().setRight(new TreeNode<>(2));
+        root1.getLeft().getRight().setLeft(new TreeNode<>(1));
+        root1.setRight(new TreeNode<>(4));
+        root1.getRight().setLeft(new TreeNode<>(2));
+        root1.getRight().getLeft().setLeft(new TreeNode<>(6));
+        root1.getRight().getLeft().setRight(new TreeNode<>(8));
+        root1.getRight().getLeft().getRight().setLeft(new TreeNode<>(1));
+        root1.getRight().getLeft().getRight().setRight(new TreeNode<>(3));
+        Node<Integer> head = new Node<>(4);
+        head.setNext(new Node<>(2));
+        head.getNext().setNext(new Node<>(8));
+        obj.linkedListInBinaryTree(head, root1);
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Text Justification");
+        //https://leetcode.com/problems/text-justification/
+        obj.textJustification(new String[]{"This", "is", "an", "example", "of", "text", "justification."}, 16);
+        obj.textJustification(new String[]{"What", "must", "be", "acknowledgment", "shall", "be"}, 16);
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Positions of Large Groups");
+        //https://leetcode.com/problems/positions-of-large-groups/
+        obj.positionsOfLargeGroups("abbxxxxzzy");
+        obj.positionsOfLargeGroups("aaa");
+        obj.positionsOfLargeGroups("abc");
+        obj.positionsOfLargeGroups("nnnhaaannnm");
+        obj.positionsOfLargeGroups_Optimized("abbxxxxzzy");
+        obj.positionsOfLargeGroups_Optimized("aaa");
+        obj.positionsOfLargeGroups_Optimized("abc");
+        obj.positionsOfLargeGroups_Optimized("nnnhaaannnm");
     }
 
 }
