@@ -1444,6 +1444,61 @@ public class DSA450Questions {
         return false;
     }
 
+    public boolean frogJump(int[] stones) {
+        //https://leetcode.com/problems/frog-jump/
+        class Jump {
+
+            int currStone;
+            int jump;
+
+            public Jump(int currStone, int jump) {
+                this.currStone = currStone;
+                this.jump = jump;
+            }
+
+        }
+
+        int n = stones.length;
+        int lastStone = stones[n - 1];
+        Queue<Jump> queue = new LinkedList<>();
+        Set<String> visited = new HashSet<>();
+        Set<Integer> stonesSet = new HashSet<>();
+        for (int stone : stones) {
+            stonesSet.add(stone);
+        }
+
+        int currStone = 0;
+        int jump = 0;
+        queue.add(new Jump(currStone, jump));
+
+        while (!queue.isEmpty()) {
+            Jump curr = queue.poll();
+            currStone = curr.currStone;
+            jump = curr.jump;
+
+            //if we have reached the last stone
+            if (currStone == lastStone) {
+                return true;
+            }
+
+            //if any currStone doesn't exist in the stone list,
+            //we can't move there, so continue
+            if (!stonesSet.contains(currStone)) {
+                continue;
+            }
+            //from curr jump we can furtehr move to k, k - 1, k + 1 move
+            for (int moveK = -1; moveK <= 1; moveK++) {
+                //if any currStone and jump previously visited, continue
+                if (visited.contains(currStone + "," + (jump + moveK))) {
+                    continue;
+                }
+                queue.add(new Jump(currStone + jump + moveK, jump + moveK));
+                visited.add(currStone + "," + (jump + moveK));
+            }
+        }
+        return false;
+    }
+
     public void nextGreaterElement2_CyclicArray(int[] arr) {
 
         //explanation: https://leetcode.com/problems/next-greater-element-ii/solution/
@@ -2168,9 +2223,9 @@ public class DSA450Questions {
         int pair = 0;
         Map<Integer, Long> map = IntStream.of(arr).boxed()
                 .collect(Collectors.groupingBy(
-                                Function.identity(),
-                                Collectors.counting()
-                        ));
+                        Function.identity(),
+                        Collectors.counting()
+                ));
 
         for (int key : map.keySet()) {
 
@@ -2198,9 +2253,9 @@ public class DSA450Questions {
         //get the frequency count of all the array element
         Map<Integer, Long> map = IntStream.of(arr).boxed()
                 .collect(Collectors.groupingBy(
-                                Function.identity(),
-                                Collectors.counting()
-                        ));
+                        Function.identity(),
+                        Collectors.counting()
+                ));
 
         //arrange all the array element at top having less frequency
         PriorityQueue<Integer> minFreq = new PriorityQueue<>(
@@ -4870,16 +4925,16 @@ public class DSA450Questions {
         int N = S.length();
         Map<Character, Long> map = S.chars().mapToObj(c -> (char) c)
                 .collect(Collectors.groupingBy(
-                                Function.identity(),
-                                Collectors.counting()
-                        ));
+                        Function.identity(),
+                        Collectors.counting()
+                ));
 
         PriorityQueue<Character> heap = new PriorityQueue<>(
                 //if freq are same for two char
                 //sort then alphabetically else max freq first
                 (e1, e2) -> map.get(e1) == map.get(e2)
-                        ? e1 - e2
-                        : (int) (map.get(e2) - map.get(e1))
+                ? e1 - e2
+                : (int) (map.get(e2) - map.get(e1))
         );
 
         //check all unique char in string S and put it in heap
@@ -5736,7 +5791,7 @@ public class DSA450Questions {
                 return false;
             }
 
-            //if one string length is smaller than others and run out of characters than the
+            //if one string length is smaller than others or run out of characters than the
             //other string
             if ((i >= 0) != (j >= 0)) {
                 return false;
@@ -6408,15 +6463,15 @@ public class DSA450Questions {
         //https://leetcode.com/problems/minimum-number-of-steps-to-make-two-strings-anagram/
         Map<Character, Long> sMap = s.chars().mapToObj(c -> (char) c)
                 .collect(Collectors.groupingBy(
-                                Function.identity(),
-                                Collectors.counting()
-                        ));
+                        Function.identity(),
+                        Collectors.counting()
+                ));
 
         Map<Character, Long> tMap = t.chars().mapToObj(c -> (char) c)
                 .collect(Collectors.groupingBy(
-                                Function.identity(),
-                                Collectors.counting()
-                        ));
+                        Function.identity(),
+                        Collectors.counting()
+                ));
 
         //if freq of a char in t is less than the freq of same char in s
         //freq(t.char, defaultIfSameCharNotPresent = 0) < freq(s.char)
@@ -6439,9 +6494,9 @@ public class DSA450Questions {
         //OPTIMISED from above link
         Map<Character, Long> sMap = s.chars().mapToObj(c -> (char) c)
                 .collect(Collectors.groupingBy(
-                                Function.identity(),
-                                Collectors.counting()
-                        ));
+                        Function.identity(),
+                        Collectors.counting()
+                ));
         //reduce the freq of char of string t from freq Map(sMap) of string s
         //this reduce will balance all the common char of both strings(anagrams)
         //all the char left in map should be removed, where String T & S are anagrams
@@ -6710,9 +6765,9 @@ public class DSA450Questions {
         //https://leetcode.com/problems/first-unique-character-in-a-string/
         Map<Character, Long> freq = str.chars().mapToObj(c -> (char) c)
                 .collect(Collectors.groupingBy(
-                                Function.identity(),
-                                Collectors.counting()
-                        ));
+                        Function.identity(),
+                        Collectors.counting()
+                ));
         for (int i = 0; i < str.length(); i++) {
             if (freq.get(str.charAt(i)) == 1) {
                 return i;
@@ -7527,6 +7582,124 @@ public class DSA450Questions {
             return isStringPallindrome(skipStart) || isStringPallindrome(skipEnd);
         }
         return true;
+    }
+
+    public void textJustification(String[] words, int maxWidth) {
+        //https://leetcode.com/problems/text-justification/
+        //https://www.interviewbit.com/problems/justified-text/hints/
+        int n = words.length;
+        int SPACE_CONSTANT = 1;
+        List<String> result = new ArrayList<>();
+        int index = 0;
+        while (index < n) {
+
+            int lineLength = -1;
+            int wordIndex = index;
+            while (wordIndex < n
+                    && words[wordIndex].length() + SPACE_CONSTANT + lineLength <= maxWidth) {
+                lineLength += words[wordIndex].length() + SPACE_CONSTANT;
+                wordIndex++;
+            }
+
+            StringBuilder sb = new StringBuilder(words[index]);
+            int spaces = 1;
+            int extras = 0;
+
+            if (wordIndex != index + 1 && wordIndex != n) {
+                spaces = (maxWidth - lineLength) / (wordIndex - index - 1) + SPACE_CONSTANT;
+                extras = (maxWidth - lineLength) % (wordIndex - index - 1);
+            }
+
+            for (int j = index + 1; j < wordIndex; j++) {
+                //add min spaces req between two words
+                for (int space = 0; space < spaces; space++) {
+                    sb.append(" ");
+                }
+                //if any extra spaces are also req, that should also be added
+                if (extras-- > 0) {
+                    sb.append(" ");
+                }
+                //after adding all the spaces, we can add the curr jth word
+                sb.append(words[j]);
+            }
+
+            int remaining = maxWidth - sb.length();
+            while (remaining-- > 0) {
+                sb.append(" ");
+            }
+            result.add(sb.toString());
+            index = wordIndex;
+        }
+        //output
+        System.out.println("Text justification: " + result);
+    }
+
+    public void positionsOfLargeGroups(String str) {
+        //https://leetcode.com/problems/positions-of-large-groups/
+        //SLIDING WINDOW approach
+        List<List<Integer>> positions = new ArrayList<>();
+        int n = str.length();
+        Map<Character, Integer> freq = new HashMap<>();
+        int start = 0;
+        int end = 0;
+        while (end < n) {
+
+            char chEnd = str.charAt(end);
+            freq.put(chEnd, freq.getOrDefault(chEnd, 0) + 1);
+
+            //size == 2 means we now have discontinuity from a potential large group,
+            //in that discontinuity we can add previous group if it was >= 3
+            //we are not calculating window length as (end - start + 1) because
+            //end is already ahead of large group where we found a discontinuity,
+            //so length to be considered here till end - 1
+            if (freq.size() == 2) {
+                if (end - start >= 3) {
+                    positions.add(Arrays.asList(start, end - 1));
+                }
+            }
+
+            //large group will be of same chars whose freq is >= 3
+            //if we have more than 1 char in our freq map, we need to adjust our window
+            //to find next coming large groups because if previous was a large groups, it
+            //would have been calculated in above if block
+            while (freq.size() > 1) {
+                char chStart = str.charAt(start);
+                freq.put(chStart, freq.getOrDefault(chStart, 0) - 1);
+                if (freq.get(chStart) <= 0) {
+                    freq.remove(chStart);
+                }
+                start++;
+            }
+            end++;
+        }
+        //this if block is handle cases of str = "aaa", "abcaaaa"
+        //here after end > n, we are not able to check the very last large groups of str
+        //so need this cond here also
+        if (end - start >= 3) {
+            positions.add(Arrays.asList(start, end - 1));
+        }
+        //output
+        System.out.println("Positions of all the large groups of strings: " + positions);
+    }
+
+    public void positionsOfLargeGroups_Optimized(String str) {
+        //https://leetcode.com/problems/positions-of-large-groups/
+        //TWO POINTER approach
+        List<List<Integer>> positions = new ArrayList<>();
+        int n = str.length();
+        int start = 0;
+        int end = 0;
+        while (end < n) {
+            if (end == n - 1 || str.charAt(end) != str.charAt(end + 1)) {
+                if (end - start + 1 >= 3) {
+                    positions.add(Arrays.asList(start, end));
+                }
+                start = end + 1;
+            }
+            end++;
+        }
+        //output
+        System.out.println("Positions of all the large groups of strings: " + positions);
     }
 
     public Node<Integer> reverseLinkedList_Iterative(Node<Integer> node) {
@@ -8575,56 +8748,56 @@ public class DSA450Questions {
         //l2 = 3-> 4-> 5-> NULL
         //reverse(l2) = 5-> 4-> 3-> NULL
         //reorderMerger(l1, l2) = 1-> 5-> 2-> 4-> 3-> NULL
-        if(head == null || head.getNext() == null){
+        if (head == null || head.getNext() == null) {
             return;
         }
-        
+
         //find mid of the linked list
         Node<Integer> slow = head;
         Node<Integer> fast = head.getNext();
-        while(fast != null && fast.getNext() != null){
+        while (fast != null && fast.getNext() != null) {
             slow = slow.getNext();
             fast = fast.getNext().getNext();
         }
-        
+
         Node<Integer> mid = slow;
-        
+
         Node<Integer> tempSecond = mid.getNext();
         mid.setNext(null);
-        
+
         //reversing the second half of the list
         Node<Integer> curr = tempSecond;
         Node<Integer> prev = null;
         Node<Integer> next = null;
-        
-        while(curr != null){
+
+        while (curr != null) {
             next = curr.getNext();
             curr.setNext(prev);
             prev = curr;
             curr = next;
         }
-        
+
         Node<Integer> second = prev;
         Node<Integer> first = head;
-        
-        while(second != null){
-            
+
+        while (second != null) {
+
             Node<Integer> firstNext = first.getNext();
             Node<Integer> secondNext = second.getNext();
-            
+
             first.setNext(second);
-            
-            if(firstNext == null){
+
+            if (firstNext == null) {
                 break;
             }
-            
+
             second.setNext(firstNext);
-            
+
             first = firstNext;
             second = secondNext;
         }
         //output
-        new LinkedListUtil<Integer>(head).print();
+        new LinkedListUtil<>(head).print();
     }
 
     public void rearrangeLinkedListAsOddIndexFirstAndEvenIndexAtEnd(Node<Integer> head) {
@@ -9993,7 +10166,9 @@ public class DSA450Questions {
         System.out.println("Lowest common ancestor of " + N1 + " " + N2 + ": " + lowestCommonAncestorOfTree_Helper(root, N1, N2));
     }
 
-    class CheckTreeIsSumTree { /*Helper class for checkTreeIsSumTree_Helper method*/ int data = 0;
+    class CheckTreeIsSumTree {
+
+        /*Helper class for checkTreeIsSumTree_Helper method*/ int data = 0;
     }
 
     public boolean checkTreeIsSumTree_Helper(TreeNode<Integer> root, CheckTreeIsSumTree obj) {
@@ -10183,7 +10358,7 @@ public class DSA450Questions {
          }
 
          }*/
-        /*List<TreeNode> q = new ArrayList<>();
+ /*List<TreeNode> q = new ArrayList<>();
          q.add(root);
          while (!q.isEmpty()) {
 
@@ -10317,8 +10492,8 @@ public class DSA450Questions {
     }
 
     class CheckIfBinaryTreeIsMaxHeapClass {
-        /*Helper class for checkIfBinaryTreeIsMaxHeap method*/
 
+        /*Helper class for checkIfBinaryTreeIsMaxHeap method*/
         int data;
     }
 
@@ -12428,6 +12603,42 @@ public class DSA450Questions {
         }
     }
 
+    private boolean linkedListInBinaryTree_MatchCheck(Node<Integer> head, TreeNode<Integer> root) {
+        if (head == null) {
+            return true;
+        }
+
+        if (root == null || root.getData() != head.getData()) {
+            return false;
+        }
+
+        return linkedListInBinaryTree_MatchCheck(head.getNext(), root.getLeft())
+                || linkedListInBinaryTree_MatchCheck(head.getNext(), root.getRight());
+
+    }
+
+    private boolean linkedListInBinaryTree_DFS(Node<Integer> head, TreeNode<Integer> root) {
+
+        if (root == null) {
+            return false;
+        }
+
+        if (linkedListInBinaryTree_MatchCheck(head, root)) {
+            return true;
+        }
+
+        return linkedListInBinaryTree_DFS(head, root.getLeft())
+                || linkedListInBinaryTree_DFS(head, root.getRight());
+
+    }
+
+    public void linkedListInBinaryTree(Node<Integer> head, TreeNode<Integer> root) {
+        //https://leetcode.com/problems/linked-list-in-binary-tree/
+        boolean output = linkedListInBinaryTree_DFS(head, root);
+        //output
+        System.out.println("Is linked list present in binary tree: " + output);
+    }
+
     // STACK
     int middleElementInStack_Element = Integer.MIN_VALUE;
 
@@ -12665,7 +12876,7 @@ public class DSA450Questions {
             System.out.println("Number formed: 0");
             return;
         }
-        
+
         StringBuilder sb = new StringBuilder();
         Stack<Integer> stack = new Stack<>();
 
@@ -12715,18 +12926,18 @@ public class DSA450Questions {
         //explanation: https://leetcode.com/problems/find-the-most-competitive-subsequence/discuss/1113429/Java-Brute-Force-Stack
         int n = nums.length;
         Stack<Integer> stack = new Stack<>();
-        
-        for(int i = 0; i < n; i++){
+
+        for (int i = 0; i < n; i++) {
             int val = nums[i];
-            
-            while(stack.size() > 0 && stack.size() + n - (i + 1) >= K
-            && stack.peek() > val){
+
+            while (stack.size() > 0 && stack.size() + n - (i + 1) >= K
+                    && stack.peek() > val) {
                 stack.pop();
             }
             stack.push(val);
         }
-        
-        while(!stack.isEmpty() && stack.size() > K){
+
+        while (!stack.isEmpty() && stack.size() > K) {
             stack.pop();
         }
         //output
@@ -17040,7 +17251,7 @@ public class DSA450Questions {
 
         currRow = row;
         currCol = col;
-        //same row straight-left col
+        //bottom-left diagonal
         while (currRow < n && currCol >= 0) {
             if (board[currRow][currCol] == 'Q') {
                 return false;
@@ -22532,6 +22743,9 @@ public class DSA450Questions {
 //        //https://leetcode.com/problems/jump-game-vii/
 //        System.out.println("Can we reach end of str: " + obj.jumpGameSeven("011010", 2, 3));
 //        System.out.println("Can we reach end of str: " + obj.jumpGameSeven("01101110", 2, 3));
+//        //https://leetcode.com/problems/frog-jump/
+//        System.out.println("Frog can reach the end of river: " + obj.frogJump(new int[]{0, 1, 3, 5, 6, 8, 12, 17}));
+//        System.out.println("Frog can reach the end of river: " + obj.frogJump(new int[]{0, 1, 2, 3, 4, 8, 9, 11}));
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
 //        System.out.println("Djikstra Algorithm Graph");
@@ -22651,12 +22865,12 @@ public class DSA450Questions {
                     {1, 2, 2, 4}});
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Binary Search Tree Iterator");
-        //https://leetcode.com/problems/binary-search-tree-iterator
-        TreeNode<Integer> root1 = new TreeNode<>(2);
-        root1.setLeft(new TreeNode<>(1));
-        root1.setRight(new TreeNode<>(3));
-        obj.binarySearchTreeIterator(root1);
+//        System.out.println("Binary Search Tree Iterator");
+//        //https://leetcode.com/problems/binary-search-tree-iterator
+//        TreeNode<Integer> root1 = new TreeNode<>(2);
+//        root1.setLeft(new TreeNode<>(1));
+//        root1.setRight(new TreeNode<>(3));
+//        obj.binarySearchTreeIterator(root1);
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
         System.out.println("Partition to K Equal Sum Subsets");
@@ -22690,6 +22904,42 @@ public class DSA450Questions {
             {'.', '6', '.', '.', '.', '.', '2', '8', '.'},
             {'.', '.', '.', '4', '1', '9', '.', '.', '5'},
             {'.', '.', '.', '.', '8', '.', '.', '7', '9'}});
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Linked List in Binary Tree");
+        //https://leetcode.com/problems/linked-list-in-binary-tree/
+        TreeNode<Integer> root1 = new TreeNode<>(1);
+        root1.setLeft(new TreeNode<>(4));
+        root1.getLeft().setRight(new TreeNode<>(2));
+        root1.getLeft().getRight().setLeft(new TreeNode<>(1));
+        root1.setRight(new TreeNode<>(4));
+        root1.getRight().setLeft(new TreeNode<>(2));
+        root1.getRight().getLeft().setLeft(new TreeNode<>(6));
+        root1.getRight().getLeft().setRight(new TreeNode<>(8));
+        root1.getRight().getLeft().getRight().setLeft(new TreeNode<>(1));
+        root1.getRight().getLeft().getRight().setRight(new TreeNode<>(3));
+        Node<Integer> head = new Node<>(4);
+        head.setNext(new Node<>(2));
+        head.getNext().setNext(new Node<>(8));
+        obj.linkedListInBinaryTree(head, root1);
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Text Justification");
+        //https://leetcode.com/problems/text-justification/
+        obj.textJustification(new String[]{"This", "is", "an", "example", "of", "text", "justification."}, 16);
+        obj.textJustification(new String[]{"What", "must", "be", "acknowledgment", "shall", "be"}, 16);
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Positions of Large Groups");
+        //https://leetcode.com/problems/positions-of-large-groups/
+        obj.positionsOfLargeGroups("abbxxxxzzy");
+        obj.positionsOfLargeGroups("aaa");
+        obj.positionsOfLargeGroups("abc");
+        obj.positionsOfLargeGroups("nnnhaaannnm");
+        obj.positionsOfLargeGroups_Optimized("abbxxxxzzy");
+        obj.positionsOfLargeGroups_Optimized("aaa");
+        obj.positionsOfLargeGroups_Optimized("abc");
+        obj.positionsOfLargeGroups_Optimized("nnnhaaannnm");
     }
 
 }
