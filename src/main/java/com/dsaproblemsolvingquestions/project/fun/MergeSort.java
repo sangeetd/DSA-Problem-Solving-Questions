@@ -5,91 +5,58 @@
  */
 package com.dsaproblemsolvingquestions.project.fun;
 
+import java.util.Arrays;
+
 /**
  *
  * @author RAVI
  */
 public class MergeSort {
-    
-    private static void merging(int[] a, int f, int l, int mid) {
-        
-        int s1=mid - f + 1;
-        int s2 = l - mid;
-        
-        int[] L = new int[s1];
-        int[] R = new int[s2];
-        
-        for(int i=0; i<s1; i++){
-            L[i] = a[f + i];
+
+    //https://leetcode.com/problems/sort-an-array/description/
+    private static void merge(int[] nums, int start, int mid, int end) {
+        int[] left = Arrays.copyOfRange(nums, start, mid + 1);
+        int[] right = Arrays.copyOfRange(nums, mid + 1, end + 1);
+
+        int i = 0;
+        int j = 0;
+        int k = start;
+
+        while (i < left.length && j < right.length) {
+            if (left[i] <= right[j]) {
+                nums[k++] = left[i++];
+            } else {
+                nums[k++] = right[j++];
+            }
         }
-        
-        for(int i=0; i<s2; i++){
-            R[i] = a[mid + 1 + i];
+
+        while (i < left.length) {
+            nums[k++] = left[i++];
         }
-        
-        
-        // Initial indexes of first and second subarrays 
-        int i = 0, j = 0; 
-  
-        // Initial index of merged subarry array 
-        int k = f; 
-        while (i < s1 && j < s2) { 
-            if (L[i] <= R[j]) { 
-                a[k] = L[i]; 
-                i++; 
-            } 
-            else { 
-                a[k] = R[j]; 
-                j++; 
-            } 
-            k++; 
-        } 
-  
-        /* Copy remaining elements of L[] if any */
-        while (i < s1) { 
-            a[k] = L[i]; 
-            i++; 
-            k++; 
-        } 
-  
-        /* Copy remaining elements of R[] if any */
-        while (j < s2) { 
-            a[k] = R[j]; 
-            j++; 
-            k++; 
-        } 
-        
-        
-    }
-    
-    public static void mergeSort(int[] a, int f, int l){
-        
-        if(f<l){
-            
-            int mid = (f+l)/2;
-            
-            mergeSort(a, f, mid);
-            mergeSort(a, mid+1, l);
-            
-            merging(a, f, l, mid);
-            
+
+        while (j < right.length) {
+            nums[k++] = right[j++];
         }
-        
-    }
-    
-    
-    public static void main(String[] args) {
-        
-        int[] a = {9, 4, 3, 6, 7, 1, 2, 11, 5};
-        
-        mergeSort(a, 0, a.length-1);
-        
-        for(int x: a){
-            System.out.print(x+" ");
-        }
-        
     }
 
-    
-    
+    private static void divide(int[] nums, int start, int end) {
+        if (start >= end) {
+            return;
+        }
+        int mid = start + (end - start) / 2;
+        divide(nums, start, mid);
+        divide(nums, mid + 1, end);
+        merge(nums, start, mid, end);
+    }
+
+    public static void main(String[] args) {
+
+        int[] nums = {9, 4, 3, 6, 7, 1, 2, 11, 5};
+
+        divide(nums, 0, nums.length - 1);
+
+        System.out.println("Merge sort :" + Arrays.toString(nums));
+
+    }
+
 }
