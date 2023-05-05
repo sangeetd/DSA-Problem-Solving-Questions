@@ -10,7 +10,7 @@ package fun;
  * @author sangeetdas
  */
 public class DisjointSet {
-
+    //explanation union-find : https://youtu.be/Kptz-NVA2RE
     //https://www.geeksforgeeks.org/disjoint-set-data-structures/
     int[] parent;
     int[] rank;
