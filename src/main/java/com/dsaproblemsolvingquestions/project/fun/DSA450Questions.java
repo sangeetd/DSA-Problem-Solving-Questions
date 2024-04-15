@@ -250,10 +250,7 @@ public class DSA450Questions {
             }
         }
         //output
-        for (int val : arr) {
-            System.out.print(val + " ");
-        }
-        System.out.println();
+        System.out.println("Sort array with values 0,1,2 (Dutch National Flag Algo) : " + Arrays.toString(arr));
     }
 
     private void nextPermutation_Print(int[] nums) {
@@ -588,10 +585,8 @@ public class DSA450Questions {
         //.......................T: O(N^2)
         //https://leetcode.com/problems/rotate-array/
         //actual:
-        for (int x : arr) {
-            System.out.print(x + " ");
-        }
-        System.out.println();
+        System.out.println(Arrays.toString(arr));
+
         int actualK = k; //just for output purpose
         int n = arr.length;
 
@@ -605,11 +600,7 @@ public class DSA450Questions {
         }
 
         //output:
-        System.out.println("Rotate array by " + actualK + " steps output brute force: ");
-        for (int x : arr) {
-            System.out.print(x + " ");
-        }
-        System.out.println();
+        System.out.println("Rotate array by " + actualK + " steps (Brute Force) : " + Arrays.toString(arr));
     }
 
     private void rotateArrayByK_ReverseArray(int[] arr, int start, int end) {
@@ -628,10 +619,7 @@ public class DSA450Questions {
         //https://leetcode.com/problems/rotate-array/
         //explanation: https://youtu.be/BHr381Guz3Y
         //actual:
-        for (int x : arr) {
-            System.out.print(x + " ");
-        }
-        System.out.println();
+        System.out.println(Arrays.toString(arr));
 
         int len = arr.length;
         //if k > len, mod it with len so that k always fall under range of len
@@ -640,18 +628,14 @@ public class DSA450Questions {
         //reverse the array
         rotateArrayByK_ReverseArray(arr, start, len - 1);
 
-        //reverse first [0 to k] elements
+        //reverse first [0 to k - 1] elements
         rotateArrayByK_ReverseArray(arr, start, k - 1);
 
         //reverse remaining [k to len] elements
         rotateArrayByK_ReverseArray(arr, k, len - 1);
 
         //output:
-        System.out.println("Rotate array by " + k + " steps output approach2: ");
-        for (int x : arr) {
-            System.out.print(x + " ");
-        }
-        System.out.println();
+        System.out.println("Rotate array by " + k + " steps (Reversing) : " + Arrays.toString(arr));
     }
 
     public void minimizeDifferenceBetweenHeights(int[] arr, int k) {
@@ -7062,6 +7046,7 @@ public class DSA450Questions {
     public void minOperationsToMakeArrayContinous(int[] nums) {
         //https://leetcode.com/problems/minimum-number-of-operations-to-make-array-continuous/
         //https://leetcode.com/problems/minimum-number-of-operations-to-make-array-continuous/discuss/2725833/Java-Sliding-Windows
+        //explanation: https://youtu.be/LqtcUyPBWrY?si=mK2_mFLtCczxzcm1
         //based on SLIDING WINDOW
         /*
         nums[] is considered continuous if both of the following conditions are fulfilled:
@@ -11092,6 +11077,644 @@ public class DSA450Questions {
         return product * n;
     }
 
+    public void numberOfFlowersInFullBloom(int[][] flowers, int[] persons) {
+        //https://leetcode.com/problems/number-of-flowers-in-full-bloom/description/
+        int m = flowers.length;
+        int n = persons.length;
+
+        int[] numberOfFullBloomFlowersPersonCanSee = new int[n];
+
+        int[][] personTimeWithIndex = new int[n][2];
+
+        //actual mapping of the arrival time for i-th person with i-th index
+        for (int i = 0; i < n; i++) {
+            personTimeWithIndex[i] = new int[]{persons[i], i};
+        }
+
+        //sort the persons array in increasing order of the time i-th person is
+        //arriving
+        Arrays.sort(personTimeWithIndex, (a, b) -> Integer.compare(a[0], b[0]));
+
+        //sort the flowers arrays in increasing order of the start time i.e,
+        //flowers[i][0]
+        Arrays.sort(flowers, (a, b) -> Integer.compare(a[0], b[0]));
+
+        PriorityQueue<Integer> minHeapEndTime = new PriorityQueue<>();
+
+        int flowerIndex = 0;
+
+        for (int[] person : personTimeWithIndex) {
+
+            int personArrivalTime = person[0];
+            int personActualIndex = person[1];
+
+            //consider all those flowers that have started to bloom, 'on or before'
+            //the curr person's arrival time 'personArrivalTime'
+            //all the flowers start time less or equal to arrival time, meaning
+            //flowers @flowerIndex has started to bloom 'on or before personArrivalTime'
+            while (flowerIndex < m && flowers[flowerIndex][0] <= personArrivalTime) {
+                //save the end time of curr flower @flowerIndex to maintain the
+                //end time in order such that any i-th person's arrival time determine
+                //what all flowers are still blooming and also this person can see
+                minHeapEndTime.add(flowers[flowerIndex][1]);
+                flowerIndex++;
+            }
+
+            //since the min heap is maintaining the order of end time of flower's bloom,
+            //the end time is when a particular visited/blooming flower stops blooming
+            //here, we must check that if at the time i-th person arrives, what all flowers
+            //have met their end time for blooming
+            //ex: minHeap have two flowers whoose end time are 3 & 6 unit
+            //and if i-th person arrives on time 10 unit, for this person, flowers with end
+            //time 3 & 6 has already expired blooming means this i-th person will not be
+            //able to see these flowers in bloom
+            //that's why we must remove those flowers from min heap whoose blooming
+            //end time has expired in comparison with 'personArrivalTime'
+            while (!minHeapEndTime.isEmpty() && minHeapEndTime.peek() < personArrivalTime) {
+                //remove those flowers whoose blooming end time has expired when the
+                //curr person arrived @personArrivalTime as this person won't be able to
+                //see these flowers in bloom
+                minHeapEndTime.poll();
+            }
+
+            //here, the number of flowers currently left in the min heap are the
+            //flowers in full bloom that curr person can see
+            numberOfFullBloomFlowersPersonCanSee[personActualIndex] = minHeapEndTime.size();
+        }
+
+        //output
+        System.out.println("Number of flowers in full bloom : " + Arrays.toString(numberOfFullBloomFlowersPersonCanSee));
+    }
+
+    public void sumOfImbalanceNumbersOfAllSubarrays(int[] nums) {
+        //https://leetcode.com/problems/sum-of-imbalance-numbers-of-all-subarrays/description/
+        int n = nums.length;
+        int sumOfImbalanceNumbers = 0;
+
+        //generate all possible subarrays using nested for()
+        for (int i = 0; i < n; i++) {
+
+            Set<Integer> hasValue = new HashSet<>();
+
+            int imbalance = 0;
+
+            for (int j = i; j < n; j++) {
+
+                int val = nums[j];
+
+                if (hasValue.isEmpty() || hasValue.contains(val)) {
+                    //do nothing
+                } else if (hasValue.contains(val - 1) && hasValue.contains(val + 1)) {
+                    imbalance--;
+                } else if (!hasValue.contains(val - 1) && !hasValue.contains(val + 1)) {
+                    imbalance++;
+                }
+
+                hasValue.add(val);
+
+                sumOfImbalanceNumbers += imbalance;
+            }
+        }
+
+        //output
+        System.out.println("Sum of imbalance numbers of all subarrays : " + sumOfImbalanceNumbers);
+    }
+
+    int kthSymbolInGrammer_Recursive_Helper(int n, int k) {
+
+        //base case, where given row ==> n = 1, in that case only grammer symbol
+        //exists i.e, 0
+        if (n == 1) {
+            return 0;
+        }
+
+        //number of bits in the n-th row
+        int numOfBitsInNthRow = (int) Math.pow(2, n - 1);
+
+        //mid point in the bit set
+        int mid = numOfBitsInNthRow / 2;
+
+        //if the given 'k' position is less or equal to mid point, the k-th grammer
+        //symbol will going to be same as in prev row(==> n - 1) & at same k-th position
+        if (k <= mid) {
+            return kthSymbolInGrammer_Recursive_Helper(n - 1, k);
+        } else {
+            //BUT, if the given 'k' position is more than the mid point, the k-th grammer
+            //symbol will going to be reverse of what is there in prev row(==> n - 1)
+            //& at (k - mid) position because there will be lesser bits in (n - 1) row
+            //so k has to be adjusted
+            return kthSymbolInGrammer_Recursive_Helper(n - 1, k - mid) == 0 ? 1 : 0;
+        }
+
+    }
+
+    public void kthSymbolInGrammer(int n, int k) {
+        //https://leetcode.com/problems/k-th-symbol-in-grammar/description/
+        //based on RECURSION
+        /*
+
+        row 1 : 0
+        row 2 : 01
+        row 3 : 0110
+        row 4 : 01101001
+
+        ex: n = 4, k = 2
+
+        numOfBits in row n = 4 ==> (2 ^ (n - 1)) ==> (2 ^ (4 - 1)) ==> (2 ^ 3) ==> 8
+        ==> 01101001
+
+        mid point = numOfBits / 2 ==> 8 / 2 ==> 4
+        ==> [0110] [1001]
+
+        here, k = 2 that is (k <= mid) ==> (2 <= 4)
+        first half [0110] is exactly same as prev row (n - 1) hence the k-th
+        grammer value that is less or equal to mid will be same as k-th grammer
+        in row (n - 1)
+
+        let say, if k = 5
+        k = 5 that is (k > mid), the actual grammer value for curr row ==> n = 4
+        and at k = 5 position is '1' but if we observe, the second half [1001] is
+        actually the reverse bits of row (n - 1) meaning,
+        n = 3 ==> 0110
+        n = 4 ==> second half [1001] ==> reverse(0110) ==> 1001
+
+        so from this observation we can say that any k that is greater than mid
+        (==> k > mid) it will match with the reverse bit of the prev row (n - 1)
+        hence, we need to find (==> k - mid) position in row (==> n - 1) and whatever
+        value comes, reverse it
+
+         */
+        int kthSymbol = kthSymbolInGrammer_Recursive_Helper(n, k);
+
+        //output
+        System.out.println("K-th symbol in grammer : " + kthSymbol);
+    }
+
+    public void numberOfWaysToBuyPensAndPencils(int totalAmount, int penCost, int pencilCost) {
+        //https://leetcode.com/problems/number-of-ways-to-buy-pens-and-pencils/description/
+        //based on BRUTE FORCE, ENUMERATION
+        //in this approach we will simply try to enumerate over all the possibilties
+        //number of pens that can be bought = total amount we have / cost of single pen
+        int numberOfPensCanBeBought = totalAmount / penCost;
+
+        long ways = 0;
+
+        //enumerate over pens in range[0 to 'numberOfPensCanBeBought'] where pen = 0
+        //means we are buying 0 pens but might buy pencils from 'totalAmount'
+        for (int pen = 0; pen <= numberOfPensCanBeBought; pen++) {
+
+            //number of pencils we can buy if we have currently bought number of
+            //pens as 'pen' and due to which we are left with 'totalAmount'
+            //ex: totalAmount = 20, penCost = 10, pencilCost = 5
+            //enumeration 1:
+            //pen bought = 0, totalAmount remained same as 20 only
+            //within this totalAmount, number of pencils that can be bought
+            //(totalAmount / pencilCost) i.e, 20 / 5 ==> 4 meaning 4 ways of buying
+            //pencil, +1 way if we choose not to buy any pencils
+            //enumeration 2:
+            //pen bought = 1, totalAmount remained same as 10 (==> totalAmount - penCost)
+            //within this totalAmount, number of pencils that cane be bought
+            //(totalAmount / pencilCost) i.e, 10 / 5 ==> 2 meaning 2 ways of buying
+            //pencil, +1 way if we choose not to buy any pencils
+            //enumeration 2:
+            //pen bought = 2, totalAmount remained same as 0 (==> totalAmount - penCost)
+            //within this totalAmount, number of pencils that cane be bought
+            //(totalAmount / pencilCost) i.e, 0 / 5 ==> 0 meaning 0 ways of buying
+            //pencil BUT still +1 way if we choose not to buy any pencils
+            ways += (totalAmount / pencilCost + 1);
+            //with each enumeration we buy pen, we so must adjust the totalAmount
+            //with the pen bought @penCost
+            totalAmount -= penCost;
+        }
+
+        //output
+        System.out.println("Number of ways to buy pens and pencils : " + ways);
+    }
+
+    public void findOriginalArrayOfPrefixXOR(int[] xorPrefix) {
+        //https://leetcode.com/problems/find-the-original-array-of-prefix-xor/description/
+        //based on BIT MANIPULATION
+        /*
+
+        if actual arr[] = [5, 7, 2, 3, 2]
+        xorPrefix[] = [5, 2, 0, 3, 1]
+
+        5
+        5 ^ 7 = 2
+        ==> 2 ^ 5 ==> 7
+
+        5 ^ 7 ^ 2 = 0
+        ==> 0 ^ (5 ^ 7) ==> 2
+
+        5 ^ 7 ^ 2 ^ 3 = 3
+        ==> 3 ^ (5 ^ 7 ^ 2) ==> 3
+
+        5 ^ 7 ^ 2 ^ 3 ^ 2 = 1
+        ==> 1 ^ (5 ^ 7 ^ 2 ^ 3) ==> 2
+
+         */
+        int n = xorPrefix.length;
+
+        int[] original = new int[n];
+        original[0] = xorPrefix[0];
+
+        for (int i = 1; i < n; i++) {
+            original[i] = xorPrefix[i] ^ xorPrefix[i - 1];
+        }
+
+        //output
+        System.out.println("Original array of XOR prefix : " + Arrays.toString(original));
+    }
+
+    public void lastMomentBeforeAllAntsFallOutOfPlank(int n, int[] left, int[] right) {
+        //https://leetcode.com/problems/last-moment-before-all-ants-fall-out-of-a-plank/description/
+        int maxTime = 0;
+
+        for (int position : left) {
+            maxTime = Math.max(maxTime, position);
+        }
+
+        for (int position : right) {
+            maxTime = Math.max(maxTime, n - position);
+        }
+
+        //output
+        System.out.println("Last moment before all ants fall out : " + maxTime);
+    }
+
+    public int findWinnerOfArrayGame(int[] nums, int k) {
+        //............T: O(N)
+        //.............S: O(N), Space taken for Deque
+        //https://leetcode.com/problems/find-the-winner-of-an-array-game/description/
+        int n = nums.length;
+        Deque<Integer> queue = new LinkedList<>();
+
+        int maxVal = nums[0];
+
+        for (int val : nums) {
+            maxVal = Math.max(maxVal, val);
+            queue.add(val);
+        }
+
+        if (k >= n) {
+            return maxVal;
+        }
+
+        int prevWinner = -1;
+
+        int consecutiveWinnerCount = 0;
+
+        //simulate the game
+        while (true) {
+
+            //pick the values from nums[] from index 0 and 1
+            int valAtIndexZero = queue.pollFirst();
+            int valAtIndexOne = queue.pollFirst();
+
+            //curr winning val is the winner among nums[0] or nums[1] in curr
+            //queue representation, winner = max(valAtIndexZero, valAtIndexOne)
+            int currWinningVal;
+
+            //choose the max value out the picked values
+            if (valAtIndexZero > valAtIndexOne) {
+
+                //mark the winning val
+                currWinningVal = valAtIndexZero;
+
+                //as per question, winning value stays at index 0 i.e, queue's first value
+                queue.addFirst(currWinningVal);
+                //also, loosing value will move at the end of queue
+                queue.addLast(valAtIndexOne);
+            } else {
+
+                //mark the winning val
+                currWinningVal = valAtIndexOne;
+
+                //as per question, winning value stays at index 0 i.e, queue's first value
+                queue.addFirst(currWinningVal);
+                //also, loosing value will move at the end of queue
+                queue.addLast(valAtIndexZero);
+            }
+
+            //here, we already have a prevWinner hence it is not -1 AND curr
+            //winning value is same as prev winner that would mean, the curr
+            //winning value is a winner in a consecutive manner, hence,
+            //'consecutiveWinnerCount' is added by +1
+            if (prevWinner != -1 && prevWinner == currWinningVal) {
+                consecutiveWinnerCount += 1;
+            } else {
+                //otherwise, if we are seeing the value for first time hence
+                //prevWinner is still -1 OR curr winning value is not same as
+                //prev winner that means the consecutive winning order breaks
+                //here, hence now we have a new winner as prevWinner and count
+                //should also be start with 1(==> 1 is the initial freq for this
+                //new 'currWinningVal')
+                prevWinner = currWinningVal;
+                consecutiveWinnerCount = 1;
+            }
+
+            //here, if the curr winning value has won consecutively for about
+            //'consecutiveWinnerCount' times and that is required as given 'k'
+            //hence we found a winner.
+            if (consecutiveWinnerCount == k) {
+                return currWinningVal;
+            }
+        }
+    }
+
+    public int findWinnerOfArrayGame2(int[] nums, int k) {
+        //............T: O(N)
+        //.............S: O(1), SPACE OPTIMIZED
+        //https://leetcode.com/problems/find-the-winner-of-an-array-game/description/
+        int n = nums.length;
+
+        int maxVal = nums[0];
+
+        for (int val : nums) {
+            maxVal = Math.max(maxVal, val);
+        }
+
+        //since we have to choose val from index 0 or 1
+        //lets assume the val at index 0 is winning value and rest other vals
+        //are challenging this val
+        int assummedWinningVal = nums[0];
+
+        //count the winning val's winning streak/consecutive count
+        int consecutiveWinnerCount = 0;
+
+        //simulate the game
+        for (int i = 1; i < n; i++) {
+
+            int challengerVal = nums[i];
+
+            //choose the max value out of the picked values
+            //if the assumed winning val is max than the curr challenger val
+            //then winning streak/ consecutive count is added by +1 for curr
+            //'assummedWinningVal'
+            if (assummedWinningVal > challengerVal) {
+
+                consecutiveWinnerCount += 1;
+
+            } else {
+
+                //otherwise, if the challenger value is max than curr 'assummedWinningVal'
+                //then we clearly have a new winner here i.e, the next assummed winning val
+                //is now 'challengerVal' since there is a change in winning value hence
+                //the streak/ consecutive count broke and need to restart from 1 again for
+                //next 'assummedWinningVal'
+                assummedWinningVal = challengerVal;
+                consecutiveWinnerCount = 1;
+            }
+
+            //here, if the curr assummed winning val has won consecutively for about
+            //'consecutiveWinnerCount' times and that is required as given 'k'
+            //hence we found a winner.
+            //OR 'assummedWinningVal' is now the maxVal of the nums[] that would
+            //mean, out of two picked value everytime i.e,
+            //assummed winning val = nums[0] or challenger val = nums[1]
+            //assummed winning val will be maxVal and challenger will always be
+            //smaller and further reaching this state 'assummedWinningVal' will
+            //eventually reach the streak/ consecutive count of k
+            if (consecutiveWinnerCount == k || assummedWinningVal == maxVal) {
+                return assummedWinningVal;
+            }
+        }
+
+        return maxVal;
+    }
+
+    public void findUniqueBinaryString(String[] nums) {
+        //https://leetcode.com/problems/find-unique-binary-string/description/
+        //https://leetcode.com/problems/find-unique-binary-string/editorial/
+        //based CANTOR'S DIAGONAL ARGUMENT
+        int size = nums.length;
+        String uniqueBinaryString = "";
+
+        //as we have to make unique binary number of the size ==> n
+        //and to make a binary number unique we can decide from the curr i-th
+        //binary number by reciprocating the binary bit 0 -> 1 or 1 -> 0
+        for (int i = 0; i < size; i++) {
+
+            String currBinaryNumber = nums[i];
+            uniqueBinaryString += currBinaryNumber.charAt(i) == '0' ? "1" : "0";
+        }
+
+        //output
+        System.out.println("Find unqiue binary string (Cantor's Diagonal Argument): " + uniqueBinaryString);
+    }
+
+    public void reductionOprnsToMakeArrayElementsEqual(int[] nums) {
+        //https://leetcode.com/problems/reduction-operations-to-make-the-array-elements-equal/description/
+        int n = nums.length;
+
+        //sort the array such that largest value is in the end and second
+        //largest value is before that and so on..
+        //smallest value(s) < ... < second largest value(s) < largest value(s)
+        Arrays.sort(nums);
+
+        int minVal = nums[0];
+
+        //all the largest value(s) must replaced with the second largest value
+        //and each replace oprns is counted as 1, thats why starting from last
+        //index to target largest value first and so on...
+        int index = n - 1;
+
+        int oprns = 0;
+
+        //as per question, Find the next largest value in nums strictly smaller
+        //than largest. Let its value be nextLargest.
+        //as mentioned above each value in nums[] will be replaced with next/second
+        //largest value compared to curr nums[index] BUT in that case
+        //minVal in sorted nums[] will never have any next/second largest value
+        //as this minVal is the smallest among all the values that means once index
+        //reached num[index] == minVal there won't be any samller values left to
+        //perform any oprns so end the while() loop
+        while (nums[index] != minVal) {
+
+            //since we have sorted nums[] here we count all the largest value(s)
+            //ex: n = 6, [2,2,2,3,3,3] here, 3 is largest value(s), so starting n - 1
+            //we will count all the occureneces of largest value based on index value
+            //ex:
+            //index : [0, 1, 2, 3, 4, 5]
+            //value : [2, 2, 2, 3, 3, 3]
+            //last occurence(starting from n - 1) of 3 is index = 3
+            //occuences of 3 i.e, 6 - 3 ==> 3
+            while (index - 1 >= 0 && nums[index - 1] == nums[index]) {
+                index--;
+            }
+
+            //count the oprns we have perform on curr (n - index) number of
+            //largest value(s), also once we have performed the oprns it is
+            //assumed that these largest value(s) are now converted its next/second
+            //largest value
+            oprns += (n - index);
+
+            //move to index that will point to next largest value to perform the
+            //oprns
+            index -= 1;
+        }
+
+        //output
+        System.out.println("Reduction oprns to make array elements equal : " + oprns);
+    }
+
+    private boolean arithemeticSubarray_IsArithemeticSubarray_BruteFroce(int[] nums) {
+
+        Arrays.sort(nums);
+
+        int n = nums.length;
+
+        if (n < 2) {
+            return false;
+        }
+
+        //if the subarray nums[FROM to (TO + 1)] is arithemetic then all the
+        //consecutive values should have diff eqaul to reqDiff
+        int reqDiff = nums[1] - nums[0];
+
+        //since the diff betten nums[0] & nums[1] is already taken so we will
+        //start checking pairs from index = 2 as nums[i - 1] & nums[i]
+        for (int i = 2; i < n; i++) {
+
+            int currDiff = nums[i] - nums[i - 1];
+
+            //if the curr diff in any subsequent consecutive pair is not 'reqDiff'
+            //means the curr subarray is not arithemetic hence return false
+            if (currDiff != reqDiff) {
+                return false;
+            }
+
+        }
+
+        return true;
+    }
+
+    private boolean arithemeticSubarray_IsArithemeticSubarray_WithoutSorting(int[] nums) {
+
+        //expplanation: https://leetcode.com/problems/arithmetic-subarrays/editorial/
+        int n = nums.length;
+
+        int minVal = Integer.MAX_VALUE;
+        int maxVal = Integer.MIN_VALUE;
+
+        Set<Integer> numsSet = new HashSet();
+
+        for (int val : nums) {
+
+            minVal = Math.min(minVal, val);
+            maxVal = Math.max(maxVal, val);
+
+            numsSet.add(val);
+        }
+
+        if ((maxVal - minVal) % (n - 1) != 0) {
+            return false;
+        }
+
+        int diff = (maxVal - minVal) / (n - 1);
+
+        int nextArithemeticVal = minVal + diff;
+
+        while (nextArithemeticVal < maxVal) {
+
+            if (!numsSet.contains(nextArithemeticVal)) {
+                return false;
+            }
+
+            nextArithemeticVal += diff;
+        }
+
+        return true;
+    }
+
+    public void arithemeticSubarray(int[] nums, int[] left, int[] right) {
+        //https://leetcode.com/problems/arithmetic-subarrays/description/
+        List<Boolean> resultBruteForce = new ArrayList<>();
+        List<Boolean> resultWithoutSorting = new ArrayList<>();
+
+        int n = left.length;
+
+        for (int i = 0; i < n; i++) {
+
+            int from = left[i];
+            int to = right[i];
+
+            int[] copy = Arrays.copyOfRange(nums, from, to + 1);
+
+            //brute force approach
+            //.....T:O(N.M.Log.M) as there are N queries(left, right) and for each
+            //i-th query will copy array of possible length M and then in brute
+            //force approach will sort it hence M.Log.M
+            resultBruteForce.add(arithemeticSubarray_IsArithemeticSubarray_BruteFroce(copy));
+
+            //OPTIMIZED approach
+            resultWithoutSorting.add(arithemeticSubarray_IsArithemeticSubarray_WithoutSorting(copy));
+        }
+
+        //output
+        System.out.println("Arithemetic subarray (Brute Force): " + resultBruteForce);
+        System.out.println("Arithemetic subarray (Without Sorting): " + resultWithoutSorting);
+    }
+
+    public void sumOfAbsDifferencesInSortedArray(int[] nums) {
+        //https://leetcode.com/problems/sum-of-absolute-differences-in-a-sorted-array/description/
+        //https://leetcode.com/problems/sum-of-absolute-differences-in-a-sorted-array/editorial/
+        //explanation: https://www.youtube.com/watch?v=2ENYvJL-Leo
+        //based on PREFIX SUM, MATH OBSERVATION
+        int n = nums.length;
+
+        int[] sumOfAbsDiff = new int[n];
+
+        int totalSum = 0;
+        for (int val : nums) {
+            totalSum += val;
+        }
+
+        int prefixLeftSum = 0;
+
+        for (int i = 0; i < n; i++) {
+
+            int prefixRightSum = totalSum - prefixLeftSum - nums[i];
+
+            int leftCount = i;
+            int rightCount = (n - i - 1);
+
+            int currSumOfAbsDiff = (nums[i] * leftCount) - prefixLeftSum;
+            currSumOfAbsDiff += prefixRightSum - (nums[i] * rightCount);
+
+            sumOfAbsDiff[i] = currSumOfAbsDiff;
+
+            prefixLeftSum += nums[i];
+        }
+
+        //output
+        System.out.println("Sum of absolute differences in sorted array : " + Arrays.toString(sumOfAbsDiff));
+    }
+
+    public int elementsAppearingMoreThan25PerInSortedArray(int[] arr) {
+        //https://leetcode.com/problems/element-appearing-more-than-25-in-sorted-array/description/
+        int n = arr.length;
+
+        int[] candidates = new int[]{arr[n / 4], arr[n / 2], arr[3 * n / 4]};
+
+        //25% of total values in arr i.e, 25% of n ==> n * 0.25 ==> n * (1 / 4)
+        int reqQty = n / 4;
+
+        for (int val : candidates) {
+
+            int firstIndex = findFirstOccurenceTargetInSortedArray(arr, val);
+            int lastIndex = findLastOccurenceTargetInSortedArray(arr, val);
+
+            int totalValQty = lastIndex - firstIndex + 1;
+
+            if (totalValQty > reqQty) {
+                return val;
+            }
+        }
+
+        return -1;
+    }
+
     public void rotateMatrixClockWise90Deg(int[][] mat) {
         //https://leetcode.com/problems/rotate-image
         int col = mat[0].length;
@@ -12479,6 +13102,422 @@ public class DSA450Questions {
         }
 
         return -1;
+    }
+
+    public void largestSubmatrixWithRearrangements(int[][] matrix) {
+        //https://leetcode.com/problems/largest-submatrix-with-rearrangements/description/
+        /*
+
+        matrix:
+        row/col:    0     1     2
+            0       [0    0     1]
+            1       [1    1     1]
+            2       [1    0     1]
+
+        if we rearrange col = 2 and col = 1
+
+        matrix:
+        row/col:    0     1     2
+            0       [0    1     0]
+            1       [1    1     1]
+            2       [1    1     0]
+
+        we will get submatrix where all of the values are 1 i.e, [1,0],[1,1],[2,0],[2,1]
+        breadth = 2, height = 2
+        hencce largestSubMatrix = breadth * height ==> 2 * 2 ==> 4
+
+        intuition:
+
+        matrix:
+        row/col:    0     1     2
+            0       [0    0     1]
+            1       [1    1     1]
+            2       [1    0     1]
+
+        count the consecutive '1's in col-wise manner means consecutive '1's in
+        each of the col
+
+        matrix:
+        row/col:    0     1     2
+            0       [0    0     1]
+            1       [1    1     2]
+            2       [2    0     3]
+
+        ex: till row = 2, col = 0 has 2 consecutive '1'
+        same, col = 2 has 3 consecutive '1'
+
+        col = 0 ==> [0][1][1]
+        col = 2 ==> [1][1][1]
+
+        consider, row = 2, we have [2, 0, 3] and if we sort this row
+        (ideally, in decreasing order but Arrays.sort(int[]) supports only increasing order)
+        ==> [3,2,0]
+
+        diagramatically:
+
+        [3 2 0]
+        1
+        1 1
+        1 1 _
+
+        here we can see the submatrix
+
+        idea here is to consider each value as height of consecutive '1's
+        where breadth will be the i-th value
+
+        ex: i = 0
+        breadth = (i + 1) = 0 + 1
+        height = row[i] = 3
+
+        means, we are considering below submatrix having all '1' and are is 3 * 1
+        1
+        1
+        1
+
+        i = 1
+        bredth = 1 + 1 = 2
+        height = row[i] = 2
+
+        means, we are considering below submatrix having all '1' and are is 2 * 2
+        1 1
+        1 1
+
+        this one has largest submatrix area having all values as '1'
+
+         */
+        int ROW = matrix.length;
+        int COL = matrix[0].length;
+
+        int largestSubMatrix = 0;
+
+        for (int row = 0; row < ROW; row++) {
+
+            //count the consecutive '1' in col-wise manner
+            for (int col = 0; col < COL; col++) {
+
+                //if prev row(==> row - 1) is valid and curr val in matrix[row][col]
+                //is not 0, meaning curr val is '1' and hence we can count the consecutive
+                //'1's from its prev row's col val(col-wise manner)
+                if (row - 1 >= 0 && matrix[row][col] != 0) {
+                    matrix[row][col] += matrix[row - 1][col];
+                }
+            }
+
+            //since we have processed one row and all its cols, we can check how
+            //large of submatrix we can form till this curr row
+            int[] sortedRow = matrix[row].clone();
+            Arrays.sort(sortedRow);
+
+            //since the curr row is sorted in increasing order means the col having
+            //largest number of consecutive '1's is on right side
+            //we will use simple area of rectangle formula
+            for (int i = COL - 1; i >= 0; i--) {
+
+                int breadth = COL - i;
+                int height = sortedRow[i];
+
+                largestSubMatrix = Math.max(largestSubMatrix, breadth * height);
+            }
+        }
+
+        //output
+        System.out.println("Largest submatrix with rearrangements : " + largestSubMatrix);
+    }
+
+    public void diffBetweenOnesAndZerosInRowAndCol(int[][] grid) {
+        //https://leetcode.com/problems/difference-between-ones-and-zeros-in-row-and-column/description/
+        int ROW = grid.length;
+        int COL = grid[0].length;
+
+        int[][] diff = new int[ROW][COL];
+
+        int[] onesInRow = new int[ROW];
+        int[] zerosInRow = new int[ROW];
+
+        int[] onesInCol = new int[COL];
+        int[] zerosInCol = new int[COL];
+
+        for (int row = 0; row < ROW; row++) {
+            for (int col = 0; col < COL; col++) {
+
+                if (grid[row][col] == 0) {
+                    zerosInRow[row] += 1;
+                    zerosInCol[col] += 1;
+                }
+
+                if (grid[row][col] == 1) {
+                    onesInRow[row] += 1;
+                    onesInCol[col] += 1;
+                }
+            }
+        }
+
+        for (int row = 0; row < ROW; row++) {
+            for (int col = 0; col < COL; col++) {
+
+                diff[row][col] = (onesInRow[row] + onesInCol[col])
+                        - (zerosInRow[row] + zerosInCol[col]);
+            }
+        }
+
+        //output
+        System.out.println("Diff between ones and zeros in row and col : ");
+        for (int[] row : diff) {
+            System.out.println(Arrays.toString(row));
+        }
+    }
+
+    private int numberOfSubmatricesThatSumsToTarget_SubarraySumEqualsTarget(int[] arr, int target) {
+        //same as subarraySumEqualsK()
+        Map<Integer, Integer> prefixSumCounter = new HashMap<>();
+        prefixSumCounter.put(0, 1);
+
+        int prefixSum = 0;
+
+        int count = 0;
+
+        for (int val : arr) {
+            prefixSum += val;
+            count += prefixSumCounter.getOrDefault(prefixSum - target, 0);
+            prefixSumCounter.put(prefixSum, prefixSumCounter.getOrDefault(prefixSum, 0) + 1);
+        }
+
+        return count;
+    }
+
+    public void numberOfSubmatricesThatSumsToTarget(int[][] matrix, int target) {
+        //https://leetcode.com/problems/number-of-submatrices-that-sum-to-target/description/
+        int ROW = matrix.length;
+        int COL = matrix[0].length;
+
+        int submatricesCount = 0;
+
+        for (int row_ = 0; row_ < ROW; row_++) {
+
+            int[] sum = new int[COL];
+
+            for (int row = row_; row < ROW; row++) {
+                for (int col = 0; col < COL; col++) {
+
+                    sum[col] += matrix[row][col];
+                }
+
+                submatricesCount += numberOfSubmatricesThatSumsToTarget_SubarraySumEqualsTarget(sum, target);
+            }
+        }
+
+        //output
+        System.out.println("Number of submatrices that sums to target : " + submatricesCount);
+    }
+
+    public void lengthOfLongestSubarrayWithAtmostKFrequency(int[] nums, int k) {
+        //https://leetcode.com/problems/length-of-longest-subarray-with-at-most-k-frequency/description/
+        //based on SLIDING WINDOW
+        int n = nums.length;
+
+        Map<Integer, Integer> freqs = new HashMap<>();
+
+        int start = 0;
+        int end = 0;
+
+        int longestGoodSubarray = 0;
+
+        while (end < n) {
+
+            freqs.put(nums[end], freqs.getOrDefault(nums[end], 0) + 1);
+
+            while (freqs.get(nums[end]) > k) {
+
+                freqs.put(nums[start], freqs.getOrDefault(nums[start], 0) - 1);
+
+                if (freqs.get(nums[start]) <= 0) {
+                    freqs.remove(nums[start]);
+                }
+
+                start++;
+            }
+
+            longestGoodSubarray = Math.max(longestGoodSubarray, (end - start + 1));
+
+            end++;
+        }
+
+        //output:
+        System.out.println("Length of longest subarray with atmost k frequency : " + longestGoodSubarray);
+    }
+
+    public void countSubarraysWithMaxElementAppearsKTimes(int[] nums, int k) {
+        //https://leetcode.com/problems/count-subarrays-where-max-element-appears-at-least-k-times/description/
+        //based on SLIDING WINDOW
+        int n = nums.length;
+        //find the max value present in nums[]
+        int maxVal = Arrays.stream(nums).max().getAsInt();
+
+        int start = 0;
+        int end = 0;
+
+        int subarrays = 0;
+
+        int countMaxVal = 0;
+
+        while (end < n) {
+
+            //if the curr value @end index is same as maxVal, incr count
+            if (nums[end] == maxVal) {
+                countMaxVal++;
+            }
+
+            while (k == countMaxVal) {
+
+                if (nums[start] == maxVal) {
+                    countMaxVal--;
+                }
+                start++;
+            }
+
+            end++;
+
+            subarrays += start;
+        }
+
+        //output:
+        System.out.println("Count subarrays with max element appears k times : " + subarrays);
+    }
+
+    public int numberOfStudentsUnableToEatLunch(int[] students, int[] sandwitches) {
+        //https://leetcode.com/problems/number-of-students-unable-to-eat-lunch/description/
+        int n = students.length;
+        int studentWithCircularPref = 0;
+        int studentWithRectangularPref = 0;
+
+        //count separately the students who prefers circular and rectagular sandwitches
+        for (int pref : students) {
+            if (pref == 0) {
+                studentWithCircularPref++;
+            } else {
+                studentWithRectangularPref++;
+            }
+        }
+
+        //iterate over the all the given sandwitches
+        for (int sandwitch : sandwitches) {
+
+            //if the curr sandwitch is circular ==> 0 but count of students who
+            //prefers cirular sandwitches are 0(studentWithCircularPref ==> 0)
+            //means return the only left over student i.e, studentWithRectangularPref
+            if (sandwitch == 0 && studentWithCircularPref == 0) {
+                return studentWithRectangularPref;
+            }
+
+            //if the curr sandwitch is rectangular ==> 1 but count of students who
+            //prefers rectangular sandwitches are 0(studentWithRectangularPref ==> 0)
+            //means return the only left over student i.e, studentWithCircularPref
+            if (sandwitch == 0 && studentWithRectangularPref == 0) {
+                return studentWithCircularPref;
+            }
+
+            //given the sandwitches to the students who prefers it and reduce the
+            //count of students as they receieve
+            if (sandwitch == 0) {
+                studentWithCircularPref--;
+            } else {
+                studentWithRectangularPref--;
+            }
+        }
+
+        return 0;
+    }
+
+    public void bestSightseeingPair(int[] values) {
+        //https://leetcode.com/problems/best-sightseeing-pair/description/
+        //based on MODIFIED KADENS ALGO
+        /*
+
+        The score of a pair (i < j) of sightseeing spots is
+        values[i] + values[j] + (i - j)
+
+        In this question we need to maximize the score of the pair
+
+        ==> values[i] + values[j] + (i - j)
+        ==> (values[i] + i) + (values[j] - j)
+
+        starting with some value (values[i] + i) we need to maximize the eqn
+        so technically in order to max the score wee need to either maximize
+        (values[i] + i) or (values[j] - j)
+
+        first part = (values[i] + i)
+        second part = (values[j] - j)
+
+         */
+        int n = values.length;
+
+        int maxPairVal = 0;
+        //initial first part (values[i] + i) ==> (values[0] + 0)
+        int currMax = values[0] + 0;
+
+        for (int j = 1; j < n; j++) {
+            //choose the max from some prev pair value i.e, maxPairVal or
+            //eqn first part ==> (values[i] + i) ==> currMax
+            //+ second part ==> (values[j] - j)
+            maxPairVal = Math.max(maxPairVal, currMax + values[j] - j);
+            //here update the next first part where curr 'j' becomes next 'i'
+            //so that we maintain (i < j) as well
+            currMax = Math.max(currMax, values[j] + j);
+        }
+
+        //output:
+        System.out.println("Best sightseeing pair : " + maxPairVal);
+    }
+
+    public void maxValueOfOrderedTriplet(int[] nums) {
+        //https://leetcode.com/problems/maximum-value-of-an-ordered-triplet-i/description/
+        //https://leetcode.com/problems/maximum-value-of-an-ordered-triplet-ii/description/
+        /*
+
+        Given nums[], The value of a triplet of indices (i, j, k) is equal to
+        (nums[i] - nums[j]) * nums[k] where (i < j < k).
+
+        in order to maximize the value of the triplet (nums[i] - nums[j]) * nums[k]
+        we have 2 ways to do that
+
+        1. choose a max value of nums[i] so when we subtract nums[j] with nums[i]
+        we will have positive value (MAX(nums[i]) - nums[j])
+
+        2. choose a max value of nums[k] so when the eqn is multiplied with some
+        MAX(nums[k]) then the whole eqn is maximized
+
+         */
+        int n = nums.length;
+        long maxTripletVal = 0;
+
+        int[] maxValLeft = new int[n];
+        int[] maxValRight = new int[n];
+
+        //choose the max value from the left side of nums
+        maxValLeft[0] = nums[0];
+        for (int i = 1; i < n; i++) {
+            maxValLeft[i] = Math.max(maxValLeft[i - 1], nums[i]);
+        }
+
+        //choose the max value from the right side of nums
+        maxValRight[n - 1] = nums[n - 1];
+        for (int i = n - 2; i >= 0; i--) {
+            maxValRight[i] = Math.max(maxValRight[i + 1], nums[i]);
+        }
+
+        //here we loop over nums with 'j' as index, then (j - 1) will be the i-th
+        //index and (j + 1) will be the k-th index
+        //that's why loop is running from j = 1 to n - 1 so that
+        //a prev to 'j' is 'i' and next to 'j' is 'k' index hence (i < j < k)
+        //also we have used the maxVal arrays to quickly find the max value for
+        //i-th and k-th index
+        for (int j = 1; j < n - 1; j++) {
+            long currTripletVal = (maxValLeft[j - 1] - nums[j]) * (long) maxValRight[j + 1];
+            maxTripletVal = Math.max(maxTripletVal, currTripletVal);
+        }
+
+        //output
+        System.out.println("Max value of ordered triplet : " + maxTripletVal);
     }
 
     public String reverseString(String str) {
@@ -16583,7 +17622,7 @@ public class DSA450Questions {
 
                 for (char ch : word.toCharArray()) {
 
-                    //if curr ch is exist in trie then move to its next node
+                    //if curr ch exist in trie then move to its next node
                     if (currRoot.nodes.containsKey(ch)) {
                         currRoot = currRoot.nodes.get(ch);
                     }
@@ -17745,6 +18784,55 @@ public class DSA450Questions {
     }
 
     public void countNumberOfHomogenousSubstring(String str) {
+        //https://leetcode.com/problems/count-number-of-homogenous-substrings/
+        //based on SLIDING WINDOW
+        int mod = 1000000007;
+
+        int n = str.length();
+
+        Map<Character, Integer> freqs = new HashMap<>();
+        int start = 0;
+        int end = 0;
+
+        int homogenousSubstrs = 0;
+
+        while (end < n) {
+
+            char chrEnd = str.charAt(end);
+            freqs.put(chrEnd, freqs.getOrDefault(chrEnd, 0) + 1);
+
+            //we are considering the substrings to homogenous, so all the chars
+            //in curr substring of window[start to end] should be same in that
+            //case keys in freqs map should only be 1 hence freqs.size() == 1
+            //BUT if we add up a char in freqs map which breaks the homogenous
+            //nature of curr subtring, we should move the window ahead
+            while (freqs.size() > 1) {
+
+                char chrStart = str.charAt(start);
+
+                freqs.put(chrStart, freqs.getOrDefault(chrStart, 0) - 1);
+
+                if (freqs.get(chrStart) <= 0) {
+                    freqs.remove(chrStart);
+                }
+
+                start++;
+            }
+
+            //as we move the window, the chars of substring in this window[start to end]
+            //are same means there will only be single char as key hence size == 1
+            if (freqs.size() == 1) {
+                homogenousSubstrs = (homogenousSubstrs + (end - start + 1)) % mod;
+            }
+
+            end++;
+        }
+
+        //output
+        System.out.println("Count number of homogenous substrings: " + homogenousSubstrs);
+    }
+
+    public void countNumberOfHomogenousSubstring2(String str) {
         //https://leetcode.com/problems/count-number-of-homogenous-substrings/
         //https://leetcode.com/problems/count-number-of-homogenous-substrings/discuss/1064530/JavaC%2B%2BPython-Straight-Forward
         //https://leetcode.com/problems/consecutive-characters/
@@ -21611,6 +22699,454 @@ public class DSA450Questions {
         System.out.println("Substrings with exactly k distinct chars : " + substringsWithExactKDistinctChars);
     }
 
+    public void uniqueThreeLengthedPallindromicSubseq(String str) {
+        //https://leetcode.com/problems/unique-length-3-palindromic-subsequences/description/
+        int n = str.length();
+
+        final int DOES_NOT_EXIST = -1;
+
+        int[] firstOccuringIndex = new int[26];
+        int[] lastOccuringIndex = new int[26];
+
+        //initially, no char exists
+        Arrays.fill(firstOccuringIndex, DOES_NOT_EXIST);
+
+        for (int i = 0; i < n; i++) {
+
+            char chr = str.charAt(i);
+
+            //if the 'chr' is seen for the first time then only add chr's index
+            //in first occuerence
+            if (firstOccuringIndex[chr - 'a'] == DOES_NOT_EXIST) {
+                firstOccuringIndex[chr - 'a'] = i;
+            }
+
+            //each subsequent 'chr' seen is considered last occuerence
+            lastOccuringIndex[chr - 'a'] = i;
+        }
+
+        int subseqs = 0;
+
+        //iterate over chars of alphabet
+        for (char chr = 'a'; chr <= 'z'; chr++) {
+
+            //skip, if the chr is not at all there in str
+            if (firstOccuringIndex[chr - 'a'] == DOES_NOT_EXIST) {
+                continue;
+            }
+
+            //till here, curr 'chr' is valid char that also exist in str as well
+            //take the first occuring index of chr
+            int firstOccurence = firstOccuringIndex[chr - 'a'];
+            //take the last occuring index of chr
+            int lastOccurence = lastOccuringIndex[chr - 'a'];
+
+            //store all the unique char in between first & last occuring index in str
+            Set<Character> uniqueChrsInBetweenFirstAndLastOccuerence = new HashSet<>();
+
+            //as we are counting unique char in between first & last index so we
+            //need not to include first and last index
+            for (int index = firstOccurence + 1; index < lastOccurence; index++) {
+
+                //chr in str[first + 1 to last - 1]
+                char chrInBetween = str.charAt(index);
+
+                //set will store unique chars only
+                uniqueChrsInBetweenFirstAndLastOccuerence.add(chrInBetween);
+            }
+
+            //add up the size of unique chars in between
+            //ex: str = aabca
+            //for chr = 'a' first = 0 & last = 4
+            //unique char in between first and last ==> [a, b, c] ==> 3
+            //all the unique & 3-lengthed pallindromic subseq are:
+            //1: {a, a, a}
+            //2: {a, b, a}
+            //3: {a, c, a}
+            //observation here is, number of unique chars present in between
+            //first-index & last-index here, {'a', '?', 'a'} will deteremine
+            //number of unique pallindromic subseq, see '?' can [a, b, c]
+            //which are char in between str = "a[abc]a"
+            subseqs += uniqueChrsInBetweenFirstAndLastOccuerence.size();
+        }
+
+        //output
+        System.out.println("Unique 3-lengthed pallindromic subseq : " + subseqs);
+    }
+
+    public int numberOfWaysToDivideLongCorridor(String corridor) {
+        //https://leetcode.com/problems/number-of-ways-to-divide-a-long-corridor/description/
+        //explanation: https://youtu.be/ixzhJ8OoA6Q?si=7Y2bvFjveQOZUDya
+        int mod = 1000000007;
+
+        int n = corridor.length();
+
+        //seat indices will hold the the index of each seat and since we are
+        //looping index-wise, seatIndices will be in sorted order
+        List<Integer> seatIndices = new ArrayList<>();
+
+        for (int index = 0; index < n; index++) {
+
+            char item = corridor.charAt(index);
+
+            if (item == 'P') {
+                continue;
+            }
+
+            seatIndices.add(index);
+        }
+
+        int totalSeats = seatIndices.size();
+
+        //if there no seats available in corridor(==> "P" ==> totalSeats == 0)
+        //OR seats are available but they are not 'even-amount-seats'
+        //in that case we won't be able to divide the corridor where
+        //'each section has exactly 2 seats'(==> "S" ==> totalSeats == 1)
+        //in any of the above case number of ways are 0
+        if (totalSeats == 0 || totalSeats % 2 != 0) {
+            return 0;
+        }
+
+        long ways = 1;
+
+        //here, as per question, 'each section has exactly 2 seats', with this
+        //loop we will calculate the number of dividers we can place between
+        //two-consecutive sections(containing 2 seats)
+        //ex: "SPSPPSPPSPPSS"
+        //seatIndices = [0, 2, 5, 8, 11, 12]
+        //as required each section should have exactly 2 seats
+        //sec1 = "SPS" ==> [0, 2]
+        //sec2 = "SPPS" ==> [5, 8]
+        //sec3 = "SS" ==> [11, 12]
+        //since these are the sections where number of seats are 2 hence we need
+        //to place dividers in-between these sections
+        //sec1 | | | sec2 | | | sec3
+        //==> "SPS" | | | "SPPS" | | | "SS"
+        //==> each divider in between them is
+        //==> "SPS" | P | P | "SPPS" | P | P | "SS"
+        //number of divider is gap between sec[i](start-seat-index) - sec[i - 1](end-seat-index)
+        //==> sec1 = [0, 2], sec2 = [5, 8], number of divider = sec2(5) - sec1(2) = 3
+        //and so on for each consecutive sections
+        for (int index = 2; index < totalSeats; index += 2) {
+
+            int numberOfDivider = seatIndices.get(index) - seatIndices.get(index - 1);
+
+            //since there can be x number of sections having exactly 2 seats
+            //then number of ways is multiplicative in nature where placing
+            //even single divider between any of these sections is equally important
+            //and will generate that many permutaion combinations of palcing dividers
+            //with respect to placing any other divider in any other section
+            ways = (ways * numberOfDivider) % mod;
+        }
+
+        return (int) ways;
+    }
+
+    public void minChangeToMakeAlternatingBinaryString(String str) {
+        //https://leetcode.com/problems/minimum-changes-to-make-alternating-binary-string/description/
+        //assume the alternating binary string looks like 010101...
+        //that is starting with '0' and alternate after that
+        char correctAltStr1Chr = '0';
+        //assume the alternating binary string looks like 101010...
+        //that is starting with '1' and alternate after that
+        char correctAltStr2Chr = '1';
+
+        int change1 = 0;
+        int change2 = 0;
+
+        //if we make any change in curr str to make it alternating it should match
+        //either the first type or second one and with this idea we can calculate
+        //changes required in str to make either of the types
+        for (char bit : str.toCharArray()) {
+
+            change1 = correctAltStr1Chr == bit ? change1 : change1 + 1;
+
+            change2 = correctAltStr2Chr == bit ? change2 : change2 + 1;
+
+            //also change the bit alternaively for the respective correct strings
+            correctAltStr1Chr = correctAltStr1Chr == '0' ? '1' : '0';
+            correctAltStr2Chr = correctAltStr2Chr == '1' ? '0' : '1';
+        }
+
+        //output
+        int minChange = Math.min(change1, change2);
+        System.out.println("Min change to make alternating binary string : " + minChange);
+    }
+
+    public int minLengthAfterDeletingSimilarEnds(String str) {
+        //https://leetcode.com/problems/minimum-length-of-string-after-deleting-similar-ends/description/
+        //based on TWO POINTERS
+        int n = str.length();
+        int left = 0;
+        int right = n - 1;
+
+        while (right > left) {
+
+            //as we are allowed to delete similar ends, means char @left must
+            //match char @right
+            //incase these chars at left or right ends don't match, we further
+            //can't process str, hence break
+            if (str.charAt(left) != str.charAt(right)) {
+                break;
+            }
+
+            //here the chars at both the end are similar
+            //case when str is pallindromic & left and right ptrs are adjacent
+            //ex: str = "cabaabac" left = 3, right = 4 ==> char[left] == char[right]
+            //in this situation there is no point in moving further
+            if (left + 1 == right) {
+                return 0;
+            }
+
+            int currLeft = left;
+
+            //move left ptr forward as long as it is matching a similar end @right ptr
+            //we can consider a single char or prefix of same chars to be similar with
+            //char @right
+            while (right > left && str.charAt(left) == str.charAt(right)) {
+                left++;
+            }
+
+            //in case where the whole str is of chars(ex: "aaaaa"), then in the above loop
+            //left will eventually reach the right end as str.charAt(left) == str.charAt(right)
+            //will never false
+            if (left == right) {
+                return 0;
+            }
+
+            //move right ptr backward as long as it is matching a similar end @left ptr
+            //we can consider a single char or suffix of same chars to be similar with
+            //char @left (currLeft is actual unchanged left)
+            while (right > left && str.charAt(currLeft) == str.charAt(right)) {
+                right--;
+            }
+
+        }
+
+        return right - left + 1;
+    }
+
+    public void lengthOfLongestCommonPrefix(int[] arr1, int[] arr2) {
+        //https://leetcode.com/problems/find-the-length-of-the-longest-common-prefix/description/
+        //based on TRIE
+        class TrieNode {
+
+            Map<Character, TrieNode> nodes;
+
+            public TrieNode() {
+                nodes = new HashMap<>();
+            }
+        }
+
+        class TrieUtil {
+
+            TrieNode ROOT;
+
+            public TrieUtil(TrieNode ROOT) {
+                this.ROOT = ROOT;
+            }
+
+            public void addToTrie(String num) {
+
+                TrieNode currROOT = ROOT;
+
+                for (char digit : num.toCharArray()) {
+                    if (!currROOT.nodes.containsKey(digit)) {
+                        TrieNode node = new TrieNode();
+                        currROOT.nodes.put(digit, node);
+                    }
+
+                    currROOT = currROOT.nodes.get(digit);
+                }
+            }
+
+            public int getLength(String num) {
+
+                int length = 0;
+                TrieNode currROOT = ROOT;
+
+                for (char digit : num.toCharArray()) {
+
+                    if (!currROOT.nodes.containsKey(digit)) {
+                        break;
+                    }
+
+                    length++;
+                    currROOT = currROOT.nodes.get(digit);
+                }
+
+                return length;
+            }
+
+        }
+
+        TrieNode ROOT = new TrieNode();
+        TrieUtil trieUtil = new TrieUtil(ROOT);
+
+        for (int val : arr2) {
+            trieUtil.addToTrie(String.valueOf(val));
+        }
+
+        int longestCommonPrefix = 0;
+
+        for (int val : arr1) {
+            longestCommonPrefix = Math.max(longestCommonPrefix, trieUtil.getLength(String.valueOf(val)));
+        }
+
+        //output:
+        System.out.println("Longest length of common prefix : " + longestCommonPrefix);
+    }
+
+    public void longestCommonSuffixQueries(String[] words, String[] queries) {
+        //https://leetcode.com/problems/longest-common-suffix-queries/description/
+        //based on TRIE
+        class TrieNode {
+
+            Map<Character, TrieNode> nodes;
+            int smallestLength;
+            int bestIndex;
+
+            public TrieNode() {
+                nodes = new HashMap<>();
+                smallestLength = Integer.MAX_VALUE;
+                bestIndex = -1;
+            }
+        }
+
+        class TrieUtil {
+
+            TrieNode ROOT;
+
+            public TrieUtil(TrieNode ROOT) {
+                this.ROOT = ROOT;
+            }
+
+            public void addToTrie(String word, int index) {
+
+                TrieNode currROOT = ROOT;
+
+                int n = word.length();
+
+                //add word in reverse so that we can access words in suffix
+                for (int i = n - 1; i >= 0; i--) {
+
+                    char chr = word.charAt(i);
+
+                    if (!currROOT.nodes.containsKey(chr)) {
+                        TrieNode node = new TrieNode();
+                        currROOT.nodes.put(chr, node);
+                    }
+
+                    currROOT = currROOT.nodes.get(chr);
+
+                    //for each node we will calculate the best word index that
+                    //query word can get
+                    //best word index: "If there are two or more strings in
+                    //word[] that share the longest common suffix, find the
+                    //string that is the smallest in length. If there are two
+                    //or more such strings that have the same smallest length,
+                    //find the one that occurred earlier in word[]."
+                    if (word.length() < currROOT.smallestLength) {
+                        currROOT.smallestLength = word.length();
+                        currROOT.bestIndex = index;
+                    } else if (word.length() == currROOT.smallestLength) {
+                        currROOT.bestIndex = Math.min(currROOT.bestIndex, index);
+                    }
+                }
+            }
+
+            public int getIndex(String word) {
+
+                TrieNode currROOT = ROOT;
+
+                int n = word.length();
+
+                for (int i = n - 1; i >= 0; i--) {
+
+                    char chr = word.charAt(i);
+
+                    //here we have two cases,
+                    //1. if the given query word doesn't even have any suffix match
+                    //hence the longest common suffix is "", that is shared with
+                    //all strings in words[], in that case choose the word with
+                    //smallest length(==> defaultBestIndex)
+                    //2. there is some suffix match then simply return bestIndex
+                    //calculated till that trie node
+                    if (!currROOT.nodes.containsKey(chr)) {
+                        return i == n - 1 ? ROOT.bestIndex : currROOT.bestIndex;
+                    }
+
+                    currROOT = currROOT.nodes.get(chr);
+                }
+
+                //in case, whole query word is a complete suffix match
+                return currROOT.bestIndex;
+            }
+        }
+
+        TrieNode ROOT = new TrieNode();
+        TrieUtil trieUtil = new TrieUtil(ROOT);
+
+        int smallestLength = Integer.MAX_VALUE;
+        int defaultBestIndex = -1;
+
+        int m = words.length;
+
+        for (int i = 0; i < m; i++) {
+
+            String word = words[i];
+
+            trieUtil.addToTrie(word, i);
+
+            if (word.length() < smallestLength) {
+                smallestLength = word.length();
+                defaultBestIndex = i;
+            }
+        }
+
+        ROOT.bestIndex = defaultBestIndex;
+
+        int n = queries.length;
+        int[] result = new int[n];
+
+        for (int i = 0; i < n; i++) {
+            result[i] = trieUtil.getIndex(queries[i]);
+        }
+
+        //output:
+        System.out.println("Longest common suffix : " + Arrays.toString(result));
+    }
+
+    public boolean checkIfWordValidAfterSubstitution(String str) {
+        //https://leetcode.com/problems/check-if-word-is-valid-after-substitutions/description/
+        StringBuilder sb = new StringBuilder();
+        for (char chr : str.toCharArray()) {
+
+            //with curr chr == 'c' the substr so formed "abc"
+            //where 'b' must exist at last char sb.length - 1
+            //and 'a' must exist at second last char sb.length - 2
+            //thats why sb.length() should be atleast 2 or greater
+            if (chr == 'c'
+                    && sb.length() >= 2
+                    && sb.charAt(sb.length() - 1) == 'b'
+                    && sb.charAt(sb.length() - 2) == 'a') {
+
+                //delete char 'b'
+                sb.deleteCharAt(sb.length() - 1);
+                //since above char 'b' is deleted hence char 'a' becomes the
+                //last char of sb hence again sb.length - 1 is used as last index
+                sb.deleteCharAt(sb.length() - 1);
+
+                continue;
+            }
+
+            //append char 'a' or 'b'
+            sb.append(chr);
+        }
+
+        return sb.isEmpty();
+    }
+
     public Node<Integer> reverseLinkedList_Iterative(Node<Integer> node) {
         System.out.println("Reverse linked list iterative");
         //actual
@@ -21924,12 +23460,12 @@ public class DSA450Questions {
         System.out.println("Kth node from end is: " + back.getData());
     }
 
-    public Node<Integer> swapLinkedListNodesInPair(Node<Integer> node) {
+    public Node<Integer> swapLinkedListNodesInPair(Node<Integer> head) {
 
         //https://www.geeksforgeeks.org/reverse-a-list-in-groups-of-given-size/
         //https://leetcode.com/problems/swap-nodes-in-pairs/
         int K = 2; //because swap in pairs;
-        Node current = node;
+        Node current = head;
         Node next = null;
         Node prev = null;
 
@@ -21948,7 +23484,7 @@ public class DSA450Questions {
          Recursively call for the list starting from current.
          And make rest of the list as next of first node */
         if (next != null) {
-            node.setNext(swapLinkedListNodesInPair(next));
+            head.setNext(swapLinkedListNodesInPair(next));
         }
 
         // prev is now head of input list
@@ -23432,6 +24968,38 @@ public class DSA450Questions {
         System.out.println();
     }
 
+    public void mergeInBetweenListNodes(Node<Integer> head1, int a, int b, Node<Integer> head2) {
+        //https://leetcode.com/problems/merge-in-between-linked-lists/description/
+
+        //actual
+        new LinkedListUtil<>(head1).print();
+
+        Node<Integer> prevNodeToA = head1;
+        for (int i = 0; i < a - 1; i++) {
+            prevNodeToA = prevNodeToA.getNext();
+        }
+
+        Node<Integer> nodeAtB = head1;
+        for (int i = 0; i < b; i++) {
+            nodeAtB = nodeAtB.getNext();
+        }
+
+        prevNodeToA.setNext(head2);
+
+        Node<Integer> tail = head2;
+
+        while (tail.getNext() != null) {
+            tail = tail.getNext();
+        }
+
+        tail.setNext(nodeAtB.getNext());
+
+        //output
+        System.out.println("Merge in between list nodes : ");
+        new LinkedListUtil<>(head1).print();
+        System.out.println();
+    }
+
     public void levelOrderTraversal_Iterative(TreeNode root) {
 
         if (root == null) {
@@ -24358,41 +25926,38 @@ public class DSA450Questions {
     public void convertTreeToSumTree(TreeNode<Integer> root) {
 
         //actual
-        BinaryTree<Integer> bt = new BinaryTree<>(root);
-        bt.treeBFS();
+        new BinaryTree<>(root).treeBFS();
 
-        Queue<TreeNode<Integer>> q = new LinkedList<>();
-        q.add(root);
+        Queue<TreeNode<Integer>> queue = new LinkedList<>();
+        queue.add(root);
 
-        while (!q.isEmpty()) {
+        while (!queue.isEmpty()) {
 
-            TreeNode<Integer> t = q.poll();
+            TreeNode<Integer> currRoot = queue.poll();
 
-            if (t.getLeft() != null) {
-                q.add(t.getLeft());
+            if (currRoot.getLeft() != null) {
+                queue.add(currRoot.getLeft());
             }
 
-            if (t.getRight() != null) {
-                q.add(t.getRight());
+            if (currRoot.getRight() != null) {
+                queue.add(currRoot.getRight());
             }
 
             //leaf
-            if (t.getLeft() == null && t.getRight() == null) {
-                t.setData(0);
+            if (currRoot.getLeft() == null && currRoot.getRight() == null) {
+                currRoot.setData(0);
                 continue;
             }
 
-            // - t.getData() just don't include the value of that node itself
-            t.setData(convertTreeToSumTree_Sum(t) - t.getData());
+            // - currRoot.getData() just don't include the value of that node itself
+            currRoot.setData(convertTreeToSumTree_Sum(currRoot) - currRoot.getData());
 
         }
 
         //output
         System.out.println();
-        bt = new BinaryTree<>(root);
-        bt.treeBFS();
+        new BinaryTree<>(root).treeBFS();
         System.out.println();
-
     }
 
     private int convertTreeToSumTree_Recursion_Helper(TreeNode<Integer> root) {
@@ -24410,10 +25975,11 @@ public class DSA450Questions {
         if (root.getLeft() == null && root.getRight() == null) {
             root.setData(0);
             return data;
-        } else {
-            root.setData(lSum + rSum);
-            return lSum + rSum + data;
         }
+
+        root.setData(lSum + rSum);
+
+        return lSum + rSum + data;
     }
 
     public void convertTreeToSumTree_Recursion(TreeNode<Integer> root) {
@@ -24786,35 +26352,32 @@ public class DSA450Questions {
         }
     }
 
-    private int diameterOfTree_Helper(TreeNode<Integer> root, Height height) {
+    private int diameterOfTree_Diameter;
+
+    private int diameterOfTree_Helper(TreeNode<Integer> root) {
 
         if (root == null) {
-            height.height = 0;
             return 0;
         }
 
-        Height leftSubTreeHeight = new Height();
-        Height rightSubTreeHeight = new Height();
+        int leftTreeDiameter = diameterOfTree_Helper(root.getLeft());
+        int rightTreeDiameter = diameterOfTree_Helper(root.getRight());
 
-        int leftTreeDiameter = diameterOfTree_Helper(root.getLeft(), leftSubTreeHeight);
-        int rightTreeDiameter = diameterOfTree_Helper(root.getRight(), rightSubTreeHeight);
+        diameterOfTree_Diameter = Math.max(diameterOfTree_Diameter,
+                leftTreeDiameter + 1 + rightTreeDiameter);
 
-        //current node height
-        height.height = Math.max(leftSubTreeHeight.height, rightSubTreeHeight.height) + 1;
-
-        return Math.max(
-                Math.max(leftTreeDiameter, rightTreeDiameter),
-                leftSubTreeHeight.height + rightSubTreeHeight.height + 1);
+        return Math.max(leftTreeDiameter, rightTreeDiameter) + 1;
     }
 
     public void diameterOfTree(TreeNode<Integer> root) {
         //https://leetcode.com/problems/diameter-of-binary-tree/
         //https://leetcode.com/problems/count-nodes-equal-to-average-of-subtree/
-        int diameter = diameterOfTree_Helper(root, new Height());
+        diameterOfTree_Diameter = 0;
+        diameterOfTree_Helper(root);
         //gives the total no of nodes forming that diameter
-        System.out.println("Diameter of tree (nodes in diameter): " + diameter);
+        System.out.println("Diameter of tree (nodes in diameter): " + diameterOfTree_Diameter);
         //gives the no. of edges between these nodes
-        System.out.println("Diameter of tree (edges in diameter): " + (diameter - 1));
+        System.out.println("Diameter of tree (edges in diameter): " + (diameterOfTree_Diameter - 1));
     }
 
     class CheckIfBinaryTreeIsMaxHeapClass {
@@ -29511,7 +31074,7 @@ public class DSA450Questions {
         break;
 
         and since in above loop, we just swapped values in their rightful arrays
-        we now need to arrange then in sorted order, for that we can sort them
+        we now need to arrange them in sorted order, for that we can sort them
         separately
 
          */
@@ -29583,10 +31146,10 @@ public class DSA450Questions {
 
             if ((mid == n - 1 || target < nums[mid + 1]) && nums[mid] == target) {
                 return mid;
-            } else if (nums[mid] > target) {
-                end = mid - 1;
-            } else {
+            } else if (nums[mid] <= target) {
                 start = mid + 1;
+            } else {
+                end = mid - 1;
             }
         }
         return -1;
@@ -30673,7 +32236,7 @@ public class DSA450Questions {
         }
 
         //we now have to take max of these 2 descision
-        return Math.max(dontPick, pick);
+        return memo[index][W] = Math.max(dontPick, pick);
     }
 
     public void knapSack01_Recursive_Memoization(int[] weight, int[] value, int W) {
@@ -30690,24 +32253,28 @@ public class DSA450Questions {
         int[][] memo = new int[N + 1][W + 1];
 
         //base cond
-        for (int x = 0; x < N + 1; x++) {
-            for (int y = 0; y < W + 1; y++) {
-                //No product row == N == 0
-                //No knapSack capacity col == W == 0
-                if (x == 0 || y == 0) {
-                    memo[x][y] = 0;
-                }
-            }
+        //if some products are given but the knapsack capacity W is 0 hence
+        //whatever you do, you can't pick any product and put in knapsack hence
+        //value obt is 0
+        for (int val = 0; val < N + 1; val++) {
+            memo[val][0] = 0;
         }
 
-        for (int x = 1; x < N + 1; x++) {
-            for (int y = 1; y < W + 1; y++) {
-                if (weight[x - 1] > y) {
-                    memo[x][y] = memo[x - 1][y];
+        //if some knapsack capacity W is given but the no product is given
+        //weight[] & value[] is empty hence whatever you do, you won't be able
+        //to put anything in knapsack hence the value obt is 0
+        for (int capacity = 0; capacity < W + 1; capacity++) {
+            memo[0][capacity] = 0;
+        }
+
+        for (int val = 1; val < N + 1; val++) {
+            for (int capacity = 1; capacity < W + 1; capacity++) {
+                if (weight[val - 1] > capacity) {
+                    memo[val][capacity] = memo[val - 1][capacity];
                 } else {
-                    memo[x][y] = Math.max(
-                            value[x - 1] + memo[x - 1][y - weight[x - 1]],
-                            memo[x - 1][y]);
+                    memo[val][capacity] = Math.max(
+                            value[val - 1] + memo[val - 1][capacity - weight[val - 1]],
+                            memo[val - 1][capacity]);
                 }
             }
         }
@@ -31164,7 +32731,7 @@ public class DSA450Questions {
         //https://leetcode.com/problems/maximum-length-of-pair-chain/solution/
         //........................T: O(N.LogN)
         //........................S: O(1)
-        Arrays.sort(pairs, (a, b) -> a[1] - b[1]); //T: O(N.LogN)
+        Arrays.sort(pairs, (a, b) -> Integer.compare(a[1], b[1])); //T: O(N.LogN)
         int prevEnd = Integer.MIN_VALUE;
         int chain = 0;
         for (int[] currPair : pairs) { //T: O(N)
@@ -31172,10 +32739,12 @@ public class DSA450Questions {
             int currStart = currPair[0];
             int currEnd = currPair[1];
 
-            if (prevEnd < currStart) {
-                prevEnd = currEnd;
-                chain++;
+            if (currStart <= prevEnd) {
+                continue;
             }
+
+            prevEnd = currEnd;
+            chain++;
         }
 
         //overall T: O(N.LogN) as, N.LogN > N
@@ -33105,12 +34674,18 @@ public class DSA450Questions {
         //https://leetcode.com/problems/minimum-falling-path-sum/description/
         int ROW = grid.length;
         int COL = grid[0].length;
+
         Integer[][] memo = new Integer[ROW][COL];
+
         int minFallingPathSum = Integer.MAX_VALUE;
+
         for (int col = 0; col < COL; col++) {
-            minFallingPathSum = Math.min(minFallingPathSum,
+
+            minFallingPathSum = Math.min(
+                    minFallingPathSum,
                     minFallingPathSum_Recursive_Memoization_Helper(grid, 0, col, memo));
         }
+
         //output
         System.out.println("Min falling path sum: " + minFallingPathSum);
     }
@@ -33211,7 +34786,7 @@ public class DSA450Questions {
 
     public void minPathCostInGrid_Recursive_Memoization(int[][] grid, int[][] moveCost) {
         //https://leetcode.com/problems/minimum-path-cost-in-a-grid/description/
-        //based o minFallingPathSumTwo_Recursive_Memoization()
+        //based on minFallingPathSumTwo_Recursive_Memoization()
         int ROW = grid.length;
         int COL = grid[0].length;
 
@@ -37308,6 +38883,115 @@ public class DSA450Questions {
         System.out.println("Knight probabilty in chessboard : " + knightProbability);
     }
 
+    public void knightDialer_Recursive_Memoization(int n) {
+        //https://leetcode.com/problems/knight-dialer/description/
+        /*
+        dial pad:
+        row/col: 0      1       2
+            0   [1      2       3]
+            1   [4      5       6]
+            2   [7      8       9]
+            3   [*      0       #]
+
+        '*' ==> STAR ==> (3, 0)
+        '#' ==> HASH ==> (3, 2)
+
+         */
+
+        final int mod = 1000000007;
+
+        //for dial pad
+        int ROW = 4;
+        int COL = 3;
+
+        //dial pad has '*' & '#' char where knight can't stand
+        final String STAR = 3 + "," + 0;
+        final String HASH = 3 + "," + 2;
+
+        //chess' knight movement
+        int[][] knightDirs = new int[][]{
+                {-2, -1},
+                {-2, 1},
+                {-1, -2},
+                {-1, 2},
+                {2, -1},
+                {2, 1},
+                {1, -2},
+                {1, 2}
+        };
+
+        class Helper {
+
+            boolean isOutOfBounds(int row, int col) {
+                return row < 0 || row >= ROW || col < 0 || col >= COL;
+            }
+
+            int knightDialer_Recursive_Memoization_Helper(int n, int row, int col, Integer[][][] memo) {
+
+                //return 0, if row & col 'isOutOfBounds'
+                if (isOutOfBounds(row, col)) {
+                    return 0;
+                }
+
+                //return 0, if knight curr stand position(row, col) is dial pad's
+                //'*' or '#' char
+                if (STAR.equals(row + "," + col) || HASH.equals(row + "," + col)) {
+                    return 0;
+                }
+
+                //return 1 as a valid way where knight has created a 'n' lengthed
+                //phone number
+                if (n == 0) {
+                    return 1;
+                }
+
+                if (memo[n][row][col] != null) {
+                    return memo[n][row][col];
+                }
+
+                int ways = 0;
+
+                //move to next valid knight's dir
+                for (int[] knightDir : knightDirs) {
+
+                    int newRow = row + knightDir[0];
+                    int newCol = col + knightDir[1];
+
+                    ways = (ways + knightDialer_Recursive_Memoization_Helper(
+                            n - 1, newRow, newCol, memo)) % mod;
+                }
+
+                return memo[n][row][col] = ways;
+            }
+
+        }
+
+        Helper helper = new Helper();
+
+        Integer[][][] memo = new Integer[n][ROW][COL];
+
+        int ways = 0;
+
+        //a knight can start from any key of the dial pad[4][3] except for '*' &
+        //'#' char, hence we need to find the possibilities from all the keys
+        //where keys are positioned at each row & col
+        for (int row = 0; row < ROW; row++) {
+
+            for (int col = 0; col < COL; col++) {
+
+                if (STAR.equals(row + "," + col) || HASH.equals(row + "," + col)) {
+                    continue;
+                }
+
+                ways = (ways + helper.knightDialer_Recursive_Memoization_Helper(
+                        n - 1, row, col, memo)) % mod;
+            }
+        }
+
+        //output
+        System.out.println("Knight Dialer : " + ways);
+    }
+
     private List<TreeNode<Integer>> allPossibleFullBinaryTrees_Recursive_Memoization_Helper(
             int n, List<TreeNode<Integer>>[] memo) {
 
@@ -38877,6 +40561,451 @@ public class DSA450Questions {
         System.out.println("Max dot product with two subseq : " + maxDotProduct);
     }
 
+    public void constrainedSubsetSum_DP_Memoization(int[] nums, int k) {
+        ////............T: O(N ^ 2)
+        //https://leetcode.com/problems/constrained-subsequence-sum/description/
+        //exlanation: https://youtu.be/tWhboGihflM?si=cKFTAQ4FgDCaN929
+        //based on modified LONGEST INCR SUBSEQ
+        //this approach will throw 'TLE' on larger inputs as this is an O(N ^ 2) approach
+        int n = nums.length;
+        int[] memoMaxSubsetSumLIS = new int[n];
+
+        System.arraycopy(nums, 0, memoMaxSubsetSumLIS, 0, n);
+
+        int maxSubsetSum = nums[0];
+
+        for (int j = 1; j < n; j++) {
+
+            //i-th loop starting right before the curr j-th index as we need (i < j)
+            //and index i will try to reach to 0 or as long as (j - i <= k) cond satisfies
+            for (int i = j - 1; i >= 0 && j - i <= k; i--) {
+
+                memoMaxSubsetSumLIS[j] = Math.max(
+                        memoMaxSubsetSumLIS[j],
+                        nums[j] + memoMaxSubsetSumLIS[i]);
+
+            }
+
+            maxSubsetSum = Math.max(maxSubsetSum, memoMaxSubsetSumLIS[j]);
+        }
+
+        //output
+        System.out.println("Constrained subset sum (approach LIS): " + maxSubsetSum);
+    }
+
+    public void constrainedSubsetSum_DP_Memoization2(int[] nums, int k) {
+        //............T: O(N)
+        //https://leetcode.com/problems/constrained-subsequence-sum/description/
+        //https://leetcode.com/problems/constrained-subsequence-sum/editorial/
+        //based on SLIDING WINDOW, MONOTONIC DEQUE
+        int n = nums.length;
+        Deque<Integer> maxQueue = new ArrayDeque<>();
+
+        int[] memo = new int[n];
+
+        int maxSubsetSum = nums[0];
+
+        for (int j = 0; j < n; j++) {
+
+            //remove all the index from maxQueue that is now not following the
+            //given cond (j - i <= k)
+            while (!maxQueue.isEmpty() && j - maxQueue.peekFirst() > k) {
+                maxQueue.removeFirst();
+            }
+
+            memo[j] = Math.max(
+                    nums[j],
+                    nums[j] + (maxQueue.isEmpty() ? 0 : memo[maxQueue.peekFirst()]));
+
+            maxSubsetSum = Math.max(maxSubsetSum, memo[j]);
+
+            while (!maxQueue.isEmpty() && memo[j] > memo[maxQueue.peekLast()]) {
+                maxQueue.removeLast();
+            }
+
+            maxQueue.add(j);
+        }
+
+        //output
+        System.out.println("Constrained subset sum : " + maxSubsetSum);
+    }
+
+    public void binaryTreeWithFactors_DP_Memoization(int[] nums) {
+        //https://leetcode.com/problems/binary-trees-with-factors/description/
+        //explanation: https://youtu.be/D2GnunVezNA?si=edQ-01tXxYvKshQW
+        int n = nums.length;
+
+        int mod = 1000000007;
+
+        Arrays.sort(nums);
+
+        long[] memo = new long[n];
+
+        Map<Integer, Integer> nodeToIndex = new HashMap<>();
+
+        for (int i = 0; i < n; i++) {
+
+            //each nums[i] node is itself a binary, hence count for binary tree
+            //forming with root node as nums[i] is 1
+            memo[i] = 1;
+
+            //also, store the index associated to nums[i] i.e, 'i'
+            nodeToIndex.put(nums[i], i);
+        }
+
+        //count for all the binary trees with factors
+        long count = 0;
+
+        for (int rootIndex = 0; rootIndex < n; rootIndex++) {
+
+            //consider the rootNode as the root of the binary tree and we will be
+            //counting all such binary trees can be formed having this 'rootNode'
+            //as root and rootNode = leftChildNode * rightChildNode
+            int rootNode = nums[rootIndex];
+
+            //in order for factor(==> rootNode = leftChildNode * rightChildNode) to be valid,
+            //we can only consider those leftChildNode which are smaller than curr rootNode
+            //that's why we sorted the nums[], now we know all the nodes in left side of curr
+            //rootIndex are smaller than rootNode
+            for (int leftChildIndex = 0; leftChildIndex < rootIndex; leftChildIndex++) {
+
+                int leftChildNode = nums[leftChildIndex];
+
+                //as the factor states, rootNode = leftChildNode * rightChildNode
+                //hence, we can find the right child node as,
+                //==> rightChildNode = rootNode / leftChildNode
+                int rightChildNode = rootNode / leftChildNode;
+
+                //as the factor states, rootNode = leftChildNode * rightChildNode
+                //basically this means that rootNode is a multiple of leftChildNode
+                //(OR leftChildNode is one of the factor of rootNode), now if curr rootNode
+                //is not divisible by leftChildNode (==> rootNode % leftChildNode != 0)
+                //means there is not reason to go further rootNode & leftChildNode are
+                //already not forming factors
+                if (rootNode % leftChildNode != 0) {
+                    continue;
+                }
+
+                //as we have found the right child node above, in order to consider
+                //curr rootNode, it should be leftChildNode * rightChild, now we already
+                //have the leftChildNode from nums[] but we still need to validate if
+                //rightChildNode is also a valid node in nums[] or not
+                //skip, if the rightChildNode is not present as valid node in nums[]
+                if (!nodeToIndex.containsKey(rightChildNode)) {
+                    continue;
+                }
+
+                //here, it is validated that rightChildNode is a node present in
+                //nums[], we can simply find its actual index right child index
+                int rightChildIndex = nodeToIndex.get(rightChildNode);
+
+                //number of ways to form binary tree with root as rootNode is
+                //total sum of ways to form binay trees(==> memo[rootIndex])
+                //+ (possible arrangement of its left & right subtree
+                //in short the sum of number of binary trees formed is the total
+                //possible combinations of the arranagement of its subtrees as well
+                memo[rootIndex] = (memo[rootIndex]
+                        + (memo[leftChildIndex] * memo[rightChildIndex])) % mod;
+            }
+
+            //count the total number of ways of forming binary trees with rootNode
+            //and combinational arrangement of all of its subtrees below it
+            count = (count + memo[rootIndex]) % mod;
+        }
+
+        //output
+        System.out.println("Binary tree with factors : " + count);
+    }
+
+    private int countNumberOfTexts_Recursive_Memoization_Helper(
+            String pressedKeys, int[] keyPadChars, int index, Integer[] memo) {
+
+        int mod = 1000000007;
+        int n = pressedKeys.length();
+
+        //return 1 as a valid possible text generated in the process
+        if (index >= n) {
+            return 1;
+        }
+
+        //if cached
+        if (memo[index] != null) {
+            return memo[index];
+        }
+
+        //ways to generate text if keys of keypad are pressed as per 'pressedKeys'
+        int numberOfTextsGenerated = 0;
+
+        //max time a particular keypad digit can be pressed and is also valid
+        //ex: in a keypad based phone, keypad digit 2 corresponds to "abc" meaning
+        //press 2 one times ==> "2" ==> "a"
+        //press 2 two times ==> "22" ==> "b"
+        //press 2 three times ==> "222" ==> "c"
+        //there is no possiblity of pressing digit 2 four or more times because
+        //max chars allowed to be pressed(by phone design) is 3(==> "abc")
+        int maxCharAllowedIfSameKeyDigitPressed = keyPadChars[pressedKeys.charAt(index) - '0'];
+        //now, as per question, keys are pressed in a consecutive manner, hence we
+        //need to count how many times keypad digit @index is pressed consecutively
+        int countCharsIfSameKeyDigitPressed = 0;
+
+        //pressedKeys.charAt(index) == pressedKeys.charAt(i) checking if the same
+        //keypad digit @index pressed consecutively on the i-th index
+        for (int i = index; i < n && pressedKeys.charAt(index) == pressedKeys.charAt(i); i++) {
+
+            //count number of times the same digit is pressed
+            countCharsIfSameKeyDigitPressed++;
+
+            //as per explanation above a keypad digit can only be pressed upto the
+            //max char allowed for the digit, beyond that it will be invalid hence break
+            if (countCharsIfSameKeyDigitPressed > maxCharAllowedIfSameKeyDigitPressed) {
+                break;
+            }
+
+            numberOfTextsGenerated = (numberOfTextsGenerated
+                    //decoded valid 'countCharsIfSameKeyDigitPressed' so far hence
+                    //as a sub-problem solve recursively for rest of the pressedKeys
+                    //from next index(==> i + 1)
+                    + countNumberOfTexts_Recursive_Memoization_Helper(
+                    pressedKeys, keyPadChars, i + 1, memo)) % mod;
+        }
+
+        return memo[index] = numberOfTextsGenerated;
+    }
+
+    public void countNumberOfTexts_Recursive_Memoization(String pressedKeys) {
+        //https://leetcode.com/problems/count-number-of-texts/description/
+
+        int n = pressedKeys.length();
+
+        Integer[] memo = new Integer[n + 1];
+
+        int[] keyPadChars = new int[10];
+        keyPadChars[0] = 0;
+        keyPadChars[1] = 0;
+        keyPadChars[2] = 3;
+        keyPadChars[3] = 3;
+        keyPadChars[4] = 3;
+        keyPadChars[5] = 3;
+        keyPadChars[6] = 3;
+        keyPadChars[7] = 4;
+        keyPadChars[8] = 3;
+        keyPadChars[9] = 4;
+
+        int numberOfTexts = countNumberOfTexts_Recursive_Memoization_Helper(
+                pressedKeys, keyPadChars, 0, memo);
+
+        //output
+        System.out.println("Count number of texts : " + numberOfTexts);
+    }
+
+    public void arithemticSlicesTwoSubsequences_DP_Memoization(int[] nums) {
+        //https://leetcode.com/problems/arithmetic-slices-ii-subsequence/description/
+        int n = nums.length;
+        int slicesCount = 0;
+
+        Map<Integer, Integer>[] memo = new HashMap[n];
+
+        for (int i = 0; i < n; ++i) {
+            memo[i] = new HashMap<>();
+        }
+
+        for (int i = 1; i < n; i++) {
+
+            for (int j = 0; j < i; j++) {
+
+                long diff = (long) nums[i] - nums[j];
+
+                if (diff > Integer.MAX_VALUE || diff < Integer.MIN_VALUE) {
+                    continue;
+                }
+
+                int diffInt = (int) diff;
+
+                memo[i].put(diffInt, memo[i].getOrDefault(diffInt, 0) + 1);
+
+                if (memo[j].containsKey(diffInt)) {
+                    memo[i].put(diffInt, memo[i].get(diffInt) + memo[j].get(diffInt));
+                    slicesCount += memo[j].get(diffInt);
+                }
+            }
+        }
+
+        //output
+        System.out.println("Arithemetic slices two : " + slicesCount);
+    }
+
+    private int kInversePairs_Recursive_Memoization_Helper(int n, int k, Integer[][] memo) {
+
+        int mod = 1000000007;
+
+        if (n == 0) {
+            return 0;
+        }
+
+        if (k <= 0) {
+            return 1;
+        }
+
+        if (memo[n][k] != null) {
+            return memo[n][k];
+        }
+
+        int pairs = 0;
+
+        for (int inversion = 0; inversion <= Math.min(k, n - 1); inversion++) {
+            pairs = (pairs + kInversePairs_Recursive_Memoization_Helper(n - 1, k - inversion, memo)) % mod;
+        }
+
+        return memo[n][k] = pairs;
+    }
+
+    public void kInversePairs_Recursive_Memoization(int n, int k) {
+        //https://leetcode.com/problems/k-inverse-pairs-array/description/
+        //explanation: https://youtu.be/y9yo1kyW7Bg?si=c-J-AVuR5VnYtVD0
+        Integer[][] memo = new Integer[n + 1][k + 1];
+        int kInversePairs = kInversePairs_Recursive_Memoization_Helper(n, k, memo);
+
+        //output:
+        System.out.println("K inverse pairs : " + kInversePairs);
+    }
+
+    private int partitionArrayForMaxSum_Recursive_Memoization_Helper(
+            int[] nums, int k, int startIndex, Integer[] memo) {
+
+        int n = nums.length;
+
+        //return 0 as the max sum, if
+        //1. the array provided is already empty
+        //2. OR the we have reached the end of the nums[] array and hence no
+        //subarray can be formed further hence sum is default to 0
+        if (startIndex >= n) {
+            return 0;
+        }
+
+        //if cached
+        if (memo[startIndex] != null) {
+            return memo[startIndex];
+        }
+
+        int maxSumAfterArrayPartition = 0;
+        int currSubarrayMaxVal = 0;
+
+        for (int endIndex = startIndex; endIndex < n; endIndex++) {
+
+            currSubarrayMaxVal = Math.max(currSubarrayMaxVal, nums[endIndex]);
+            int subarraySize = endIndex - startIndex + 1;
+
+            //array can be partitioned into subarrays for size 'atmost k', incase
+            //the size of the curr subarray[startIndex to endIndex] is more
+            //than 'k' then break
+            if (subarraySize > k) {
+                break;
+            }
+
+            //if the values in curr subarray[startIndex to endIndex] has
+            //to be replaced with the max value of that subarray then the sum of
+            //that subarray after the replace will be subarray_size * maxVal
+            //ex: subarray after replacing all value with max value of that subarray
+            //==> [15, 15, 15] ==> 15 + 15 + 15 ==> 3 * 15 ==> subarray_size * maxVal
+            int currSubarraySum = subarraySize * currSubarrayMaxVal;
+
+            //choose the max sum of array partition, where we are trying to make
+            //partition in the nums[] at every endIndex until subarray size is
+            //greater than k
+            maxSumAfterArrayPartition = Math.max(
+                    maxSumAfterArrayPartition,
+                    //we formed a subarray[startIndex to endIndex] replaced
+                    //all values with max val in that and got the curr subarray sum
+                    //as currSubarraySum, this way we formed the curr subarray
+                    //now as per DP repeating sub problem, we will make further
+                    //partition in nums[] hence next subarray index starts
+                    //from (endIndex + 1)
+                    currSubarraySum + partitionArrayForMaxSum_Recursive_Memoization_Helper(
+                            nums, k, endIndex + 1, memo));
+        }
+
+        return memo[startIndex] = maxSumAfterArrayPartition;
+    }
+
+    public void partitionArrayForMaxSum_Recursive_Memoization(int[] nums, int k) {
+        //https://leetcode.com/problems/partition-array-for-maximum-sum/description/
+        int n = nums.length;
+        Integer[] memo = new Integer[n + 1];
+        int maxSum = partitionArrayForMaxSum_Recursive_Memoization_Helper(nums, k, 0, memo);
+
+        //output
+        System.out.println("Partition array for max sum : " + maxSum);
+    }
+
+    public void largestDivisbleSubset_DP_Memoization(int[] nums) {
+        //https://leetcode.com/problems/largest-divisible-subset/description/
+        //based on LIS LONGEST INCR SUBSEQ
+        int n = nums.length;
+        int[] memoLIS = new int[n];
+
+        Arrays.fill(memoLIS, 1);
+
+        Arrays.sort(nums);
+
+        //length of the longest incr subseq
+        int longestIncrSubseq = 1;
+        //index of the last value that is part of the longest incr subseq
+        //ex: if nums[] = [1, 4, 6, 7] ==> LIS = 3 ==> [1 < 6 < 7]
+        //in this case longestIncrSubseqStartingIndex = 3 ==> nums[3] = 7, index
+        //of last value that is part of LIS
+        int longestIncrSubseqStartingIndex = 0;
+
+        for (int i = 1; i < n; i++) {
+
+            for (int j = 0; j < i; j++) {
+
+                if (nums[i] % nums[j] == 0 && memoLIS[i] <= memoLIS[j]) {
+                    memoLIS[i] = memoLIS[j] + 1;
+                }
+            }
+
+            if (memoLIS[i] > longestIncrSubseq) {
+                longestIncrSubseq = memoLIS[i];
+                longestIncrSubseqStartingIndex = i;
+            }
+        }
+
+        List<Integer> largestDivisibleSusbets = new ArrayList<>();
+
+        //initially num will be the largest value in the LIS @longestIncrSubseqStartingIndex
+        //points to 'index of the last value that is part of the longest incr subseq'
+        int num = nums[longestIncrSubseqStartingIndex];
+
+        //starting from the index of largest value in LIS, loop back to smallest
+        //num of the LIS
+        //ex: nums[] = [1, 4, 6, 7] ==> LIS = [1 < 6 < 7]
+        //initial num = nums[longestIncrSubseqStartingIndex] = 7
+        //understand here, as we are saying LIS is of length 3 ==> [1 < 6 < 7]
+        //that means we saying length has increased by 1 with each value in LIS
+        //[1] ==> length 1
+        //[1, 6] ==> length = 2
+        //[1, 6, 7] ==> length 3
+        for (int i = longestIncrSubseqStartingIndex; i >= 0; i--) {
+
+            //with each i-th iteration, we are looping back i.e, [7 > 6 > 1]
+            //hence as explained above, length should also decrease by 1
+            //[7, 6, 1] ==> length 3
+            //[6, 1] ==> length = 2
+            //[1] ==> length 1
+            if (num % nums[i] == 0 && memoLIS[i] == longestIncrSubseq) {
+
+                largestDivisibleSusbets.add(nums[i]);
+                num = nums[i];
+                //each time we are moving to a prev value in LIS, length must be
+                //decreased
+                longestIncrSubseq--;
+            }
+        }
+
+        //output
+        System.out.println("Largest divisible subsets : " + largestDivisibleSusbets);
+    }
+
     public boolean meetingRooms_Greedy(int[][] intervals) {
         //https://leetcode.com/problems/meeting-rooms/description/
         int n = intervals.length;
@@ -40050,6 +42179,101 @@ public class DSA450Questions {
         return target == 1 ? moves : moves + (target - 1);
     }
 
+    public void minNumberOfFuncCallToMakeNumsToTargetArr_Greedy(int[] nums) {
+        //https://leetcode.com/problems/minimum-numbers-of-function-calls-to-make-target-array/
+        //based on BRUTE FORCE & minMovesToReachTarget_Greedy()
+        /*
+
+        In minMovesToReachTarget_Greedy() problem, there is simply a 'target' value
+        that we need to reduce to 0 by applying some operations on it, and we need
+        to do this 'target reduce to 0' task in min oprns possible.
+
+        Here, this problem is also similar but on arrays, given target ==> nums[n]
+        we need to reduce it to arr[n] i.e, [0,0,0..]
+
+        As per the given modify() func we can perform two oprns:
+        1. add(==> +1)
+        2. multiply(==> *2)
+        in order to reach from src arr[] to target nums[]
+
+        BUT
+
+        we will apply the backward approach to make the given nums[] to src arr[]
+        by reversing the given operations
+        1. add will be subtract(==> -1) & 2. multiply will be divide(==> /2)
+
+         */
+
+        class Helper {
+
+            boolean areAllZeros(int[] nums) {
+
+                for (int val : nums) {
+                    //return false, if there exists a value that is not 0
+                    if (val != 0) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            boolean areAllEven(int[] nums) {
+
+                for (int val : nums) {
+                    //return false, if there exists a value that is odd
+                    if (val % 2 == 1) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
+
+        int n = nums.length;
+
+        int minOprns = 0;
+
+        Helper helper = new Helper();
+
+        //while() unitl we make the nums[] reach to target array arr[] with all
+        //values as 0s
+        while (!helper.areAllZeros(nums)) {
+
+            //we can perform half(==> /2) operation only when all the values
+            //currently in nums[] are even, because as per given modify() funct
+            //double(==> *2) OR half(==> /2) oprn will be performed on whole array
+            //that's why when we perform this oprn, it must be counted as a single
+            //oprn for whole nums[] array
+            if (helper.areAllEven(nums)) {
+
+                for (int i = 0; i < n; i++) {
+                    nums[i] /= 2;
+                }
+
+                minOprns++;
+
+            } else {
+
+                //if the values currently in nums[] contains some ODD value as well
+                //we need to perform add(==> +1) OR subtract(==> -1) oprns only on
+                //that single value and not on whole nums[], that's why each time
+                //we see an ODD value in current nums[] and we perform this oprn
+                //it must be counted as individual oprn for that i-th value
+                for (int i = 0; i < n; i++) {
+
+                    if (nums[i] % 2 == 1) {
+
+                        nums[i] -= 1;
+                        minOprns++;
+                    }
+                }
+            }
+        }
+
+        //output
+        System.out.println("Min operations to make nums[] to target arr[] with all values as 0 : " + minOprns);
+    }
+
     public int maximizeTopmostElementAfterKMoves_Greedy(int[] nums, int k) {
         //https://leetcode.com/problems/maximize-the-topmost-element-after-k-moves/
         int n = nums.length;
@@ -40376,7 +42600,7 @@ public class DSA450Questions {
         int currSum = 0;
         int val = 1;
 
-        //as the range of numbers are val = [1, n]
+        //as val in the range of numbers [1 to n]
         while (val <= n) {
 
             //any 'val' that is not banned should be considered
@@ -42018,6 +44242,186 @@ public class DSA450Questions {
         System.out.println("Is alice winner : " + isAliceWinner);
     }
 
+    public void maxScoreOfGoodSubarray_Greedy(int[] nums, int k) {
+        //https://leetcode.com/problems/maximum-score-of-a-good-subarray/description/
+        //explanation: https://youtu.be/2XMBLBdgqW8?si=q5fGUEWf7rcNpwe7
+        int n = nums.length;
+
+        //since it is given that the subarray of nums we choose, say nums[left to right]
+        //must include k as index in it i.e, left <= k <= right
+        //this gives the intuition that whatever subarray we consider, k will
+        //always be there, so we better start from k itself and expand in left & right
+        //directions while considering good subarray
+        int left = k;
+        int right = k;
+
+        //since we are already starting from nums[k] i.e, left = right = k
+        //our basic subarray will have single value ==> nums[k] & it is of length
+        //1(==> right - left + 1 ==> k - k + 1 ==> 1) so our starting score will
+        //be min(nums[left to right]) * (right - left + 1) ==> nums[k] * 1 ==> nums[k]
+        int maxScore = nums[k];
+        //also, there is just one value in first considered good subarray so min
+        //in that subarray will also be nums[k] only
+        int currMinInSubarray = nums[k];
+
+        //with this while() cond, we will eventually be covering whole nums[] because
+        //we have OR ==> || here, and as long as either left or right index are valid
+        //while() will continue to execute
+        while (left > 0 || right < n - 1) {
+
+            //consider a left value only if left - 1 index is valid otherwise 0
+            int leftVal = left > 0 ? nums[left - 1] : 0;
+            //consider a right value only if right + 1 index is valid otherwise 0
+            int rightVal = right < n - 1 ? nums[right + 1] : 0;
+
+            if (leftVal > rightVal) {
+
+                left -= 1;
+                currMinInSubarray = Math.min(currMinInSubarray, leftVal);
+
+            } else {
+
+                right += 1;
+                currMinInSubarray = Math.min(currMinInSubarray, rightVal);
+            }
+
+            int currScore = currMinInSubarray * (right - left + 1);
+
+            maxScore = Math.max(maxScore, currScore);
+        }
+
+        //output
+        System.out.println("Max score of good subarray : " + maxScore);
+    }
+
+    public void maxElementAfterDecreasingAndRearranging_Greedy(int[] nums) {
+        //...........T: O(N.Log.N), for sorting the nums[]
+        //https://leetcode.com/problems/maximum-element-after-decreasing-and-rearranging/description/
+        int n = nums.length;
+
+        Arrays.sort(nums);
+
+        //as required in the question,
+        //The value of the first element in arr must be 1.
+        nums[0] = 1;
+
+        int maxVal = nums[0];
+
+        for (int i = 1; i < n; i++) {
+
+            //as required in the question,
+            //The absolute difference between any 2 adjacent elements must be
+            //less than or equal to 1
+            //skip, the curr adjacent pair (i - 1, i) if they are valid because
+            //in this case we need not to apply any given oprns on array
+            if (nums[i] - nums[i - 1] <= 1) {
+                continue;
+            }
+
+            //otherwise, put just a greater value than its prev value such that
+            //the absolute diff between values @(i - 1, i) remains 1 only
+            nums[i] = nums[i - 1] + 1;
+        }
+
+        //if we ever make the oprns then in that scenario the max element will be
+        //stored @(n - 1) index
+        int maxElement = Math.max(maxVal, nums[n - 1]);
+
+        //output
+        System.out.println("Max element after decreasing and rearranging : " + maxElement);
+    }
+
+    public void maxElementAfterDecreasingAndRearranging2_Greedy(int[] nums) {
+        //...........T: O(N)
+        //OPTIMIZED
+        //https://leetcode.com/problems/maximum-element-after-decreasing-and-rearranging/description/
+        int n = nums.length;
+
+        int[] freqs = new int[n + 1];
+
+        for (int val : nums) {
+            freqs[Math.min(val, n)]++;
+        }
+
+        int maxElement = 1;
+
+        for (int val = 2; val <= n; val++) {
+            maxElement = Math.min(maxElement + freqs[val], val);
+        }
+
+        //output
+        System.out.println("Max element after decreasing and rearranging (Without Sorting): " + maxElement);
+    }
+
+    public void divideArrayIntoArraysWithMaxDiff_Greedy(int[] nums, int k) {
+        //https://leetcode.com/problems/divide-array-into-arrays-with-max-difference/description/
+        int n = nums.length;
+        int numberOfSubarrays = n / 3;
+
+        Arrays.sort(nums);
+
+        int[][] result = new int[numberOfSubarrays][3];
+        int index = 0;
+
+        for (int i = 0; i < n; i += 3) {
+
+            if (nums[i + 1] - nums[i] > k) {
+                result = new int[][]{};
+                break;
+            }
+
+            if (nums[i + 2] - nums[i + 1] > k) {
+                result = new int[][]{};
+                break;
+            }
+
+            if (nums[i + 2] - nums[i] > k) {
+                result = new int[][]{};
+                break;
+            }
+
+            result[index++] = new int[]{nums[i], nums[i + 1], nums[i + 2]};
+        }
+
+        //output:
+        System.out.println("Divide array into arrays with max diff : ");
+        for (int[] subarray : result) {
+            System.out.println(Arrays.toString(subarray));
+        }
+    }
+
+    public void polygonWithLargestPerimeter_Greedy(int[] nums) {
+        //https://leetcode.com/problems/find-polygon-with-the-largest-perimeter/description/
+        int n = nums.length;
+
+        //sorting is required because, as given nums[] can be sides of polygon
+        //hence sorting them will given nums[i] value being greater that its
+        //prev sides nums[0] < nums[1] < nums[2] < ... < nums[i] < .. < nums[n - 1]
+        //so here nums[i] plays the role of longest side that may be considered
+        //in the polygon only if sum(nums[0], nums[1], nums[2] ... nums[i - 1]) > nums[i]
+        Arrays.sort(nums);
+
+        long largestPerimeter = -1;
+
+        long prevPolygonSum = 0;
+
+        for (int i = 0; i < n; i++) {
+            //i >= 2 as min polygon should have atleast 3 sides, meaning we considered
+            //atleast nums[0], nums[1], nums[2] as part of polygon
+            //also longest side of polygon should be less than the sum of its
+            //all other sides
+            //sum(nums[0], nums[1], nums[2] ... nums[i - 1]) > nums[i]
+            if (i >= 2 && prevPolygonSum > nums[i]) {
+                largestPerimeter = prevPolygonSum + nums[i];
+            }
+
+            prevPolygonSum += nums[i];
+        }
+
+        //output
+        System.out.println("Polygon with largest perimeter : " + largestPerimeter);
+    }
+
     public void graphBFSAdjList_Graph(int V, List<List<Integer>> adjList) {
 
         if (adjList == null || adjList.isEmpty()) {
@@ -43010,8 +45414,8 @@ public class DSA450Questions {
             int u = edge[0];
             int v = edge[1];
 
-            //in actual (i --> j) edge, the dest vertex j
-            //as an outgoing edge(i --> j) is add as -ve
+            //in actual (u --> v) edge, the dest vertex v
+            //as an outgoing edge(u --> v) is add as -ve
             graph.putIfAbsent(u, new ArrayList<>());
             graph.get(u).add(-v);
 
@@ -43214,7 +45618,7 @@ public class DSA450Questions {
 
                 //if this new row & col is an OBSTACLE but we can still try to
                 //remove this OBSTACLE because our currCell KThRemoval count is
-                //greater than equal to k and also this  new row & col & (currCell.KThRemoval - 1)
+                //greater than equal to 0 and also this new row & col & (currCell.KThRemoval - 1)
                 //combination path should not have previously visited, then we will
                 //add it to queue and mark the state as visited means this OBSTACLE
                 //will be count as a movable path
@@ -43338,8 +45742,8 @@ public class DSA450Questions {
         Queue<Integer> leaves = new LinkedList<>();
 
         for (int u = 0; u < V; u++) {
-            //in an undirected graph both node i contains j and j contains i
-            //if a node is leaf that means it should only contains 1 node as edge
+            //in an undirected graph both node u contains v and v contains u
+            //if a node is leaf that means it should only contain 1 node as edge
             //and that is to its parent
             if (graph.get(u).size() == 1) {
                 leaves.add(u);
@@ -43598,7 +46002,7 @@ public class DSA450Questions {
         //do a topoSort on the graph vertex, the graph can be disconnected
         //hence we need to loop over all the vetices of the graph
         for (int u = 0; u < V; u++) {
-            //skip, if the curr src vertex == i is already visited in some previous
+            //skip, if the curr src vertex == u is already visited in some previous
             //topo sort dfs call
             if (visited[u]) {
                 continue;
@@ -43613,9 +46017,9 @@ public class DSA450Questions {
         }
 
         //as we have directed edge relations in graph: course --> mandatoryCourse
-        //thats why we need to revers loop to get first independent course to
+        //thats why we need to reverse loop to get first independent course to
         //access its child mandatoryCourse
-        for (int i = 0; i < topoSort.size(); i++) {
+        for (int i = topoSort.size() - 1; i >= 0; i--) {
             //get the first independent course that must be taken first before
             //any other course
             int course = topoSort.get(i);
@@ -43945,6 +46349,7 @@ public class DSA450Questions {
                 .of(restrictions)
                 .boxed()
                 .collect(Collectors.toSet()));
+
         Map<Integer, List<Integer>> graph = new HashMap<>();
         for (int[] edge : edges) {
             int u = edge[0];
@@ -44022,7 +46427,7 @@ public class DSA450Questions {
         for (int r = 0; r < ROW; r++) {
             for (int c = 0; c < COL; c++) {
                 if (grid[r][c] == 1) {
-                    landCellsQueue.add(new Cell(r, c, 1));
+                    landCellsQueue.add(new Cell(r, c, 0));
                     visited[r][c] = true;
                 }
             }
@@ -44065,7 +46470,7 @@ public class DSA450Questions {
             }
         }
         //output
-        maxDist = maxDist == 1 ? -1 : maxDist - 1;
+        maxDist = maxDist == 0 ? -1 : maxDist;
         System.out.println("Farthest water cell from the land cell: " + maxDist);
     }
 
@@ -44208,7 +46613,7 @@ public class DSA450Questions {
         //nextBallCol = 0 + -1 = -1 < 0, board left-edge wall
         //hitting the right-edge wall, how?
         //if currBallCol = COL - 1 and dir = 1 means slide-to-right-diagonal-col
-        //nextBallCol = (COL - 1) + 1 = COL >= 0, board right-edge wall
+        //nextBallCol = (COL - 1) + 1 = COL == COL, board right-edge wall
         if (nextBallCol < 0 || nextBallCol >= COL) {
             return -1;
         }
@@ -44522,7 +46927,7 @@ public class DSA450Questions {
         }
 
         //if curr src row & col is itself a valid 'exit', that should not be
-        //checked, hence remove this src row * col exit(if exists in existAtBorder)
+        //checked, hence remove this src row & col exit(if exists in existAtBorder)
         exitsAtBorder.remove(srcRow + "," + srcCol);
 
         boolean[][] visited = new boolean[ROW][COL];
@@ -44582,7 +46987,7 @@ public class DSA450Questions {
         for (int u = 0; u < V; u++) {
 
             int v = edges[u];
-            //here node u has and directed edge to node v(==> u --> v)
+            //here node u has a directed edge to node v(==> u --> v)
             //so we will calculate the edge score for node v, as it has incoming
             //edge from node u, score will be the sum of all those node 'u' that
             //has an incoming edge towards node 'v' ==> edges[u]
@@ -44864,13 +47269,13 @@ public class DSA450Questions {
 
         Map<Integer, List<Integer>> graph = new HashMap<>();
 
-        //create the directed graph where a bomb[j] coord falls under the area of
-        //bomb[i], that means if bomb[i] is started with detonation then all the
-        //v-index bombs connected to i-index bomb will be exploded
-        //why directed? because if bomb[i] is able to explode bomb[j] it is not
-        //always true that bomb[j] can also explode bomb[i] because of the dist
-        //& radius range between them, as bomb[j] radius might be so small that
-        //it is not able to cover the dist to bomb[i] hence graph become directed
+        //create the directed graph where a bomb[v] coord falls under the area of
+        //bomb[u], that means if bomb[u] is started with detonation then all the
+        //v-index bombs connected to u-index bomb will be exploded
+        //why directed? because if bomb[u] is able to explode bomb[v] it is not
+        //always true that bomb[v] can also explode bomb[u] because of the dist
+        //& radius range between them, as bomb[v] radius might be so small that
+        //it is not able to cover the dist to bomb[u] hence graph become directed
         for (int u = 0; u < n; u++) {
 
             int[] bombU = bombs[u];
@@ -44985,11 +47390,12 @@ public class DSA450Questions {
                 //curr farmland at row & col is visited
                 land[row][col] = 0;
 
-                //DFS on curr farmland to go in depth/far of the land
-                //to find the max row & col of this farmland
-                numberOfIsland(land, row - 1, col, bottomRight);
+                //DFS on curr farmland to go in depth/far of the land to find
+                //the max row & col of this farmland, since we already started
+                //from top-left row & col, we just need to find bottom-right
+                //row & col for that we only need to move either to next row or
+                //next col
                 numberOfIsland(land, row + 1, col, bottomRight);
-                numberOfIsland(land, row, col - 1, bottomRight);
                 numberOfIsland(land, row, col + 1, bottomRight);
             }
         }
@@ -45021,6 +47427,149 @@ public class DSA450Questions {
         //return coord.toArray(new int[coord.size()][]);
         groupsOfFarmland.stream().forEach(farmCoord -> System.out.println(Arrays.toString(farmCoord)));
         System.out.println();
+    }
+
+    public void countSubIslands_Graph(int[][] grid1, int[][] grid2) {
+        //https://leetcode.com/problems/count-sub-islands/description/
+        //based on BFS, Number of islands
+        int ROW = grid1.length;
+        int COL = grid1[0].length;
+
+        final int LAND = 1;
+
+        int[][] dirs = {
+                {-1, 0},
+                {1, 0},
+                {0, -1},
+                {0, 1}
+        };
+
+        boolean[][] visitedCellsInGrid2 = new boolean[ROW][COL];
+
+        class Helper {
+
+            boolean isOutOfBounds(int row, int col) {
+                return row < 0 || row >= ROW || col < 0 || col >= COL;
+            }
+
+            boolean isGrid2SubIslandOfGrid1_BFS_Helper(int[][] grid1, int[][] grid2, int row, int col) {
+
+                //mark the curr land cell(row, col) in grid2 as visited
+                visitedCellsInGrid2[row][col] = true;
+
+                //from curr land cell(row, col) will start BFS to all the 4-dir
+                //adjacent land cells and at the same time compare that grid1[row][col]
+                //also contains the land cell or not
+                //by any chance, grid2[row][col] is land cell but grid1[row][col] is not
+                //means that curr land cell island in grid2 is not the sub island in grid1
+                Queue<int[]> queue = new LinkedList<>();
+                //queue holds int[] = cell(row, col) as cell[0] = row, cell[1] = col
+                queue.add(new int[]{row, col});
+
+                //initially assume that curr island in grid2 over which we are
+                //doing BFS is actually sub-island of an island existing in grid1
+                //we will validate this value 'true' in below BFS logic
+                boolean isGrid2SubIslandInGrid1 = true;
+
+                while (!queue.isEmpty()) {
+
+                    int[] currCell = queue.poll();
+
+                    int currRow = currCell[0];
+                    int currCol = currCell[1];
+
+                    //a valid sub-island cond is "when an island(connected land cells(row, col))
+                    //existing in grid2, then all of these land cells should also exists
+                    //in grid1 and at same land cell(row, col)"
+                    //below cond as (grid2[currRow][currCol] == LAND && grid1[currRow][currCol] == LAND)
+                    //says that there exists land cell in grid2 & grid1 at same @cell(currRow, currCol)
+                    //but if this above cond fails then it clearly means grid2 is not sub-island in
+                    //grid1 and can never become, hence we will save the 'false' value
+                    //we are not 'return' this false value as soon as we see this failing cond because
+                    //we also need to traverse the curr grid2 island completely, why?
+                    //reason is simple, just to mark all the land cell(row, col) of curr grid2 island
+                    //as visited so that we don't end up visiting land cell(row, col) of same island
+                    //again and again
+                    if (!(grid2[currRow][currCol] == LAND && grid1[currRow][currCol] == LAND)) {
+                        isGrid2SubIslandInGrid1 = false;
+                    }
+
+                    for (int[] dir : dirs) {
+
+                        int newRow = currRow + dir[0];
+                        int newCol = currCol + dir[1];
+
+                        //skip, if the new row & col 'isOutOfBounds'
+                        if (isOutOfBounds(newRow, newCol)) {
+                            continue;
+                        }
+
+                        //skip, if the new row & col is already visited land cell
+                        //of the same island in grid2
+                        if (visitedCellsInGrid2[newRow][newCol]) {
+                            continue;
+                        }
+
+                        //skip, if the new row & col is not a land cell as we are
+                        //only considering land cells in the connected island
+                        if (grid2[newRow][newCol] != LAND) {
+                            continue;
+                        }
+
+                        //mark the land cell as visited
+                        visitedCellsInGrid2[newRow][newCol] = true;
+
+                        queue.add(new int[]{newRow, newCol});
+                    }
+                }
+
+                //at last, we can pass the saved and validated value
+                return isGrid2SubIslandInGrid1;
+            }
+
+        }
+
+        Helper helper = new Helper();
+
+        int subIslands = 0;
+
+        //as we need to know how many islands in grid2 are actually the sub-islands
+        //of islands in grid1, we will iterate over grid2 island's land cell
+        for (int row = 0; row < ROW; row++) {
+
+            for (int col = 0; col < COL; col++) {
+
+                //skip, if curr row & col is not a land cell
+                if (grid2[row][col] != LAND) {
+                    continue;
+                }
+
+                //skip, if curr row & col is already visited means the curr land
+                //cell in grid2 has been traversed as a part of some island previously
+                if (visitedCellsInGrid2[row][col]) {
+                    continue;
+                }
+
+                //if the curr row & col of both grid1 and grid2 are land cells, it
+                //gives the inutition that there might be 4-dir adjacent land cells
+                //connected from curr land cell(row, col) and using BFS we can traverse
+                //that island
+                //BUT if this cond fails, there is no point to start BFS
+                if (!(grid2[row][col] == LAND && grid1[row][col] == LAND)) {
+                    continue;
+                }
+
+                //start BFS, traverse island in grid1 and grid2 and validate if
+                //island of grid2 is sub-island in grid1, if returns true, count
+                //sub-island by +1
+                if (helper.isGrid2SubIslandOfGrid1_BFS_Helper(grid1, grid2, row, col)) {
+                    subIslands++;
+                }
+            }
+        }
+
+        //output
+        System.out.println("Count sub-islands : " + subIslands);
     }
 
     private void sumOfDistancesInTree_Graph_DFS1(Map<Integer, List<Integer>> graph,
@@ -45258,7 +47807,7 @@ public class DSA450Questions {
                 //square not in the component, or on the boundary of the grid
                 //(the first or last row or column).
 
-                //we can that curr cell row & col is at border(TOP, BOTTOM, LEFT, RIGHT)
+                //we can say that curr cell row & col is at border(TOP, BOTTOM, LEFT, RIGHT)
                 //if one of 4-dirs from this curr cell row & col is out of the grid
                 //making it 'isOutOfBounds'
                 if (newRow < 0 || newRow >= ROW || newCol < 0 || newCol >= COL
@@ -45308,7 +47857,7 @@ public class DSA450Questions {
                     graph, hasApple, childRoot, root);
 
             //as we are doing a recursive call to curr childRoot's subtree, in a
-            //hope that there are apples in the substree then the time to reach
+            //hope that there are apples in the subtree then the time to reach
             //that node in the subtree and come back to curr childRoot will take
             //some time 'timeTakenToFetchApplesAndComeBack', now if there actually
             //has apples and we fetched it then definitely the time taken is more
@@ -45629,7 +48178,7 @@ public class DSA450Questions {
             //skip, because as per question, a path should not have two adjacent
             //nodes having same char label, so here if the curr root and one of
             //its childRoot have the same char label it is not required to count
-            //that path comming from this childRoot
+            //that path coming from this childRoot
             if (childRootLabel == currRootLabel) {
                 continue;
             }
@@ -45835,10 +48384,10 @@ public class DSA450Questions {
                 continue;
             }
 
-            graph.put(u, new HashSet<>());
+            graph.putIfAbsent(u, new HashSet<>());
             graph.get(u).add(v);
 
-            graph.put(v, new HashSet<>());
+            graph.putIfAbsent(v, new HashSet<>());
             graph.get(v).add(u);
         }
 
@@ -46051,7 +48600,7 @@ public class DSA450Questions {
                 labelToCell[currLabel] = new Cell(row, col);
                 currLabel++;
             }
-            //reverse col after creating labels for each row, this ways the actual
+            //reverse col after creating labels for each row, this way the actual
             //snakes & ladder board will have its look
             Collections.reverse(cols);
         }
@@ -46108,31 +48657,39 @@ public class DSA450Questions {
     private int[] findClosestNodeToGivenTwoNodes_Graph_GetDistFromNode(int[] edges, int node) {
         int n = edges.length;
 
-        Set<Integer> visited = new HashSet<>();
-
         int[] dist = new int[n];
+
         Arrays.fill(dist, Integer.MAX_VALUE);
+
+        boolean[] visited = new boolean[n];
+        Queue<Integer> queue = new LinkedList<>();
+
         dist[node] = 0;
 
-        Queue<Integer> queue = new LinkedList<>();
+        visited[node] = true;
         queue.add(node);
 
         while (!queue.isEmpty()) {
 
             int currNode = queue.poll();
 
-            if (visited.contains(currNode)) {
+            int childNode = edges[currNode];
+
+            if (childNode == -1) {
                 continue;
             }
 
-            visited.add(currNode);
-
-            int childNode = edges[currNode];
-            if (childNode != -1 && !visited.contains(childNode)) {
-                dist[childNode] = 1 + dist[currNode];
-                queue.add(childNode);
+            if (visited[childNode]) {
+                continue;
             }
+
+            dist[childNode] = 1 + dist[currNode];
+
+            visited[childNode] = true;
+
+            queue.add(childNode);
         }
+
         return dist;
     }
 
@@ -46140,7 +48697,7 @@ public class DSA450Questions {
         //https://leetcode.com/problems/find-closest-node-to-given-two-nodes/description/
         //based on BFS, DIJIKSTRA ALGO
         int n = edges.length;
-        //get the smallest dist to reach other vertices from given nodes 1 & 2 respec
+        //get the shortest dist to reach other vertices from given nodes 1 & 2 respec
         int[] distFromNode1 = findClosestNodeToGivenTwoNodes_Graph_GetDistFromNode(edges, node1);
         int[] distFromNode2 = findClosestNodeToGivenTwoNodes_Graph_GetDistFromNode(edges, node2);
 
@@ -51019,6 +53576,927 @@ public class DSA450Questions {
         return -1;
     }
 
+    private int countServersThatCommunicate_Graph_Helper(
+            int[][] grid, boolean[][] visited, int row, int col) {
+
+        int ROW = grid.length;
+        int COL = grid[0].length;
+
+        final int SERVER = 1;
+
+        //server that is located initailly at grid[row][col] when this DFS call
+        //is made
+        int currConnectedServer = 1;
+
+        //mark the curr server at grid[row][col] as visited
+        visited[row][col] = true;
+
+        //count all the servers that are present in same 'col', if there exists
+        //a server in the same 'col' start a DFS call from there count further
+        for (int nextRow = 0; nextRow < ROW; nextRow++) {
+
+            //skip, if the nextRow & col is visited as some previous connected
+            //server group, we need not to count those server again & again
+            if (visited[nextRow][col]) {
+                continue;
+            }
+
+            //skip, if there is not server present at grid[nextRow][col]
+            if (grid[nextRow][col] != SERVER) {
+                continue;
+            }
+
+            //add up all the distinct & unvisited servers counts that falls on
+            //same 'col' as that of curr server at grid[row][col] from DFS calls
+            currConnectedServer += countServersThatCommunicate_Graph_Helper(
+                    grid, visited, nextRow, col);
+        }
+
+        //count all the servers that are present in same 'row', if there exists
+        //a server in the same 'row' start a DFS call from there count further
+        for (int nextCol = 0; nextCol < COL; nextCol++) {
+
+            //skip, if the row & nextCol is visited as some previous connected
+            //server group, we need not to count those server again & again
+            if (visited[row][nextCol]) {
+                continue;
+            }
+
+            //skip, if there is not server present at grid[row][nextCol]
+            if (grid[row][nextCol] != SERVER) {
+                continue;
+            }
+
+            //add up all the distinct & unvisited servers counts that falls on
+            //same 'row' as that of curr server at grid[row][col] from DFS calls
+            currConnectedServer += countServersThatCommunicate_Graph_Helper(
+                    grid, visited, row, nextCol);
+        }
+
+        //return the total count of connected servers, connected to initial server
+        //at grid[row][col] for which this DFS call was made
+        return currConnectedServer;
+    }
+
+    public void countServersThatCommunicate_Graph(int[][] grid) {
+        //https://leetcode.com/problems/count-servers-that-communicate/description/
+        int ROW = grid.length;
+        int COL = grid[0].length;
+
+        final int SERVER = 1;
+        final int ISOLATED_SERVER_COUNT = 1;
+
+        boolean[][] visited = new boolean[ROW][COL];
+
+        //add up all the server counts that are forming some connected group,
+        //excluding the isolated single servers that not able to communicate
+        //with other servers(if any present)
+        int countCommunicatingServers = 0;
+
+        for (int row = 0; row < ROW; row++) {
+
+            for (int col = 0; col < COL; col++) {
+
+                if (visited[row][col]) {
+                    continue;
+                }
+
+                //if currently its a server, find all the connected server that
+                //shares the same 'row' OR 'col' as this server (DFS way)
+                if (grid[row][col] == SERVER) {
+
+                    //if there exist only one server i.e, server == grid[row][col] == 1
+                    //on the same 'row' OR 'col' (in DFS way) then count returned for
+                    //this server will be just 1 only, meaning this single server on this
+                    //grid @(row, col) is NOT ABLE TO COMMUNICATE with any other servers,
+                    //if any present on the grid
+                    int currConnectedServers = countServersThatCommunicate_Graph_Helper(grid, visited, row, col);
+
+                    //hence, if the curr connected server count for curr server at
+                    //(server == grid[row][col] == 1) is only 1 that simply means its
+                    //the isolated single server, meaning it is not communicating with
+                    //any other server so the count to add is 0 otherwise 'currConnectedServers'
+                    countCommunicatingServers += currConnectedServers <= ISOLATED_SERVER_COUNT
+                            ? 0
+                            : currConnectedServers;
+                }
+            }
+        }
+
+        //output
+        System.out.println("Count servers that communicate : " + countCommunicatingServers);
+    }
+
+    public void mapOfHeighestPeak_Graph(int[][] isWater) {
+        //https://leetcode.com/problems/map-of-highest-peak/description/
+        //based on BFS, LEVEL-ORDER-BFS
+        int ROW = isWater.length;
+        int COL = isWater[0].length;
+
+        int LAND = 0;
+        int WATER = 1;
+
+        int[][] dirs = {
+                {-1, 0},
+                {1, 0},
+                {0, -1},
+                {0, 1}
+        };
+
+        boolean[][] visited = new boolean[ROW][COL];
+
+        class Helper {
+
+            boolean isOutOfBounds(int row, int col) {
+                return row < 0 || row >= ROW || col < 0 || col >= COL;
+            }
+
+            //BFS, LEVEL-ORDER-BFS
+            void mapOfHeighestPeakBFSHelper(int[][] isWater, Queue<int[]> queue, int row, int col) {
+
+                //starting from all the water cells from the queue do level-order
+                //traversal that is movement to adjacent 4-dir in level by level
+                int level = 0;
+
+                while (!queue.isEmpty()) {
+
+                    int size = queue.size();
+
+                    for (int i = 0; i < size; i++) {
+
+                        int[] currCell = queue.poll();
+
+                        int currRow = currCell[0];
+                        int currCol = currCell[1];
+
+                        //curr cells belong to a curr level
+                        isWater[currRow][currCol] = level;
+
+                        //move to adjacent 4-dir
+                        for (int[] dir : dirs) {
+
+                            int newRow = currRow + dir[0];
+                            int newCol = currCol + dir[1];
+
+                            //skip, if the new row & col 'isOutOfBounds'
+                            if (isOutOfBounds(newRow, newCol)) {
+                                continue;
+                            }
+
+                            //skip, if the new row & col is already visited
+                            if (visited[newRow][newCol]) {
+                                continue;
+                            }
+
+                            visited[newRow][newCol] = true;
+
+                            queue.add(new int[]{newRow, newCol});
+                        }
+                    }
+
+                    level += 1;
+                }
+            }
+
+        }
+
+        //queue initially should contain all the water cells
+        Queue<int[]> queue = new LinkedList<>();
+
+        for (int row = 0; row < ROW; row++) {
+
+            for (int col = 0; col < COL; col++) {
+
+                //skip, if the curr row & col is a LAND cell
+                if (isWater[row][col] == LAND) {
+                    continue;
+                }
+
+                //put all the water cells in the queue and mark them visited
+                visited[row][col] = true;
+                queue.add(new int[]{row, col});
+            }
+        }
+
+        Helper helper = new Helper();
+
+        helper.mapOfHeighestPeakBFSHelper(isWater, queue, ROW, COL);
+
+        //output
+        System.out.println("Map of heighest peak : ");
+        for (int[] row : isWater) {
+            System.out.println(Arrays.toString(row));
+        }
+    }
+
+    public void restoreTheArrayFromAdjacentPairs_Graph(int[][] adjacentPairs) {
+        //https://leetcode.com/problems/restore-the-array-from-adjacent-pairs/description/
+        //based on GRAPH, DFS
+        int n = adjacentPairs.length + 1;
+
+        //taking visited as Set because val in adjacentPairs can be negative and
+        //can't be directly indexed if visited[] array was used
+        Set<Integer> visited = new HashSet<>();
+        Map<Integer, Set<Integer>> graph = new HashMap<>();
+
+        class Helper {
+
+            int[] restoredArray = new int[n];
+
+            //simple DFS call
+            void restoreArrayDFSHelper(int rootVal, int index) {
+
+                visited.add(rootVal);
+
+                //put each val at index and with DFS calls place adjacent val in
+                //next index
+                restoredArray[index] = rootVal;
+
+                for (int adjacentVal : graph.get(rootVal)) {
+
+                    if (visited.contains(adjacentVal)) {
+                        continue;
+                    }
+
+                    restoreArrayDFSHelper(adjacentVal, index + 1);
+                }
+            }
+
+        }
+
+        //create undirected graph using adjacentPairs
+        for (int[] pair : adjacentPairs) {
+
+            int valU = pair[0];
+            int valV = pair[1];
+
+            graph.putIfAbsent(valU, new HashSet<>());
+            graph.get(valU).add(valV);
+
+            graph.putIfAbsent(valV, new HashSet<>());
+            graph.get(valV).add(valU);
+        }
+
+        //initial root value
+        int rootVal = adjacentPairs[0][0];
+
+        //this part is most important for this relatively easy question based on
+        //simple DFS traversal!!!
+        //Given that adjacentPairs contains pairs at each i-th index such that
+        //adjacentPairs[i] = [a, b] now, this a, b means, in the 'actual array'
+        //a & b MUST BE ADJACENT to each other, it can be like,
+        //arr = [a, b, ...] OR arr = [b, a, ...]
+        //lets take an ex: adjacentPairs[][] = [[a, b], [c, b], [c, d]] with this
+        //possible restoredArray will be like = [a, b, c, d] following the adjacency
+        //of the value from given adjacentPairs.
+        //Observation here is there will be two values in the adjacentPairs, that
+        //will have only single occuenece ex: [a, b] & [c, d] here in this a and d
+        //are occuring in just single i-th pair and the reason for that is, these
+        //two values are the left-most and right-most value in the restoredArray
+        //and likewise 'a' will not have adjacent value to its left and 'd' will not
+        //have adjacent value to its right ==> [a ... d], hence starting DFS from
+        //either of these values will always give the restoredArray with correct
+        //adjacent value arranged as per adjacentPairs
+        //Now, while creating the undirected graph b -> [a, c] BUT a -> [b]
+        //similarly, c -> [b, d] BUT d -> [c] both 'a' & 'd' will have only one
+        //adjacent val as their edge in the graph, so we can find this edge and
+        //hence the root value to start DFS from
+        for (Map.Entry<Integer, Set<Integer>> entry : graph.entrySet()) {
+            if (entry.getValue().size() == 1) {
+                rootVal = entry.getKey();
+                break;
+            }
+        }
+
+        Helper helper = new Helper();
+
+        helper.restoreArrayDFSHelper(rootVal, 0);
+
+        //output
+        System.out.println("Restore array from adjacent pairs : " + Arrays.toString(helper.restoredArray));
+    }
+
+    public void numberOfRestrictedPathFromFirstToLastNode_Graph_Memoization(int n, int[][] edges) {
+        //https://leetcode.com/problems/number-of-restricted-paths-from-first-to-last-node/description/
+
+        class Node {
+
+            int vertex;
+            int weight;
+
+            public Node(int vertex, int weight) {
+                this.vertex = vertex;
+                this.weight = weight;
+            }
+
+        }
+
+        int mod = 1000000007;
+        Map<Integer, Set<Node>> graph = new HashMap<>();
+
+        class Helper {
+
+            //dijkstra shortest path algo
+            int[] shortestPathHelper(int n, int srcVertex) {
+
+                //as node's label are [1 to n] so to include n-th node value
+                //take (n + 1) size
+                int[] dist = new int[n + 1];
+                Arrays.fill(dist, Integer.MAX_VALUE);
+
+                //dist to src vertex will be 0 always
+                dist[srcVertex] = 0;
+
+                PriorityQueue<Node> queue = new PriorityQueue<>(
+                        (a, b) -> Integer.compare(a.weight, b.weight));
+
+                queue.add(new Node(srcVertex, dist[srcVertex]));
+
+                while (!queue.isEmpty()) {
+
+                    Node currNode = queue.poll();
+
+                    for (Node childNode : graph.getOrDefault(currNode.vertex, new HashSet<>())) {
+
+                        if (dist[childNode.vertex] > dist[currNode.vertex] + childNode.weight) {
+
+                            dist[childNode.vertex] = dist[currNode.vertex] + childNode.weight;
+                            queue.add(new Node(childNode.vertex, dist[childNode.vertex]));
+                        }
+                    }
+                }
+
+                return dist;
+            }
+
+            int countRestrictedPath_DFS_Memoization_Helper(
+                    int srcVertex, int destVertex, int[] distFromDestVertex, Integer[] memo) {
+
+                //return 1 as we reached from first node(src ==> 1) to last node
+                //(==> n) following the condition of restricted path
+                if (srcVertex == destVertex) {
+                    return 1;
+                }
+
+                if (memo[srcVertex] != null) {
+                    return memo[srcVertex];
+                }
+
+                int pathCount = 0;
+
+                for (Node childNode : graph.getOrDefault(srcVertex, new HashSet<>())) {
+
+                    if (distFromDestVertex[srcVertex] > distFromDestVertex[childNode.vertex]) {
+
+                        pathCount = (pathCount
+                                + countRestrictedPath_DFS_Memoization_Helper(
+                                childNode.vertex, destVertex, distFromDestVertex, memo)) % mod;
+                    }
+                }
+
+                return memo[srcVertex] = pathCount;
+            }
+
+        }
+
+        //create weighted directed graph as mentioned in question
+        for (int[] edge : edges) {
+
+            int nodeU = edge[0];
+            int nodeV = edge[1];
+            int weight = edge[2];
+
+            graph.putIfAbsent(nodeU, new HashSet<>());
+            graph.get(nodeU).add(new Node(nodeV, weight));
+
+            graph.putIfAbsent(nodeV, new HashSet<>());
+            graph.get(nodeV).add(new Node(nodeU, weight));
+        }
+
+        Helper helper = new Helper();
+
+        //find the shortest dist to reach all other nodes in the graph if the
+        //src node is the 'lastNode' ==> n-th node
+        int lastNode = n;
+        int[] shortestDistFromLastNode = helper.shortestPathHelper(n, lastNode);
+
+        Integer[] memo = new Integer[n + 1];
+        int restrictedPathCount = helper.countRestrictedPath_DFS_Memoization_Helper(
+                1, lastNode, shortestDistFromLastNode, memo);
+
+        //output
+        System.out.println("Number of restricted path count from first to last node : " + restrictedPathCount);
+    }
+
+    public int busRoute_Graph(int[][] routes, int source, int target) {
+        //https://leetcode.com/problems/bus-routes/description/
+        //based on GRAPH, BFS, LEVEL-ORDER-BFS-TRAVERSAL
+        //this questions requires how efficiently we can create graph map based
+        //on given routes[][] rest other is simple BFS traversal
+        if (source == target) {
+            return 0;
+        }
+
+        int n = routes.length;
+
+        Set<Integer> visited = new HashSet<>();
+        Queue<Integer> queue = new LinkedList<>();
+
+        Map<Integer, Set<Integer>> graph = new HashMap<>();
+
+        class Helper {
+
+            //since the stops are sorted before calling this method, we can use
+            //this sorted nature to efficiently find the common stop point
+            boolean hasAnyCommonStop(int[] stopsU, int[] stopsV) {
+
+                int len1 = stopsU.length;
+                int len2 = stopsV.length;
+
+                int i = 0;
+                int j = 0;
+
+                while (i < len1 && j < len2) {
+
+                    if (stopsU[i] == stopsV[j]) {
+                        return true;
+                    } else if (stopsU[i] < stopsV[j]) {
+                        i++;
+                    } else {
+                        j++;
+                    }
+                }
+
+                return false;
+            }
+
+            //since the stops are sorted we can use binary search to find stop point
+            boolean isStopPointInBusRoute(int[] stops, int stopPoint) {
+
+                int len = stops.length;
+
+                int start = 0;
+                int end = len - 1;
+
+                while (end >= start) {
+
+                    int mid = start + (end - start) / 2;
+
+                    if (stops[mid] == stopPoint) {
+                        return true;
+                    } else if (stops[mid] < stopPoint) {
+                        start = mid + 1;
+                    } else {
+                        end = mid - 1;
+                    }
+                }
+
+                return false;
+            }
+
+            public void createGraph() {
+
+                //sort all the stops so that we can find the common stop point
+                //between in two bus routes later
+                for (int bus = 0; bus < n; bus++) {
+
+                    int[] stops = routes[bus];
+
+                    Arrays.sort(stops);
+
+                    //all the buses that contains source stop point in it, will be queued
+                    //beacuse these buses in queue can be used to potentially reach to
+                    //target stop point
+                    if (isStopPointInBusRoute(stops, source)) {
+
+                        visited.add(bus);
+                        queue.add(bus);
+                    }
+                }
+
+                for (int busU = 0; busU < n; busU++) {
+
+                    int[] stopsForBusU = routes[busU];
+
+                    for (int busV = busU + 1; busV < n; busV++) {
+
+                        int[] stopsForBusV = routes[busV];
+
+                        //if two buses say busU & busV has any stop points common in their
+                        //respective routes then they can be connected
+                        if (hasAnyCommonStop(stopsForBusU, stopsForBusV)) {
+
+                            graph.putIfAbsent(busU, new HashSet<>());
+                            graph.get(busU).add(busV);
+
+                            graph.putIfAbsent(busV, new HashSet<>());
+                            graph.get(busV).add(busU);
+                        }
+                    }
+                }
+            }
+
+        }
+
+        Helper helper = new Helper();
+
+        helper.createGraph();
+
+        //in case where source and target stop points lie in the single bus route
+        //then curr single bus will be used
+        int busUsed = 1;
+
+        while (!queue.isEmpty()) {
+
+            int size = queue.size();
+
+            for (int i = 0; i < size; i++) {
+
+                int currBus = queue.poll();
+
+                if (helper.isStopPointInBusRoute(routes[currBus], target)) {
+                    return busUsed;
+                }
+
+                visited.add(currBus);
+
+                for (int nextBus : graph.getOrDefault(currBus, new HashSet<>())) {
+
+                    if (visited.contains(nextBus)) {
+                        continue;
+                    }
+
+                    queue.add(nextBus);
+                }
+            }
+
+            busUsed += 1;
+        }
+
+        return -1;
+    }
+
+    public void numbersWithSameConsecutiveDiff_Graph(int n, int k) {
+        //https://leetcode.com/problems/numbers-with-same-consecutive-differences/description/
+        //based on GRAPH, BFS, LEVEL-ORDER BFS
+        Queue<Integer> queue = new LinkedList<>();
+
+        //numbers of length 'n' generated should not start with 0 hence loop
+        //runs from [1 to 9]
+        for (int num = 1; num <= 9; num++) {
+            queue.add(num);
+        }
+
+        int length = 0;
+
+        //as this is LEVEL-ORDER BFS and initial values in queue are single digit
+        //value [1 to 9] and we need to generate numbers of length 'n', this
+        //cond length < n - 1 ensures that at the time loop end, queue will have
+        //all the numbers of length 'n'
+        while (!queue.isEmpty() && length < n - 1) {
+
+            int size = queue.size();
+
+            for (int i = 0; i < size; i++) {
+
+                int currNum = queue.poll();
+
+                int lastDigit = currNum % 10;
+
+                //as we are appending only single digit value to currNum where
+                //the diff between the last digit and new added digit should be 'k'
+                //ex: currNum = 1, last digit = 1 % 10 = 1, new digit = 1 + k OR 1 - k
+                //valid nextDigit = 1 + 7 ==> 8, invalid prevDigit = 1 - 7 ==> -6
+                //ex: currNum = 18, last digit = 18 % 10 = 8, new digit = 8 + k OR 8 - k
+                //invalid nextDigit = 8 + 7 ==> 16, valid prevDigit = 8 - 7 ==> 1
+                int nextDigit = lastDigit + k;
+                int prevDigit = lastDigit - k;
+
+                //as said above we are only considering single digit value to be
+                //appended to currNum, so the next digit or prev digit should also
+                //lie in the range of [0 to 9]
+                if (prevDigit >= 0) {
+                    int newNum = currNum * 10 + prevDigit;
+                    queue.add(newNum);
+                }
+
+                if (nextDigit <= 9) {
+                    int newNum = currNum * 10 + nextDigit;
+                    queue.add(newNum);
+                }
+            }
+
+            length++;
+        }
+
+        //output
+        //.distinct() is required here, why?
+        //as we are generating numbers that have consecutive diff as k, now in case
+        //this 'k' is 0 then can be duplicated numbers in the result hence to avoid
+        //duplicates
+        int[] numsOfLengthN = queue.stream().mapToInt(num -> num).distinct().toArray();
+        System.out.println("Numbers with same consecutive diff : " + Arrays.toString(numsOfLengthN));
+    }
+
+    public void findAllPeopleWithSecret_Graph(int n, int[][] meetings, int firstPerson) {
+        //https://leetcode.com/problems/find-all-people-with-secret/description/
+        Map<Integer, List<int[]>> graph = new HashMap<>();
+        for (int[] meeting : meetings) {
+
+            int x = meeting[0];
+            int y = meeting[1];
+            int time = meeting[2];
+
+            graph.computeIfAbsent(x, l -> new ArrayList<>()).add(new int[]{time, y});
+            graph.computeIfAbsent(y, l -> new ArrayList<>()).add(new int[]{time, x});
+        }
+
+        PriorityQueue<int[]> queue = new PriorityQueue<>(
+                (a, b) -> Integer.compare(a[0], b[0]));
+
+        queue.add(new int[]{0, 0});
+        queue.add(new int[]{0, firstPerson});
+
+        boolean[] visited = new boolean[n];
+
+        while (!queue.isEmpty()) {
+
+            int currTime = queue.peek()[0];
+            int currPerson = queue.peek()[1];
+
+            queue.poll();
+
+            if (visited[currPerson]) {
+                continue;
+            }
+            visited[currPerson] = true;
+
+            for (int[] nextTimePerson : graph.getOrDefault(currPerson, new ArrayList<>())) {
+
+                int nextTime = nextTimePerson[0];
+                int nextPerson = nextTimePerson[1];
+
+                if (nextTime < currTime) {
+                    continue;
+                }
+
+                queue.add(nextTimePerson);
+            }
+        }
+
+        List<Integer> personsWithSecret = new ArrayList<>();
+        for (int person = 0; person < n; person++) {
+            if (visited[person]) {
+                personsWithSecret.add(person);
+            }
+        }
+
+        //output:
+        System.out.println("Find all person with secrets : " + personsWithSecret);
+    }
+
+    public void findAllPeopleWithSecret_Graph_UnionFind(int n, int[][] meetings, int firstPerson) {
+        //https://leetcode.com/problems/find-all-people-with-secret/description/
+
+        class UnionFind {
+
+            int[] parent;
+            int[] rank;
+
+            public UnionFind(int n) {
+                parent = new int[n];
+                rank = new int[n];
+
+                for (int node = 0; node < n; node++) {
+                    parent[node] = node;
+                }
+            }
+
+            public int find(int node) {
+                if (node == parent[node]) {
+                    return node;
+                }
+                return parent[node] = find(parent[node]);
+            }
+
+            public void union(int node1, int node2) {
+
+                int parent1 = find(node1);
+                int parent2 = find(node2);
+
+                if (parent1 == parent2) {
+                    return;
+                }
+
+                if (rank[parent1] > rank[parent2]) {
+                    parent[parent2] = parent1;
+                } else if (rank[parent1] < rank[parent2]) {
+                    parent[parent1] = parent2;
+                } else {
+                    parent[parent2] = parent1;
+                    rank[parent1] += 1;
+                }
+            }
+
+            public boolean isConnected(int node1, int node2) {
+                return find(node1) == find(node2);
+            }
+
+            public void reset(int node) {
+                parent[node] = node;
+                rank[node] = 0;
+            }
+
+        }
+
+        //group together all the meetings that occur at time 'time' and keep them
+        //in sorted order according to 'time' using treemap
+        Map<Integer, List<int[]>> timeToMeetings = new TreeMap<>();
+        for (int[] meeting : meetings) {
+
+            int x = meeting[0];
+            int y = meeting[1];
+            int time = meeting[2];
+
+            timeToMeetings.computeIfAbsent(time, l -> new ArrayList<>()).add(new int[]{x, y});
+        }
+
+        //union find for all 'n' person, all the connected persons will represent
+        //persons who knows secret
+        UnionFind unionFind = new UnionFind(n);
+
+        //initially, person(0) shares the secret with person(firstPerson) hence
+        //person 0 and firstPerson are already connected hence union()
+        unionFind.union(0, firstPerson);
+
+        //since, meetings are grouped and sorted based on time in incr seq in treemap
+        //with each time(in incr seq) we will process all the meetings it holds
+        for (int timeInIncrSeq : timeToMeetings.keySet()) {
+
+            //all the persons in meetings at curr time @timeInIncrSeq
+            List<int[]> meetingsInCurrTime = timeToMeetings.get(timeInIncrSeq);
+
+            //person in meeting
+            //since all the meetings are occuring at time 'timeInIncrSeq' and
+            //a person can take multiple meetings in same time that means all
+            //the persons involved in meetingsInCurrTime are connected to each
+            //other hence union()
+            for (int[] meeting : meetingsInCurrTime) {
+
+                int x = meeting[0];
+                int y = meeting[1];
+
+                unionFind.union(x, y);
+            }
+
+            //now here, we will validate that any of the person in meetingsInCurrTime
+            //has any connection to person(0), why?
+            //because person(0) is the initial person who knew the secret from
+            //the very begining. In case any person is not connected to person(0)
+            //we have to reset the union find for the person(x) and person(y)
+            for (int[] meeting : meetingsInCurrTime) {
+
+                int x = meeting[0];
+                int y = meeting[1];
+
+                //checking isConnected(x, 0) because in above loop we already made
+                //union for x & y hence union(x, y) are already connected so here we
+                //can only check union for either x or y with 0 hence union(x, 0)
+                //incase isConnected(x, 0) is false, meaning x and 0 are not connected
+                //meaning there is now way person(0) have shared the secret with curr
+                //person(x) which means person(x) is not able to share the secret with
+                //any of the persons in meetingsInCurrTime, hence reset
+                if (!unionFind.isConnected(x, 0)) {
+                    unionFind.reset(x);
+                    unionFind.reset(y);
+                }
+            }
+        }
+
+        List<Integer> personsWithSecret = new ArrayList<>();
+
+        for (int person = 0; person < n; person++) {
+            //same here, check if any person have any connection with person(0)
+            //who knew the secret from the beinging then only it is validated
+            //that curr 'person' also knows the secret
+            if (unionFind.isConnected(person, 0)) {
+                personsWithSecret.add(person);
+            }
+        }
+
+        //output:
+        System.out.println("Find all person with secrets : " + personsWithSecret);
+    }
+
+    public int minCostOfPathWithSpecialRoad_Graph(int[] start, int[] target, int[][] specialRoads) {
+        //https://leetcode.com/problems/minimum-cost-of-a-path-with-special-roads/description/
+
+        class Node {
+
+            int row;
+            int col;
+
+            public Node(int row, int col) {
+                this.row = row;
+                this.col = col;
+            }
+
+            @Override
+            public int hashCode() {
+                int hash = 3;
+                hash = 97 * hash + this.row;
+                hash = 97 * hash + this.col;
+                return hash;
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                if (this == obj) {
+                    return true;
+                }
+                if (obj == null) {
+                    return false;
+                }
+                if (getClass() != obj.getClass()) {
+                    return false;
+                }
+                final Node other = (Node) obj;
+                if (this.row != other.row) {
+                    return false;
+                }
+                return this.col == other.col;
+            }
+
+        }
+
+        class Util {
+
+            //manhattan dist
+            public int getCost(Node a, Node b) {
+                return Math.abs(a.row - b.row) + Math.abs(a.col - b.col);
+            }
+        }
+
+        Util util = new Util();
+
+        Map<Node, Integer> costMap = new HashMap<>();
+
+        PriorityQueue<Node> queue = new PriorityQueue<>(
+                (a, b) -> Integer.compare(costMap.get(a), costMap.get(b)));
+
+        Node startNode = new Node(start[0], start[1]);
+        Node targetNode = new Node(target[0], target[1]);
+
+        costMap.put(startNode, 0);
+
+        queue.add(startNode);
+
+        int costStartToTarget = util.getCost(startNode, targetNode);
+
+        while (!queue.isEmpty()) {
+
+            Node currNode = queue.poll();
+            int costToReachCurrNode = costMap.get(currNode);
+
+            int costCurrNodeToTarget = util.getCost(currNode, targetNode);
+
+            costStartToTarget = Math.min(costStartToTarget,
+                    costToReachCurrNode + costCurrNodeToTarget);
+
+            if (currNode == targetNode) {
+                return costStartToTarget;
+            }
+
+            for (int[] road : specialRoads) {
+
+                Node n1 = new Node(road[0], road[1]);
+                Node n2 = new Node(road[2], road[3]);
+
+                int specialCostN1ToN2 = road[4];
+                int actulaCostN1ToN2 = util.getCost(n1, n2);
+
+                int costToChoose = Math.min(specialCostN1ToN2, actulaCostN1ToN2);
+
+                int costCurrNodeToN1 = util.getCost(currNode, n1);
+
+                int cost = costToReachCurrNode + costCurrNodeToN1 + costToChoose;
+
+                if (cost >= costStartToTarget) {
+                    continue;
+                }
+
+                if (cost >= costMap.getOrDefault(n2, Integer.MAX_VALUE)) {
+                    continue;
+                }
+
+                costMap.put(n2, cost);
+                queue.add(n2);
+            }
+        }
+
+        return costStartToTarget;
+    }
+
     public void floodFill_Helper(int[][] image, int row, int col,
                                  int srcColor, int newColor, boolean[][] visited) {
 
@@ -53376,7 +56854,7 @@ public class DSA450Questions {
             restoreIPAddresses_Backtracking_Helper(str, endIndex + 1, subnets, ipAddresses);
 
             //typical backtracking, remove the last subnet segment added, why?
-            //because last segment we considered "1" but later we considered "19"
+            //because last segment we considered "1" but later we will consider "19"
             //so for that remove "1" and then consider "19" as another subnet
             subnets.remove(subnets.size() - 1);
         }
@@ -53944,6 +57422,41 @@ public class DSA450Questions {
 
         //output
         System.out.println("Pallindrome permutations two : " + uniquePallindromePermutations);
+    }
+
+    private String findUniqueBinaryString_Backtracking_Helper(int size, Set<String> numsSet, String currBinaryNumber) {
+
+        //here, we have created a binary number of required 'size' now we need to
+        //check if this currBinaryNumber is unqiue or not
+        if (currBinaryNumber.length() == size) {
+            //if currBinaryNumber is already in numsSet means, its not unique
+            //then return "" otherwise the actual currBinaryNumber formed
+            return numsSet.contains(currBinaryNumber) ? "" : currBinaryNumber;
+        }
+
+        //if by appending only '0' to currBinaryNumber gives us the unique binaryNumber
+        String binaryNumber = findUniqueBinaryString_Backtracking_Helper(size, numsSet, currBinaryNumber + "0");
+
+        //check if the binaryNumber by only appending '0' is actually correct then
+        //return the binaryNumber right away
+        if (!"".equals(binaryNumber)) {
+            return binaryNumber;
+        }
+
+        //otherwise, also try appending '1' in currBinaryNumber
+        return findUniqueBinaryString_Backtracking_Helper(size, numsSet, currBinaryNumber + "1");
+    }
+
+    public void findUniqueBinaryString_Backtracking(String[] nums) {
+        //https://leetcode.com/problems/find-unique-binary-string/description/
+        int size = nums.length;
+
+        Set<String> numsSet = Arrays.stream(nums).collect(Collectors.toSet());
+
+        String uniqueBinaryString = findUniqueBinaryString_Backtracking_Helper(size, numsSet, "");
+
+        //output
+        System.out.println("Find unique binary string : " + uniqueBinaryString);
     }
 
     public void LRUCacheDesignImpl(List<String> operations, List<List<Integer>> inputs) {
@@ -56026,6 +59539,112 @@ public class DSA450Questions {
                 break;
             }
         }
+    }
+
+    //MATHS QUESTIONS
+    public boolean checkIfCellIsReachableInGivenTime(int startX, int startY, int endX, int endY, int time) {
+        //https://leetcode.com/problems/determine-if-a-cell-is-reachable-at-a-given-time/description/
+        //based on MATH
+        //this question looks like BFS/DFS question but the given constraints are
+        //large that BFS/DFS won't work efficiently, hence required this approach
+        int width = Math.abs(startX - endX);
+        int height = Math.abs(startY - endY);
+
+        if (width == 0 && height == 0 && time == 1) {
+            return false;
+        }
+
+        return time >= Math.max(width, height);
+    }
+
+    public void factorialTrailingZeroes(int n) {
+        //https://leetcode.com/problems/factorial-trailing-zeroes/
+        //explanation: https://leetcode.com/problems/factorial-trailing-zeroes/solutions/4879499/beats-90-fast-easy-mathematical-converging-series-solution/
+        //based on MATHS
+        int countTrailingZeroes = 0;
+        while (n > 0) {
+            n /= 5;
+            countTrailingZeroes += n;
+        }
+
+        //output:
+        System.out.println("Factorial trailing zeroes : " + countTrailingZeroes);
+    }
+
+    //ENUMERATION QUESTIONS
+    public void sequenceDigits(int low, int high) {
+        //https://leetcode.com/problems/sequential-digits/description/
+        //based on ENUMRATION, RECURSION
+        List<String> nums = new ArrayList<>();
+
+        class Helper {
+
+            public void generateSequenceDigits(int val, String numStr) {
+
+                int num = "".equals(numStr) ? 0 : Integer.parseInt(numStr);
+
+                if (num > high) {
+                    return;
+                }
+
+                if (low <= num && num <= high) {
+                    nums.add(numStr);
+                }
+
+                if (val > 9) {
+                    return;
+                }
+
+                generateSequenceDigits(val + 1, numStr + "" + val);
+            }
+        }
+
+        Helper helper = new Helper();
+
+        for (int val = 1; val <= 9; val++) {
+            helper.generateSequenceDigits(val, "");
+        }
+
+        Comparator<String> numStrComparator = (a, b) -> a.length() == b.length()
+                ? a.compareTo(b)
+                : Integer.compare(a.length(), b.length());
+
+        List<Integer> numList = nums.stream()
+                .sorted(numStrComparator)
+                .map(numStr -> Integer.parseInt(numStr))
+                .collect(Collectors.toList());
+
+        //output
+        System.out.println("Sequenced digits (Recursion) : ");
+        System.out.println(numList);
+    }
+
+    public void sequenceDigits2(int low, int high) {
+        //https://leetcode.com/problems/sequential-digits/description/
+        //based on ENUMRATION
+        List<Integer> nums = new ArrayList<>();
+
+        for (int digit = 1; digit < 9; digit++) {
+
+            int num = digit;
+            int val = digit;
+
+            while (val < 10 && num <= high) {
+
+                if (num >= low) {
+                    nums.add(num);
+                }
+
+                val++;
+                num = num * 10 + val;
+            }
+        }
+
+        Collections.sort(nums);
+
+        //output
+        System.out.println("Sequenced digits (Brute Force) : ");
+        System.out.println(nums);
     }
 
     public static void main(String[] args) {
@@ -62069,6 +65688,9 @@ public class DSA450Questions {
 //        obj.countNumberOfHomogenousSubstring("abbcccaa");
 //        obj.countNumberOfHomogenousSubstring("xy");
 //        obj.countNumberOfHomogenousSubstring("zzzzz");
+//        obj.countNumberOfHomogenousSubstring2("abbcccaa");
+//        obj.countNumberOfHomogenousSubstring2("xy");
+//        obj.countNumberOfHomogenousSubstring2("zzzzz");
 //        obj.numberOfSubstringWithOnlyOnes("0110111");
 //        obj.numberOfSubstringWithOnlyOnes("101");
 //        obj.numberOfSubstringWithOnlyOnes("111111");
@@ -62414,6 +66036,13 @@ public class DSA450Questions {
 //        System.out.println("Min moves from src = 1 to target: " + obj.minMovesToReachTarget_Greedy(19, 2));
 //        System.out.println("Min moves from src = 1 to target: " + obj.minMovesToReachTarget_Greedy(10, 4));
 //        System.out.println("Min moves from src = 1 to target: " + obj.minMovesToReachTarget_Greedy(1000000000, 100));
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+//        System.out.println("Minimum Numbers of Function Calls to Make Target Array");
+//        //https://leetcode.com/problems/minimum-numbers-of-function-calls-to-make-target-array/description/
+//        obj.minNumberOfFuncCallToMakeNumsToTargetArr_Greedy(new int[]{1, 5});
+//        obj.minNumberOfFuncCallToMakeNumsToTargetArr_Greedy(new int[]{2, 2});
+//        obj.minNumberOfFuncCallToMakeNumsToTargetArr_Greedy(new int[]{4, 2, 5});
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
 //        System.out.println("Make The String Great");
@@ -62848,21 +66477,31 @@ public class DSA450Questions {
 //        obj.findAllGroupOfFarmland_Graph(new int[][]{{0}});
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Sum of Distances in Tree");
-        //https://leetcode.com/problems/sum-of-distances-in-tree/description/
-        obj.sumOfDistancesInTree_Graph(2, new int[][]{{0, 1}});
-        obj.sumOfDistancesInTree_Graph(6, new int[][]{{0, 1}, {0, 2}, {2, 3}, {2, 4}, {2, 5}});
-        obj.sumOfDistancesInTree_Graph(1, new int[][]{});
+//        System.out.println("Count Sub Islands");
+//        //https://leetcode.com/problems/count-sub-islands/description/
+//        obj.countSubIslands_Graph(
+//                new int[][]{{1, 1, 1, 0, 0}, {0, 1, 1, 1, 1}, {0, 0, 0, 0, 0}, {1, 0, 0, 0, 0}, {1, 1, 0, 1, 1}},
+//                new int[][]{{1, 1, 1, 0, 0}, {0, 0, 1, 1, 1}, {0, 1, 0, 0, 0}, {1, 0, 1, 1, 0}, {0, 1, 0, 1, 0}});
+//        obj.countSubIslands_Graph(
+//                new int[][]{{1, 0, 1, 0, 1}, {1, 1, 1, 1, 1}, {0, 0, 0, 0, 0}, {1, 1, 1, 1, 1}, {1, 0, 1, 0, 1}},
+//                new int[][]{{0, 0, 0, 0, 0}, {1, 1, 1, 1, 1}, {0, 1, 0, 1, 0}, {0, 1, 0, 1, 0}, {1, 0, 0, 0, 1}});
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Domino and Tromino Tiling");
-        //https://leetcode.com/problems/domino-and-tromino-tiling/description/
-        obj.dominoTrominoTiling_DP_Memoization(1);
-        obj.dominoTrominoTiling_DP_Memoization(2);
-        obj.dominoTrominoTiling_DP_Memoization(3);
-        obj.dominoTrominoTiling_DP_Memoization(4);
-        obj.dominoTrominoTiling_DP_Memoization(5);
-        obj.dominoTrominoTiling_DP_Memoization(1000);
+//        System.out.println("Sum of Distances in Tree");
+//        //https://leetcode.com/problems/sum-of-distances-in-tree/description/
+//        obj.sumOfDistancesInTree_Graph(2, new int[][]{{0, 1}});
+//        obj.sumOfDistancesInTree_Graph(6, new int[][]{{0, 1}, {0, 2}, {2, 3}, {2, 4}, {2, 5}});
+//        obj.sumOfDistancesInTree_Graph(1, new int[][]{});
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+//        System.out.println("Domino and Tromino Tiling");
+//        //https://leetcode.com/problems/domino-and-tromino-tiling/description/
+//        obj.dominoTrominoTiling_DP_Memoization(1);
+//        obj.dominoTrominoTiling_DP_Memoization(2);
+//        obj.dominoTrominoTiling_DP_Memoization(3);
+//        obj.dominoTrominoTiling_DP_Memoization(4);
+//        obj.dominoTrominoTiling_DP_Memoization(5);
+//        obj.dominoTrominoTiling_DP_Memoization(1000);
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
 //        System.out.println("Custom Sort String");
@@ -63104,22 +66743,22 @@ public class DSA450Questions {
 //                new int[][]{{0, 1}, {0, 2}, {1, 3}, {0, 4}}, "aabab");
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Longest Path With Different Adjacent Characters");
-        //https://leetcode.com/problems/longest-path-with-different-adjacent-characters/description/
-        obj.longestPathWithDiffAdjacentCharsInTree_Graph(new int[]{-1, 0, 0, 1, 1, 2}, "abacbe");
-        obj.longestPathWithDiffAdjacentCharsInTree_Graph(new int[]{-1, 0, 0, 0}, "aabc");
-        obj.longestPathWithDiffAdjacentCharsInTree_Graph(new int[]{-1, 0, 1}, "aab");
+//        System.out.println("Longest Path With Different Adjacent Characters");
+//        //https://leetcode.com/problems/longest-path-with-different-adjacent-characters/description/
+//        obj.longestPathWithDiffAdjacentCharsInTree_Graph(new int[]{-1, 0, 0, 1, 1, 2}, "abacbe");
+//        obj.longestPathWithDiffAdjacentCharsInTree_Graph(new int[]{-1, 0, 0, 0}, "aabc");
+//        obj.longestPathWithDiffAdjacentCharsInTree_Graph(new int[]{-1, 0, 1}, "aab");
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Lexicographically Smallest Equivalent String");
-        //https://leetcode.com/problems/lexicographically-smallest-equivalent-string/description/
-        obj.lexicographicallySmallestEquivalentString_Graph("parker", "morris", "parser");
-        obj.lexicographicallySmallestEquivalentString_Graph("hello", "world", "hold");
-        obj.lexicographicallySmallestEquivalentString_Graph("leetcode", "programs", "sourcecode");
-        obj.lexicographicallySmallestEquivalentString_Graph(
-                "opecenadojbodihfgmpijpfocomhcncicefpohkibjckijghii",
-                "ndlbhpaeppgekfhnjnmmplmdoifdhbglmedpjgleofgnahglbe",
-                "ttusuhhrabgsswpaapxoxdanchyccmpjitwwmfioedtbiggfru");
+//        System.out.println("Lexicographically Smallest Equivalent String");
+//        //https://leetcode.com/problems/lexicographically-smallest-equivalent-string/description/
+//        obj.lexicographicallySmallestEquivalentString_Graph("parker", "morris", "parser");
+//        obj.lexicographicallySmallestEquivalentString_Graph("hello", "world", "hold");
+//        obj.lexicographicallySmallestEquivalentString_Graph("leetcode", "programs", "sourcecode");
+//        obj.lexicographicallySmallestEquivalentString_Graph(
+//                "opecenadojbodihfgmpijpfocomhcncicefpohkibjckijghii",
+//                "ndlbhpaeppgekfhnjnmmplmdoifdhbglmedpjgleofgnahglbe",
+//                "ttusuhhrabgsswpaapxoxdanchyccmpjitwwmfioedtbiggfru");
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
 //        System.out.println("Accounts Merge");
@@ -63171,11 +66810,11 @@ public class DSA450Questions {
 //        obj.longestChunkedPallindromeDecomposition_Greedy("antaprezatepzapreanta");
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Decoded String at Index");
-        //https://leetcode.com/problems/decoded-string-at-index/description/
-        System.out.println("Decode string at index: " + obj.decodeStringAtIndex("leet2code3", 10));
-        System.out.println("Decode string at index: " + obj.decodeStringAtIndex("ha22", 5));
-        System.out.println("Decode string at index: " + obj.decodeStringAtIndex("a2345678999999999999999", 1));
+//        System.out.println("Decoded String at Index");
+//        //https://leetcode.com/problems/decoded-string-at-index/description/
+//        System.out.println("Decode string at index: " + obj.decodeStringAtIndex("leet2code3", 10));
+//        System.out.println("Decode string at index: " + obj.decodeStringAtIndex("ha22", 5));
+//        System.out.println("Decode string at index: " + obj.decodeStringAtIndex("a2345678999999999999999", 1));
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
 //        System.out.println("Restore IP Addresses");
@@ -63185,23 +66824,23 @@ public class DSA450Questions {
 //        obj.restoreIPAddresses_Backtracking("101023");
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Snakes and Ladders");
-        //https://leetcode.com/problems/snakes-and-ladders/description/
-        obj.snakesAndLadder_Graph(new int[][]{
-                {-1, -1, -1, -1, -1, -1},
-                {-1, -1, -1, -1, -1, -1},
-                {-1, -1, -1, -1, -1, -1},
-                {-1, 35, -1, -1, 13, -1},
-                {-1, -1, -1, -1, -1, -1},
-                {-1, 15, -1, -1, -1, -1}});
-        obj.snakesAndLadder_Graph(new int[][]{
-                {-1, -1}, {-1, 3}});
+//        System.out.println("Snakes and Ladders");
+//        //https://leetcode.com/problems/snakes-and-ladders/description/
+//        obj.snakesAndLadder_Graph(new int[][]{
+//            {-1, -1, -1, -1, -1, -1},
+//            {-1, -1, -1, -1, -1, -1},
+//            {-1, -1, -1, -1, -1, -1},
+//            {-1, 35, -1, -1, 13, -1},
+//            {-1, -1, -1, -1, -1, -1},
+//            {-1, 15, -1, -1, -1, -1}});
+//        obj.snakesAndLadder_Graph(new int[][]{
+//            {-1, -1}, {-1, 3}});
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Find Closest Node to Given Two Nodes");
-        //https://leetcode.com/problems/find-closest-node-to-given-two-nodes/description/
-        obj.findClosestNodeToGivenTwoNodes_Graph(new int[]{2, 2, 3, -1}, 0, 1);
-        obj.findClosestNodeToGivenTwoNodes_Graph(new int[]{1, 2, -1}, 0, 2);
+//        System.out.println("Find Closest Node to Given Two Nodes");
+//        //https://leetcode.com/problems/find-closest-node-to-given-two-nodes/description/
+//        obj.findClosestNodeToGivenTwoNodes_Graph(new int[]{2, 2, 3, -1}, 0, 1);
+//        obj.findClosestNodeToGivenTwoNodes_Graph(new int[]{1, 2, -1}, 0, 2);
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
 //        System.out.println("Data Stream as Disjoint Intervals");
@@ -63213,11 +66852,11 @@ public class DSA450Questions {
 //                Arrays.asList(1, -1, 3, -1, 7, -1, 2, -1, 6, -1));
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
-        System.out.println("Best Team With No Conflicts");
-        //https://leetcode.com/problems/best-team-with-no-conflicts/description/
-        obj.bestTeamWithNoConflict_DP_Memoization(new int[]{1, 3, 5, 10, 15}, new int[]{1, 2, 3, 4, 5});
-        obj.bestTeamWithNoConflict_DP_Memoization(new int[]{4, 5, 6, 5}, new int[]{2, 1, 2, 1});
-        obj.bestTeamWithNoConflict_DP_Memoization(new int[]{1, 2, 3, 5}, new int[]{8, 9, 10, 1});
+//        System.out.println("Best Team With No Conflicts");
+//        //https://leetcode.com/problems/best-team-with-no-conflicts/description/
+//        obj.bestTeamWithNoConflict_DP_Memoization(new int[]{1, 3, 5, 10, 15}, new int[]{1, 2, 3, 4, 5});
+//        obj.bestTeamWithNoConflict_DP_Memoization(new int[]{4, 5, 6, 5}, new int[]{2, 1, 2, 1});
+//        obj.bestTeamWithNoConflict_DP_Memoization(new int[]{1, 2, 3, 5}, new int[]{8, 9, 10, 1});
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
 //        System.out.println("Naming a Company");
@@ -64662,6 +68301,12 @@ public class DSA450Questions {
         obj.knightProbabiltyInChessBoard_Recursive_Memoization(1, 0, 0, 0);
         //......................................................................
 //        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Knight Dialer");
+        //https://leetcode.com/problems/knight-dialer/description/
+        obj.knightDialer_Recursive_Memoization(1);
+        obj.knightDialer_Recursive_Memoization(2);
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
         System.out.println("Substrings That Begin and End With the Same Letter");
         //https://leetcode.com/problems/substrings-that-begin-and-end-with-the-same-letter/description/
         //https://leetcode.ca/2021-12-06-2083-Substrings-That-Begin-and-End-With-the-Same-Letter/
@@ -65375,6 +69020,447 @@ public class DSA450Questions {
         obj.maxDotProductsWithTwoSubseq_Recursive_Memoization(new int[]{2, 1, -2, 5}, new int[]{3, 0, -6});
         obj.maxDotProductsWithTwoSubseq_Recursive_Memoization(new int[]{3, -2}, new int[]{2, -6, 7});
         obj.maxDotProductsWithTwoSubseq_Recursive_Memoization(new int[]{-1, -1}, new int[]{1, 1});
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Number of Flowers in Full Bloom");
+        //https://leetcode.com/problems/number-of-flowers-in-full-bloom/description/
+        obj.numberOfFlowersInFullBloom(new int[][]{{1, 6}, {3, 7}, {9, 12}, {4, 13}}, new int[]{2, 3, 7, 11});
+        obj.numberOfFlowersInFullBloom(new int[][]{{1, 10}, {3, 3}}, new int[]{3, 3, 2});
+        obj.numberOfFlowersInFullBloom(new int[][]{{1, 4}, {6, 9}, {11, 14}, {16, 19}}, new int[]{5, 10, 15, 20});
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Constrained Subsequence Sum");
+        //https://leetcode.com/problems/constrained-subsequence-sum/description/
+        //LIS
+        obj.constrainedSubsetSum_DP_Memoization(new int[]{10, 2, -10, 5, 20}, 2);
+        obj.constrainedSubsetSum_DP_Memoization(new int[]{-1, -2, -3}, 1);
+        obj.constrainedSubsetSum_DP_Memoization(new int[]{10, -2, -10, -5, 20}, 2);
+        //SLIDING WINDOW
+        obj.constrainedSubsetSum_DP_Memoization2(new int[]{10, 2, -10, 5, 20}, 2);
+        obj.constrainedSubsetSum_DP_Memoization2(new int[]{-1, -2, -3}, 1);
+        obj.constrainedSubsetSum_DP_Memoization2(new int[]{10, -2, -10, -5, 20}, 2);
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Maximum Score of a Good Subarray");
+        //https://leetcode.com/problems/maximum-score-of-a-good-subarray/description/
+        obj.maxScoreOfGoodSubarray_Greedy(new int[]{1, 4, 3, 7, 4, 5}, 3);
+        obj.maxScoreOfGoodSubarray_Greedy(new int[]{5, 5, 4, 5, 4, 1, 1, 1}, 0);
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Sum of Imbalance Numbers of All Subarrays");
+        //https://leetcode.com/problems/sum-of-imbalance-numbers-of-all-subarrays/description/
+        obj.sumOfImbalanceNumbersOfAllSubarrays(new int[]{2, 3, 1, 4});
+        obj.sumOfImbalanceNumbersOfAllSubarrays(new int[]{1, 3, 3, 3, 5});
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("K-th Symbol in Grammar");
+        //https://leetcode.com/problems/k-th-symbol-in-grammar/description/
+        obj.kthSymbolInGrammer(1, 1);
+        obj.kthSymbolInGrammer(2, 1);
+        obj.kthSymbolInGrammer(3, 2);
+        obj.kthSymbolInGrammer(4, 4);
+        obj.kthSymbolInGrammer(4, 5);
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Count Servers that Communicate");
+        //https://leetcode.com/problems/count-servers-that-communicate/description/
+        obj.countServersThatCommunicate_Graph(new int[][]{{1}});
+        obj.countServersThatCommunicate_Graph(new int[][]{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}});
+        obj.countServersThatCommunicate_Graph(new int[][]{{1, 0}, {1, 1}});
+        obj.countServersThatCommunicate_Graph(new int[][]{{1, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}});
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Binary Trees With Factors");
+        //https://leetcode.com/problems/binary-trees-with-factors/description/
+        obj.binaryTreeWithFactors_DP_Memoization(new int[]{2, 4});
+        obj.binaryTreeWithFactors_DP_Memoization(new int[]{2, 4, 5, 10});
+        obj.binaryTreeWithFactors_DP_Memoization(new int[]{18, 3, 6, 2});
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Count Number of Texts");
+        //https://leetcode.com/problems/count-number-of-texts/description/
+        obj.countNumberOfTexts_Recursive_Memoization("22233");
+        obj.countNumberOfTexts_Recursive_Memoization("22222222");
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Number of Ways to Buy Pens and Pencils");
+        //https://leetcode.com/problems/number-of-ways-to-buy-pens-and-pencils/description/
+        obj.numberOfWaysToBuyPensAndPencils(20, 10, 5);
+        obj.numberOfWaysToBuyPensAndPencils(3, 10, 10);
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Find The Original Array of Prefix Xor");
+        //https://leetcode.com/problems/find-the-original-array-of-prefix-xor/description/
+        obj.findOriginalArrayOfPrefixXOR(new int[]{5, 2, 0, 3, 1});
+        obj.findOriginalArrayOfPrefixXOR(new int[]{13});
+        obj.findOriginalArrayOfPrefixXOR(new int[]{1, 2, 3, 4, 5});
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Last Moment Before All Ants Fall Out of a Plank");
+        //https://leetcode.com/problems/last-moment-before-all-ants-fall-out-of-a-plank/description/
+        obj.lastMomentBeforeAllAntsFallOutOfPlank(4, new int[]{4, 3}, new int[]{0, 1});
+        obj.lastMomentBeforeAllAntsFallOutOfPlank(7, new int[]{}, new int[]{0, 1, 2, 3, 4, 5, 6, 7});
+        obj.lastMomentBeforeAllAntsFallOutOfPlank(7, new int[]{0, 1, 2, 3, 4, 5, 6, 7}, new int[]{});
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Find the Winner of an Array Game");
+        //https://leetcode.com/problems/find-the-winner-of-an-array-game/description/
+        System.out.println("Find the winner of array game : "
+                + obj.findWinnerOfArrayGame(new int[]{2, 1, 3, 5, 4, 6, 7}, 2));
+        System.out.println("Find the winner of array game : "
+                + obj.findWinnerOfArrayGame(new int[]{3, 2, 1}, 10));
+        System.out.println("Find the winner of array game (without deque): "
+                + obj.findWinnerOfArrayGame2(new int[]{2, 1, 3, 5, 4, 6, 7}, 2));
+        System.out.println("Find the winner of array game (without deque): "
+                + obj.findWinnerOfArrayGame2(new int[]{3, 2, 1}, 10));
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Map of Highest Peak");
+        //https://leetcode.com/problems/map-of-highest-peak/description/
+        obj.mapOfHeighestPeak_Graph(new int[][]{{0, 1}, {0, 0}});
+        obj.mapOfHeighestPeak_Graph(new int[][]{{0, 0, 1}, {1, 0, 0}, {0, 0, 0}});
+        obj.mapOfHeighestPeak_Graph(new int[][]{{1, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}});
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Determine if a Cell Is Reachable at a Given Time");
+        //https://leetcode.com/problems/determine-if-a-cell-is-reachable-at-a-given-time/description/
+        System.out.println("Check if cell is reachable at given time : "
+                + obj.checkIfCellIsReachableInGivenTime(2, 4, 7, 7, 6));
+        System.out.println("Check if cell is reachable at given time : "
+                + obj.checkIfCellIsReachableInGivenTime(3, 1, 7, 3, 3));
+        System.out.println("Check if cell is reachable at given time : "
+                + obj.checkIfCellIsReachableInGivenTime(1, 1, 1, 1, 3));
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Restore the Array From Adjacent Pairs");
+        //https://leetcode.com/problems/restore-the-array-from-adjacent-pairs/description/
+        obj.restoreTheArrayFromAdjacentPairs_Graph(new int[][]{{2, 1}, {3, 4}, {3, 2}});
+        obj.restoreTheArrayFromAdjacentPairs_Graph(new int[][]{{4, -2}, {1, 4}, {-3, 1}});
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Number of Restricted Paths From First to Last Node");
+        //https://leetcode.com/problems/number-of-restricted-paths-from-first-to-last-node/description/
+        obj.numberOfRestrictedPathFromFirstToLastNode_Graph_Memoization(5,
+                new int[][]{{1, 2, 3}, {1, 3, 3}, {2, 3, 1}, {1, 4, 2}, {5, 2, 2}, {3, 5, 1}, {5, 4, 10}});
+        obj.numberOfRestrictedPathFromFirstToLastNode_Graph_Memoization(7,
+                new int[][]{{1, 3, 1}, {4, 1, 2}, {7, 3, 4}, {2, 5, 3}, {5, 6, 1}, {6, 7, 2}, {7, 5, 3}, {2, 6, 4}});
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Bus Routes");
+        //https://leetcode.com/problems/bus-routes/description/
+        System.out.println("Bus routes buses used from src to target : "
+                + obj.busRoute_Graph(new int[][]{{1, 2, 7}, {3, 6, 7}}, 1, 6));
+        System.out.println("Bus routes buses used from src to target : "
+                + obj.busRoute_Graph(new int[][]{{1, 2, 7}, {1, 6, 7}}, 1, 6));
+        System.out.println("Bus routes buses used from src to target : "
+                + obj.busRoute_Graph(new int[][]{{7, 12}, {4, 5, 15}, {6}, {15, 19}, {9, 12, 13}}, 15, 12));
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Unique Length-3 Palindromic Subsequences");
+        //https://leetcode.com/problems/unique-length-3-palindromic-subsequences/description/
+        obj.uniqueThreeLengthedPallindromicSubseq("aabca");
+        obj.uniqueThreeLengthedPallindromicSubseq("adc");
+        obj.uniqueThreeLengthedPallindromicSubseq("bbcbaba");
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Maximum Element After Decreasing and Rearranging");
+        //https://leetcode.com/problems/maximum-element-after-decreasing-and-rearranging/description/
+        obj.maxElementAfterDecreasingAndRearranging_Greedy(new int[]{2, 2, 1, 2, 1});
+        obj.maxElementAfterDecreasingAndRearranging_Greedy(new int[]{100, 1, 1000});
+        obj.maxElementAfterDecreasingAndRearranging_Greedy(new int[]{1, 2, 3, 4, 5});
+        obj.maxElementAfterDecreasingAndRearranging_Greedy(new int[]{10, 100, 2, 40, 6, 1000});
+        obj.maxElementAfterDecreasingAndRearranging_Greedy(
+                new int[]{1000000000, 1000000000, 1000000000, 1000000000, 1000000000, 1000000000});
+        obj.maxElementAfterDecreasingAndRearranging2_Greedy(new int[]{2, 2, 1, 2, 1});
+        obj.maxElementAfterDecreasingAndRearranging2_Greedy(new int[]{100, 1, 1000});
+        obj.maxElementAfterDecreasingAndRearranging2_Greedy(new int[]{1, 2, 3, 4, 5});
+        obj.maxElementAfterDecreasingAndRearranging2_Greedy(new int[]{10, 100, 2, 40, 6, 1000});
+        obj.maxElementAfterDecreasingAndRearranging2_Greedy(
+                new int[]{1000000000, 1000000000, 1000000000, 1000000000, 1000000000, 1000000000});
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Find Unique Binary String");
+        //https://leetcode.com/problems/find-unique-binary-string/description/
+        //more intuitive
+        obj.findUniqueBinaryString_Backtracking(new String[]{"01", "10"});
+        obj.findUniqueBinaryString_Backtracking(new String[]{"00", "01"});
+        obj.findUniqueBinaryString_Backtracking(new String[]{"111", "011", "001"});
+        obj.findUniqueBinaryString(new String[]{"01", "10"});
+        obj.findUniqueBinaryString(new String[]{"00", "01"});
+        obj.findUniqueBinaryString(new String[]{"111", "011", "001"});
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Reduction Operations to Make the Array Elements Equal");
+        //https://leetcode.com/problems/reduction-operations-to-make-the-array-elements-equal/description/
+        obj.reductionOprnsToMakeArrayElementsEqual(new int[]{5, 1, 3});
+        obj.reductionOprnsToMakeArrayElementsEqual(new int[]{1, 1, 1});
+        obj.reductionOprnsToMakeArrayElementsEqual(new int[]{1, 1, 2, 2, 3});
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Arithmetic Subarrays");
+        //https://leetcode.com/problems/arithmetic-subarrays/description/
+        obj.arithemeticSubarray(new int[]{4, 6, 5, 9, 3, 7},
+                new int[]{0, 0, 2},
+                new int[]{2, 3, 5});
+        obj.arithemeticSubarray(new int[]{-12, -9, -3, -12, -6, 15, 20, -25, -20, -15, -10},
+                new int[]{0, 1, 6, 4, 8, 7},
+                new int[]{4, 4, 9, 7, 9, 10});
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Sum of Absolute Differences in a Sorted Array");
+        //https://leetcode.com/problems/sum-of-absolute-differences-in-a-sorted-array/description/
+        obj.sumOfAbsDifferencesInSortedArray(new int[]{2, 3, 5});
+        obj.sumOfAbsDifferencesInSortedArray(new int[]{1, 4, 6, 8, 10});
+        obj.sumOfAbsDifferencesInSortedArray(new int[]{1, 4, 6, 8, 12, 18, 21});
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Largest Submatrix With Rearrangements");
+        //https://leetcode.com/problems/largest-submatrix-with-rearrangements/description/
+        obj.largestSubmatrixWithRearrangements(new int[][]{{0, 0, 1}, {1, 1, 1}, {1, 0, 1}});
+        obj.largestSubmatrixWithRearrangements(new int[][]{{1, 0, 1, 0, 1}});
+        obj.largestSubmatrixWithRearrangements(new int[][]{{1, 1, 0}, {1, 0, 1}});
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Number of Ways to Divide a Long Corridor");
+        //https://leetcode.com/problems/number-of-ways-to-divide-a-long-corridor/description/
+        System.out.println("Number of ways to divide long corridor : "
+                + obj.numberOfWaysToDivideLongCorridor("SSPPSPS"));
+        System.out.println("Number of ways to divide long corridor : "
+                + obj.numberOfWaysToDivideLongCorridor("PPSPSP"));
+        System.out.println("Number of ways to divide long corridor : "
+                + obj.numberOfWaysToDivideLongCorridor("S"));
+        System.out.println("Number of ways to divide long corridor : "
+                + obj.numberOfWaysToDivideLongCorridor("P"));
+        System.out.println("Number of ways to divide long corridor : "
+                + obj.numberOfWaysToDivideLongCorridor("SPSPPSPPSPPSS"));
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Element Appearing More Than 25% In Sorted Array");
+        //https://leetcode.com/problems/element-appearing-more-than-25-in-sorted-array/description/
+        System.out.println("Element apprearing more 25% : "
+                + obj.elementsAppearingMoreThan25PerInSortedArray(
+                new int[]{1, 2, 2, 6, 6, 6, 6, 7, 10}));
+        System.out.println("Element apprearing more 25% : "
+                + obj.elementsAppearingMoreThan25PerInSortedArray(
+                new int[]{1, 1}));
+        System.out.println("Element apprearing more 25% : "
+                + obj.elementsAppearingMoreThan25PerInSortedArray(
+                new int[]{1}));
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Difference Between Ones and Zeros in Row and Column");
+        //https://leetcode.com/problems/difference-between-ones-and-zeros-in-row-and-column/description/
+        obj.diffBetweenOnesAndZerosInRowAndCol(new int[][]{{0, 1, 1}, {1, 0, 1}, {0, 0, 1}});
+        obj.diffBetweenOnesAndZerosInRowAndCol(new int[][]{{1, 1, 1}, {1, 1, 1}});
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Minimum Changes To Make Alternating Binary String");
+        //https://leetcode.com/problems/minimum-changes-to-make-alternating-binary-string/description/
+        obj.minChangeToMakeAlternatingBinaryString("0100");
+        obj.minChangeToMakeAlternatingBinaryString("10");
+        obj.minChangeToMakeAlternatingBinaryString("1111");
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Arithmetic Slices II - Subsequence");
+        //https://leetcode.com/problems/arithmetic-slices-ii-subsequence/description/
+        obj.arithemticSlicesTwoSubsequences_DP_Memoization(new int[]{2, 4, 6, 8, 10});
+        obj.arithemticSlicesTwoSubsequences_DP_Memoization(new int[]{7, 7, 7, 7, 7});
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("K Inverse Pairs Array");
+        //https://leetcode.com/problems/k-inverse-pairs-array/description/
+        obj.kInversePairs_Recursive_Memoization(3, 0);
+        obj.kInversePairs_Recursive_Memoization(3, 1);
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Number of Submatrices That Sum to Target");
+        //https://leetcode.com/problems/number-of-submatrices-that-sum-to-target/description/
+        obj.numberOfSubmatricesThatSumsToTarget(new int[][]{{0, 1, 0}, {1, 1, 1}, {0, 1, 0}}, 0);
+        obj.numberOfSubmatricesThatSumsToTarget(new int[][]{{1, -1}, {-1, 1}}, 0);
+        obj.numberOfSubmatricesThatSumsToTarget(new int[][]{{904}}, 0);
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Divide Array Into Arrays With Max Difference");
+        //https://leetcode.com/problems/divide-array-into-arrays-with-max-difference/description/
+        obj.divideArrayIntoArraysWithMaxDiff_Greedy(
+                new int[]{1, 3, 4, 8, 7, 9, 3, 5, 1}, 2);
+        obj.divideArrayIntoArraysWithMaxDiff_Greedy(
+                new int[]{1, 3, 3, 2, 7, 3}, 3);
+        obj.divideArrayIntoArraysWithMaxDiff_Greedy(
+                new int[]{15, 13, 12, 13, 12, 14, 12, 2, 3, 13, 12, 14, 14, 13, 5, 12, 12, 2, 13, 2, 2}, 2);
+        obj.divideArrayIntoArraysWithMaxDiff_Greedy(
+                new int[]{6, 10, 5, 12, 7, 11, 6, 6, 12, 12, 11, 7}, 2);
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Sequential Digits");
+        //https://leetcode.com/problems/sequential-digits/description/
+        obj.sequenceDigits(100, 300);
+        obj.sequenceDigits(1000, 13000);
+        obj.sequenceDigits2(100, 300);
+        obj.sequenceDigits2(1000, 13000);
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Partition Array for Maximum Sum");
+        //https://leetcode.com/problems/partition-array-for-maximum-sum/description/
+        obj.partitionArrayForMaxSum_Recursive_Memoization(new int[]{1, 15, 7, 9, 2, 5, 10}, 3);
+        obj.partitionArrayForMaxSum_Recursive_Memoization(new int[]{1, 4, 1, 5, 7, 3, 6, 1, 9, 9, 3}, 4);
+        obj.partitionArrayForMaxSum_Recursive_Memoization(new int[]{1}, 1);
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Numbers With Same Consecutive Differences");
+        //https://leetcode.com/problems/numbers-with-same-consecutive-differences/description/
+        obj.numbersWithSameConsecutiveDiff_Graph(3, 7);
+        obj.numbersWithSameConsecutiveDiff_Graph(2, 1);
+        obj.numbersWithSameConsecutiveDiff_Graph(2, 0);
+        obj.numbersWithSameConsecutiveDiff_Graph(9, 0);
+        obj.numbersWithSameConsecutiveDiff_Graph(2, 9);
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Largest Divisible Subset");
+        //https://leetcode.com/problems/largest-divisible-subset/description/
+        obj.largestDivisbleSubset_DP_Memoization(new int[]{1, 2, 3});
+        obj.largestDivisbleSubset_DP_Memoization(new int[]{1, 2, 4, 8});
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Length of Longest Subarray With at Most K Frequency");
+        //https://leetcode.com/problems/length-of-longest-subarray-with-at-most-k-frequency/description/
+        obj.lengthOfLongestSubarrayWithAtmostKFrequency(new int[]{1, 2, 3, 1, 2, 3, 1, 2}, 2);
+        obj.lengthOfLongestSubarrayWithAtmostKFrequency(new int[]{1, 2, 1, 2, 1, 2, 1, 2}, 1);
+        obj.lengthOfLongestSubarrayWithAtmostKFrequency(new int[]{5, 5, 5, 5, 5, 5, 5}, 4);
+        obj.lengthOfLongestSubarrayWithAtmostKFrequency(new int[]{1, 4, 4, 3}, 1);
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Find Polygon With the Largest Perimeter");
+        //https://leetcode.com/problems/find-polygon-with-the-largest-perimeter/description/
+        obj.polygonWithLargestPerimeter_Greedy(new int[]{5, 5, 5});
+        obj.polygonWithLargestPerimeter_Greedy(new int[]{1, 12, 1, 2, 5, 50, 3});
+        obj.polygonWithLargestPerimeter_Greedy(new int[]{5, 5, 50});
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Find All People With Secret");
+        //https://leetcode.com/problems/find-all-people-with-secret/description/
+        obj.findAllPeopleWithSecret_Graph(6, new int[][]{{1, 2, 5}, {2, 3, 8}, {1, 5, 10}}, 1);
+        obj.findAllPeopleWithSecret_Graph(4, new int[][]{{3, 1, 3}, {1, 2, 2}, {0, 3, 3}}, 3);
+        obj.findAllPeopleWithSecret_Graph(5, new int[][]{{3, 4, 2}, {1, 2, 1}, {2, 3, 1}}, 1);
+        obj.findAllPeopleWithSecret_Graph_UnionFind(6, new int[][]{{1, 2, 5}, {2, 3, 8}, {1, 5, 10}}, 1);
+        obj.findAllPeopleWithSecret_Graph_UnionFind(4, new int[][]{{3, 1, 3}, {1, 2, 2}, {0, 3, 3}}, 3);
+        obj.findAllPeopleWithSecret_Graph_UnionFind(5, new int[][]{{3, 4, 2}, {1, 2, 1}, {2, 3, 1}}, 1);
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Minimum Length of String After Deleting Similar Ends");
+        //https://leetcode.com/problems/minimum-length-of-string-after-deleting-similar-ends/description/
+        System.out.println("Min Length of string after deleting similar ends : "
+                + obj.minLengthAfterDeletingSimilarEnds("ca"));
+        System.out.println("Min Length of string after deleting similar ends : "
+                + obj.minLengthAfterDeletingSimilarEnds("cabaabac"));
+        System.out.println("Min Length of string after deleting similar ends : "
+                + obj.minLengthAfterDeletingSimilarEnds("aabccabba"));
+        System.out.println("Min Length of string after deleting similar ends : "
+                + obj.minLengthAfterDeletingSimilarEnds("aaaaa"));
+        System.out.println("Min Length of string after deleting similar ends : "
+                + obj.minLengthAfterDeletingSimilarEnds("aacaa"));
+        System.out.println("Min Length of string after deleting similar ends : "
+                + obj.minLengthAfterDeletingSimilarEnds("c"));
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Find the Length of the Longest Common Prefix");
+        //https://leetcode.com/problems/find-the-length-of-the-longest-common-prefix/description/
+        obj.lengthOfLongestCommonPrefix(new int[]{1, 10, 100}, new int[]{1000});
+        obj.lengthOfLongestCommonPrefix(new int[]{1, 2, 3}, new int[]{4, 4, 4});
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+//        System.out.println("Merge In Between Linked Lists");
+//        //https://leetcode.com/problems/merge-in-between-linked-lists/description/
+//        Node<Integer> head1 = new Node<>(10);
+//        head1.setNext(new Node<>(1));
+//        head1.getNext().setNext(new Node<>(13));
+//        head1.getNext().getNext().setNext(new Node<>(6));
+//        head1.getNext().getNext().getNext().setNext(new Node<>(9));
+//        head1.getNext().getNext().getNext().getNext().setNext(new Node<>(5));
+//        Node<Integer> head2 = new Node<>(1000000);
+//        head2.setNext(new Node<>(1000001));
+//        head2.getNext().setNext(new Node<>(1000002));
+//        obj.mergeInBetweenListNodes(head1, 3, 4, head2);
+//        head1 = new Node<>(10);
+//        head1.setNext(new Node<>(1));
+//        head1.getNext().setNext(new Node<>(13));
+//        head1.getNext().getNext().setNext(new Node<>(6));
+//        head1.getNext().getNext().getNext().setNext(new Node<>(9));
+//        head1.getNext().getNext().getNext().getNext().setNext(new Node<>(5));
+//        head2 = new Node<>(1000000);
+//        head2.setNext(new Node<>(1000001));
+//        head2.getNext().setNext(new Node<>(1000002));
+//        obj.mergeInBetweenListNodes(head1, 3, 3, head2);
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Longest Common Suffix Queries");
+        //https://leetcode.com/problems/longest-common-suffix-queries/description/
+        obj.longestCommonSuffixQueries(new String[]{"abcd", "bcd", "xbcd"},
+                new String[]{"cd", "bcd", "xyz"});
+        obj.longestCommonSuffixQueries(new String[]{"abcdefgh", "poiuygh", "ghghgh"},
+                new String[]{"gh", "acbfgh", "acbfegh"});
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Count Subarrays Where Max Element Appears at Least K Times");
+        //https://leetcode.com/problems/count-subarrays-where-max-element-appears-at-least-k-times/description/
+        obj.countSubarraysWithMaxElementAppearsKTimes(new int[]{1, 3, 2, 3, 3}, 2);
+        obj.countSubarraysWithMaxElementAppearsKTimes(new int[]{1, 4, 2, 1}, 3);
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Factorial Trailing Zeroes");
+        //https://leetcode.com/problems/factorial-trailing-zeroes/
+        obj.factorialTrailingZeroes(3);
+        obj.factorialTrailingZeroes(5);
+        obj.factorialTrailingZeroes(1000);
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Number of Students Unable to Eat Lunch");
+        //https://leetcode.com/problems/number-of-students-unable-to-eat-lunch/description/
+        System.out.println("Number of students unable to eat lunch : "
+                + obj.numberOfStudentsUnableToEatLunch(new int[]{1, 1, 0, 0}, new int[]{0, 1, 0, 1}));
+        System.out.println("Number of students unable to eat lunch : "
+                + obj.numberOfStudentsUnableToEatLunch(new int[]{1, 1, 1, 0, 0, 1}, new int[]{1, 0, 0, 0, 1, 1}));
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Check If Word Is Valid After Substitutions");
+        //https://leetcode.com/problems/check-if-word-is-valid-after-substitutions/description/
+        System.out.println("Check if word is valid after 'abc' str substitution : "
+                + obj.checkIfWordValidAfterSubstitution("aabcbc"));
+        System.out.println("Check if word is valid after 'abc' str substitution : "
+                + obj.checkIfWordValidAfterSubstitution("abcabcababcc"));
+        System.out.println("Check if word is valid after 'abc' str substitution : "
+                + obj.checkIfWordValidAfterSubstitution("abccba"));
+        System.out.println("Check if word is valid after 'abc' str substitution : "
+                + obj.checkIfWordValidAfterSubstitution("a"));
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Best Sightseeing Pair");
+        //https://leetcode.com/problems/best-sightseeing-pair/description/
+        obj.bestSightseeingPair(new int[]{8, 1, 5, 2, 6});
+        obj.bestSightseeingPair(new int[]{1, 2});
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Maximum Value of an Ordered Triplet I/ II");
+        //https://leetcode.com/problems/maximum-value-of-an-ordered-triplet-i/description/
+        //https://leetcode.com/problems/maximum-value-of-an-ordered-triplet-ii/description/
+        obj.maxValueOfOrderedTriplet(new int[]{12, 6, 1, 2, 7});
+        obj.maxValueOfOrderedTriplet(new int[]{1, 10, 3, 4, 19});
+        obj.maxValueOfOrderedTriplet(new int[]{1, 2, 3});
+        obj.maxValueOfOrderedTriplet(new int[]{1000000, 1, 1000000});
+        //......................................................................
+//        Row: SEPARATE QUESTION IMPORTANT
+        System.out.println("Minimum Cost of a Path With Special Roads");
+        //https://leetcode.com/problems/minimum-cost-of-a-path-with-special-roads/description/
+        System.out.println("Min cost of path with special roads : "
+                + obj.minCostOfPathWithSpecialRoad_Graph(
+                new int[]{1, 1},
+                new int[]{4, 5},
+                new int[][]{{1, 2, 3, 3, 2}, {3, 4, 4, 5, 1}}));
+        System.out.println("Min cost of path with special roads : "
+                + obj.minCostOfPathWithSpecialRoad_Graph(
+                new int[]{3, 2},
+                new int[]{5, 7},
+                new int[][]{{3, 2, 3, 4, 4}, {3, 3, 5, 5, 5}, {3, 4, 5, 6, 6}}));
     }
 
 }
