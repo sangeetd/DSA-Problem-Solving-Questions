@@ -1,8 +1,6 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package fun;
+
+import java.util.Objects;
 
 /**
  *
@@ -23,5 +21,22 @@ public class Pair<T, V> {
 
     public V getValue() {
         return value;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true; // Check if both references point to the same object
+        if (obj == null || getClass() != obj.getClass()) return false; // Ensure class type matches
+
+        Pair<?, ?> pair = (Pair<?, ?>) obj; // Safe cast to Pair
+
+        // Compare key and value using Objects.equals() to handle nulls
+        return Objects.equals(key, pair.key) && Objects.equals(value, pair.value);
+    }
+
+    @Override
+    public int hashCode() {
+        // Generate hash code using Objects.hash() to combine key and value
+        return Objects.hash(key, value);
     }
 }
